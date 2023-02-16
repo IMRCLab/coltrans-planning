@@ -1,6 +1,7 @@
 meshcat: 
   openWindow: True
-  timestep: 0.01 # in secs
+  timestep: 0.1 # timestep in secs
+  finalstep: 2  # sleep at final step
 
 uav: 
   path: ../examples/visualize/cf2_assembly.stl

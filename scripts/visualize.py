@@ -30,8 +30,8 @@ if __name__ == "__main__":
     if mcconfigs['meshcat']['openWindow'] == True:
         vis.open()
         vis["/Cameras/default"].set_transform(
-        tf.translation_matrix([0, 0, 0]).dot(
-            tf.euler_matrix(np.radians(-40), np.radians(0), np.radians(-35))))
+        tf.translation_matrix([0.5, 0, 0]).dot(
+            tf.euler_matrix(np.radians(-25), np.radians(0), np.radians(-35))))
 
         vis["/Cameras/default/rotated/<object>"].set_transform(
             tf.translation_matrix([-1, 0, 2]))
@@ -69,11 +69,10 @@ if __name__ == "__main__":
             for state in motion[0]["states"]:
                 vis["payload"].set_transform(
                             tf.translation_matrix(state[0:3]).dot(
-                    tf.quaternion_matrix([1, 0, 0, 0])))
-            # for state in motion["states"]:
-            #     print(state)
+                    tf.quaternion_matrix(state[3:7])))
                 time.sleep(mcconfigs['meshcat']["timestep"])
 
-        
+        time.sleep(mcconfigs['meshcat']["finalstep"])
+
         
         pass
