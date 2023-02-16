@@ -15,5 +15,12 @@ make
 
 ```
 cd build
-./RigidBodyPlanning
+./payloadPlanner --input ../examples/payload/payload.yaml --output ../examples/payload/output.yaml
 ```
+
+## Visualize
+```
+cd scripts
+ python3 visualize.py ../examples/payload/output.yaml rod
+```
+- For different payloads: currently we support: rod, cuboid, triangle and pointmass. 
