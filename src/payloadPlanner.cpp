@@ -1,8 +1,10 @@
 
 #include <ompl/base/SpaceInformation.h>
+#include <ompl/base/objectives/PathLengthOptimizationObjective.h>
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/base/spaces/SE3StateSpace.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
+#include <ompl/geometric/planners/rrt/RRTstar.h>
 
 #include <ompl/config.h>
 
@@ -32,9 +34,14 @@ bool isStateValid(const ob::State *state)
     return (const void*)rot != (const void*)pos;
 }
 
+ob::OptimizationObjectivePtr getPathLengthObjective(const ob::SpaceInformationPtr& si)
+{
+    return ob::OptimizationObjectivePtr(new ob::PathLengthOptimizationObjective(si));
+}
+
 void payloadPlan(const std::vector<double>& start, const std::vector<double>& goal,
                 const std::vector<double>& envmin, const std::vector<double>& envmax,
-                std::string outputFile)
+                const size_t &plannerType, const float &timelimit, std::string outputFile)
 {
     // construct the state space
     auto space(std::make_shared<ob::SE3StateSpace>());
@@ -73,8 +80,28 @@ void payloadPlan(const std::vector<double>& start, const std::vector<double>& go
     pdef->setGoalState(goalState);
     si->freeState(goalState);
 
+    std::shared_ptr<ob::Planner> planner;
     //create planner
-    auto planner(std::make_shared<og::RRTConnect>(si));
+    switch (plannerType)
+    {
+        case 0: {
+            auto rrtconnect = new og::RRTConnect(si);
+            planner.reset(rrtconnect);
+            // planner(std::make_shared<og::RRTConnect>(si));
+            break;
+        }
+        case 1: {
+            auto rrtstar = new og::RRTstar(si);
+            planner.reset(rrtstar);
+            break;
+        }
+        default: {
+            std::cout << "Wrong planner!" << std::endl;
+            break;
+        }
+    }
+    // set optimization objective
+    pdef->setOptimizationObjective(getPathLengthObjective(si));
 
     // set the problem we are truing to solve for the planner
     planner->setProblemDefinition(pdef);
@@ -88,12 +115,13 @@ void payloadPlan(const std::vector<double>& start, const std::vector<double>& go
     // print the problem settings
     pdef->print(std::cout);
 
-    ob::PlannerStatus solved = planner->ob::Planner::solve(10.0);
+    ob::PlannerStatus solved = planner->ob::Planner::solve(timelimit);
 
     if (solved) 
     {
         std::cout << "found solution!" << std::endl;
         auto path = pdef->getSolutionPath()->as<og::PathGeometric>();
+        path->print(std::cout);
         path->interpolate();
 
         // stream the solution to the output file
@@ -155,6 +183,11 @@ int main(int argc, char* argv[])
 
     YAML::Node configFile = YAML::LoadFile(inputFile);
     
+    // planner type
+    const size_t& plannerType = configFile["plannerType"].as<double>();
+    // timelimit to find a solution
+    const float& timelimit = configFile["timelimit"].as<float>();
+    
     // start and goal states from config
     const auto& startSt = configFile["payload"]["start"];
     std::vector<double> startvec;
@@ -181,7 +214,7 @@ int main(int argc, char* argv[])
         envmax.push_back(max.as<double>());
     } 
 
-    payloadPlan(startvec, goalvec, envmin, envmax, outputFile);
+    payloadPlan(startvec, goalvec, envmin, envmax, plannerType, timelimit, outputFile);
 
     std::cout << std::endl << std::endl;
 
