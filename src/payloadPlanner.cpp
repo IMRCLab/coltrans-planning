@@ -39,8 +39,8 @@ ob::OptimizationObjectivePtr getPathLengthObjective(const ob::SpaceInformationPt
     return ob::OptimizationObjectivePtr(new ob::PathLengthOptimizationObjective(si));
 }
 
-void payloadPlan(const std::vector<double>& start, const std::vector<double>& goal,
-                const std::vector<double>& envmin, const std::vector<double>& envmax,
+void payloadPlan(const std::vector<double>* start, const std::vector<double>* goal,
+                 const std::vector<double>* envmin, const std::vector<double>* envmax,
                 const size_t &plannerType, const float &timelimit, std::string outputFile)
 {
     // construct the state space
@@ -49,9 +49,9 @@ void payloadPlan(const std::vector<double>& start, const std::vector<double>& go
 
     ob::RealVectorBounds bounds(3);
     // prepare the bounds
-    for (size_t i=0; i < envmin.size(); ++i) {
-        bounds.setLow(i, envmin[i]);
-        bounds.setHigh(i,envmax[i]);
+    for (size_t i=0; i< envmin->size(); ++i) {
+        bounds.setLow(i, envmin->operator[](i));
+        bounds.setHigh(i, envmax->operator[](i));
     } 
     // set the bounds
     space->setBounds(bounds);
@@ -68,14 +68,14 @@ void payloadPlan(const std::vector<double>& start, const std::vector<double>& go
 
     // create and set a start state
     auto startState = si->allocState();
-    si->getStateSpace()->copyFromReals(startState, start);
+    si->getStateSpace()->copyFromReals(startState, *start);
     si->enforceBounds(startState);
     pdef->addStartState(startState);
     si->freeState(startState);
     
     // create and set a goal state
     auto goalState = si->allocState();
-    si->getStateSpace()->copyFromReals(goalState, goal);
+    si->getStateSpace()->copyFromReals(goalState, *goal);
     si->enforceBounds(goalState);
     pdef->setGoalState(goalState);
     si->freeState(goalState);
@@ -149,6 +149,13 @@ void payloadPlan(const std::vector<double>& start, const std::vector<double>& go
         std::cout << "No solution found" << std::endl;
     }
 }
+
+void yamltovec(std::vector<double> *vec, const YAML::Node &yamlvec) {
+    for (const auto& i : yamlvec) {
+        vec->push_back(i.as<double>());
+    }  
+}
+
 int main(int argc, char* argv[])
 {
 
@@ -189,35 +196,27 @@ int main(int argc, char* argv[])
     const float& timelimit = configFile["timelimit"].as<float>();
     
     // start and goal states from config
-    const auto& startSt = configFile["payload"]["start"];
-    std::vector<double> startvec;
-    for (const auto& start : startSt) {
-        startvec.push_back(start.as<double>());
-    }
+    const auto &startSt = configFile["payload"]["start"];
+    std::vector<double> *startvec = new std::vector<double>();
+    yamltovec(startvec, startSt);
     
     const auto& goalSt = configFile["payload"]["goal"];
-    std::vector<double> goalvec;
-    for (const auto& goal : goalSt) {
-        goalvec.push_back(goal.as<double>());
-    }
-    
+    std::vector<double> *goalvec = new std::vector<double>();
+    yamltovec(goalvec, goalSt);
+ 
+   
     // extract environment bounds from config 
     const auto& envmincfg = configFile["environment"]["min"];    
-    std::vector<double> envmin;
-    for (const auto& min : envmincfg) {
-        envmin.push_back(min.as<double>());
-    }
+    std::vector<double> *envmin = new std::vector<double>();
+    yamltovec(envmin, envmincfg);
 
     const auto& envmaxcfg = configFile["environment"]["max"];
-    std::vector<double> envmax;
-    for (const auto& max : envmaxcfg) {
-        envmax.push_back(max.as<double>());
-    } 
+    std::vector<double> *envmax = new std::vector<double>();
+    yamltovec(envmax, envmaxcfg);
 
     payloadPlan(startvec, goalvec, envmin, envmax, plannerType, timelimit, outputFile);
 
     std::cout << std::endl << std::endl;
-
-
+    
     return 0;
 }
