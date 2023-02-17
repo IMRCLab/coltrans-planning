@@ -41,7 +41,7 @@ ob::OptimizationObjectivePtr getPathLengthObjective(const ob::SpaceInformationPt
 
 void payloadPlan(const std::vector<double>* start, const std::vector<double>* goal,
                  const std::vector<double>* envmin, const std::vector<double>* envmax,
-                const size_t &plannerType, const float &timelimit, std::string outputFile)
+                const std::string &plannerType, const float &timelimit, std::string outputFile)
 {
     // construct the state space
     auto space(std::make_shared<ob::SE3StateSpace>());
@@ -82,24 +82,35 @@ void payloadPlan(const std::vector<double>* start, const std::vector<double>* go
 
     std::shared_ptr<ob::Planner> planner;
     //create planner
-    switch (plannerType)
-    {
-        case 0: {
-            auto rrtconnect = new og::RRTConnect(si);
-            planner.reset(rrtconnect);
-            // planner(std::make_shared<og::RRTConnect>(si));
-            break;
-        }
-        case 1: {
-            auto rrtstar = new og::RRTstar(si);
-            planner.reset(rrtstar);
-            break;
-        }
-        default: {
-            std::cout << "Wrong planner!" << std::endl;
-            break;
-        }
+    if (plannerType == "rrtconnect") {
+        auto rrtconnect = new og::RRTConnect(si);
+        planner.reset(rrtconnect);
+    } else if (plannerType == "rrtstar") {
+        auto rrtstar = new og::RRTstar(si);
+        planner.reset(rrtstar);
+    } else {
+        std::cout << "Wrong Planner!" << std::endl;
+        exit(3);
     }
+
+    // switch (plannerType)
+    // {
+    //     case str2"rrtconnect": {
+    //         auto rrtconnect = new og::RRTConnect(si);
+    //         planner.reset(rrtconnect);
+    //         // planner(std::make_shared<og::RRTConnect>(si));
+    //         break;
+    //     }
+    //     case "rrtstar": {
+    //         auto rrtstar = new og::RRTstar(si);
+    //         planner.reset(rrtstar);
+    //         break;
+    //     }
+    //     default: {
+    //         std::cout << "Wrong planner!" << std::endl;
+    //         break;
+    //     }
+    // }
     // set optimization objective
     pdef->setOptimizationObjective(getPathLengthObjective(si));
 
@@ -191,7 +202,7 @@ int main(int argc, char* argv[])
     YAML::Node configFile = YAML::LoadFile(inputFile);
     
     // planner type
-    const size_t& plannerType = configFile["plannerType"].as<double>();
+    const std::string& plannerType = configFile["plannerType"].as<std::string>();
     // timelimit to find a solution
     const float& timelimit = configFile["timelimit"].as<float>();
     
@@ -217,6 +228,6 @@ int main(int argc, char* argv[])
     payloadPlan(startvec, goalvec, envmin, envmax, plannerType, timelimit, outputFile);
 
     std::cout << std::endl << std::endl;
-    
+
     return 0;
 }
