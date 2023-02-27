@@ -44,9 +44,6 @@ ob::OptimizationObjectivePtr getPathLengthObjective(const ob::SpaceInformationPt
     return ob::OptimizationObjectivePtr(new ob::PathLengthOptimizationObjective(si));
 }
 
-// void azAndelToUnitVector(on::) {
-//     // conversion from azimuth and elevation to a unit vector
-// }
 void cablesPayloadPlanner(const std::vector<double>* start, const std::vector<double>* goal,
                  const std::vector<double>* envmin, const std::vector<double>* envmax,
                  const std::vector<double>* cablemin, const std::vector<double>* cablemax,
