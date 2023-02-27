@@ -188,6 +188,7 @@ void cablesPayloadPlanner(const std::vector<double>* start, const std::vector<do
 }
 
 void yamltovec(std::vector<double> *vec, const YAML::Node &yamlvec) {
+    // helper function to convert yaml vec to  std::vec
     for (const auto& i : yamlvec) {
         vec->push_back(i.as<double>());
     }  
