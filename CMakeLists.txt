@@ -18,12 +18,16 @@ include_directories(
   ${YAMLCPP_INCLUDE_DIRS}
   )
 
+# # PayloadPlanning
+# add_executable(payloadPlanner
+#   src/payloadPlanner.cpp
+# )
 
-## PayloadPlanning
-add_executable(payloadPlanner
-  src/payloadPlanner.cpp
+add_executable(nUavsPayloadPlanner
+  src/nUavsPayloadPlanner.cpp
 )
-target_link_libraries(payloadPlanner
+
+target_link_libraries(nUavsPayloadPlanner
   ${OMPL_LIBRARIES}
   ${Boost_LIBRARIES}
   ${YAMLCPP_LIBRARIES}
