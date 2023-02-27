@@ -8,9 +8,27 @@ import meshcat
 import meshcat.geometry as g
 import meshcat.transformations as tf
 
+def normalize(v):
+    return v/np.linalg.norm(v)
 
+    
+def polartovector(cablestate, attpoint, length, plstate):
+    # returns the points to be visualized for the cable 
+    az = cablestate[0]
+    el = cablestate[1]
+    plpos = plstate[0:3]
+    plquat = plstate[3:7]
+    # azimuth and elevation --> unit vec
+    # source https://math.stackexchange.com/questions/1150232/finding-the-unit-direction-vector-given-azimuth-and-elevation
+    unitvec = np.array([np.cos(az)*np.cos(el),
+                        np.sin(az)*np.cos(el),
+                        np.sin(el)]) 
+    
+    attpInfixedFr = plpos + rn.rotate(plquat, attpoint) # attachment point in fixed frame
+    uavpos = attpInfixedFr + length*unitvec 
+    return uavpos, np.linspace(attpInfixedFr, uavpos, num=2).T
 
-if __name__ == "__main__": 
+def main(): 
     # loads the abstract meshcat yaml file.
     # the meshcat.yaml has all rigid body data
     # UAV, payload, cables: 
@@ -61,18 +79,46 @@ if __name__ == "__main__":
     
     with open(args.motions) as motions_file:
         motions = yaml.load(motions_file, Loader=yaml.FullLoader)
-    # print(motions.values())
     # motions consist of: 
-        # - payload states: [x y z qw qx qy qz]
-    while True:
-        for motion in motions.values(): 
-            for state in motion[0]["states"]:
-                vis["payload"].set_transform(
-                            tf.translation_matrix(state[0:3]).dot(
-                    tf.quaternion_matrix(state[3:7])))
-                time.sleep(mcconfigs['meshcat']["timestep"])
+        # - payload states: [x y z qw qx qy qz az elv]
+    cablelengths = motions['result'][1]['cablelengths'][0]
+    numofCables = 2*len(cablelengths)
+    numofuavs   = len(cablelengths)
+    attpoints = motions['result'][2]['cablepoints'][0]
+    numofAtts = len(attpoints)
 
+    ## set objects for the uavs in a list
+    uavsphere = []
+    path  = mcconfigs['uav']['path']
+    shape = mcconfigs['uav']['sphere']         
+    for i in range(numofuavs):
+        uavshape = vis["uav"+str(i)]
+        uavconst = vis["sphere"+str(i)]
+        uavshape.set_object(g.StlMeshGeometry.from_file(path))
+        uavconst.set_object(g.Mesh(g.Sphere(shape["radius"]), g.MeshLambertMaterial(color=shape["color"], opacity=shape["opacity"])))
+        uavsphere.append((uavshape, uavconst))
+
+    while True:
+        for motion in motions.values():
+            for plstate in motion[0]["states"]:
+                vis["payload"].set_transform(
+                            tf.translation_matrix(plstate[0:3]).dot(
+                    tf.quaternion_matrix(plstate[3:7])))                
+                # visualization of uavs, constraint spheres, and cables
+                cablestates = plstate[7::]
+                for cablecounter, attcounter, length, uavcounter in zip(range(0,numofCables,2), range(0,numofAtts,3), cablelengths, range(numofuavs)):
+                    cablestate = cablestates[cablecounter:cablecounter+2]
+                    attpoint = attpoints[attcounter:attcounter+3]
+                    uavpos, cablegeometry = polartovector(cablestate, attpoint, length, plstate)
+                    # visualize cables
+                    vis["cable"+str(cablecounter)].set_object(g.Line(g.PointsGeometry(cablegeometry)))
+                    # visualize uavs
+                    uav, sphere = uavsphere[uavcounter]
+                    uav.set_transform(tf.translation_matrix(uavpos))
+                    sphere.set_transform(tf.translation_matrix(uavpos))
+                time.sleep(mcconfigs['meshcat']["timestep"])
         time.sleep(mcconfigs['meshcat']["finalstep"])
 
-        
-        pass
+    
+if __name__ == "__main__": 
+    main()
