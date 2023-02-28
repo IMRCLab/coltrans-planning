@@ -1,0 +1,8 @@
+plannerType: 'rrtstar' # we currently support rrtstar and rrtconnect
+timelimit: 3.0
+environment:
+  min: [0.0, 0.0, 0.0]
+  max: [6.0, 6.0, 6.0]
+payload:
+  start: [0,0,0,1,0,0,0] # [xi, yi, zi, qwi,qxi,qyi,qzi]
+  goal : [1,0,0, 0.70710678, 0.70710678, 0 , 0] # [xf, yf, zf qwf,qxf,qyf,qzf]

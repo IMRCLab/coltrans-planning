@@ -1,0 +1,35 @@
+meshcat: 
+  openWindow: true
+  timestep: 0.05 # timestep in secs
+  finalstep: 2  # sleep at final step
+
+uav: 
+  path: ../examples/visualize/cf2_assembly.stl
+  sphere:
+    radius  : 0.15
+    opacity : 0.05
+    color   : 0x000000
+cable: 
+  color: 0x000000
+  linewidth: 1.0
+
+payload:
+  triangle: 
+    path: ../examples/visualize/Triangle_meteres_centered.stl
+    color: 0x808080
+
+  pointmass:
+    radius: 0.01
+    opacity: 1.0
+    color: 0x808080
+  
+  rod:
+    radius: 0.025
+    height: 0.2
+    opacity: 1.0
+    color: 0xff11dd
+
+  cuboid:
+    opacity: 1.0
+    size: [0.07, 0.14, 0.005]
+    color: 0x808080
