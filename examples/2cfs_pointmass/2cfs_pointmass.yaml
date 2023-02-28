@@ -1,14 +1,15 @@
 plannerType: 'rrtstar'
-timelimit: 3.0
+timelimit: 10.0
 numofuavs: 2
 environment:
   min: [0.0, 0.0, 0.0]
   max: [6.0, 6.0, 6.0]
 payload:
-  start: [0, 0, 0, 1, 0, 0, 0, 1.57, 0.78,  4.71, 0.78] # [xi, yi, zi, qwi,qxi,qyi,qzi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
-  goal : [1, 0, 0, 1, 0, 0, 0, 1.57,  0.3, 4.71, 0.3] # [xf, yf, zf qwf,qxf,qyf,qzf, az1_f, elv1_f,...azn_f, elvn_f]  final azimuth(s) and elevation(s)
+  start: [0, 0, 0, 1, 0, 0, 0, 1.57,  0.3, 4.71, 0.3] # [xi, yi, zi, qwi,qxi,qyi,qzi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
+  goal : [1, 0, 0, 1, 0, 0, 0, 1.57, 0.78,  4.71, 0.78] # [xf, yf, zf qwf,qxf,qyf,qzf, az1_f, elv1_f,...azn_f, elvn_f]  final azimuth(s) and elevation(s)
 cables: 
   lengths: [0.5, 0.5]
   attachmentpoints: [0, 0, 0, 0, 0, 0]
   min: [0, -1.57, 0, -1.57] # minimum az_i, elv_i for each ith cable 
   max: [6.28, 2.3554, 6.28, 2.3554] # maximum az_i, elv_i for each ith cable  
+  desired: [1.57, 0.78,  4.71, 0.78]

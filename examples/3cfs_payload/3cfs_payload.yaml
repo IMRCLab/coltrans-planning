@@ -12,3 +12,4 @@ cables:
   attachmentpoints: [0.04, 0, 0.005, -0.04, 0.04, 0.005, -0.04, -0.04, 0.005]
   min: [0, -1.57, 0, -1.57, 0, -1.57] # minimum az_i, elv_i for each ith cable 
   max: [6.28, 2.3554, 6.28, 2.3554, 6.28, 2.3554] # maximum az_i, elv_i for each ith cable  
+  desired: [0, 0.78,  2.1, 0.78,  4.2, 0.78] # desired az_i, elv_i for each ith cable  
