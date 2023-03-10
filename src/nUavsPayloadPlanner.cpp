@@ -6,6 +6,7 @@
 
 // Objectives
 #include <ompl/base/objectives/PathLengthOptimizationObjective.h>
+#include <ompl/base/OptimizationObjective.h>
 // Planners
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <ompl/geometric/planners/rrt/RRTstar.h>
@@ -44,35 +45,63 @@ ob::OptimizationObjectivePtr getPathLengthObjective(const ob::SpaceInformationPt
     return ob::OptimizationObjectivePtr(new ob::PathLengthOptimizationObjective(si));
 }
 
-void cablesPayloadPlanner(const std::vector<double>* start, const std::vector<double>* goal,
-                 const std::vector<double>* envmin, const std::vector<double>* envmax,
-                 const std::vector<double>* cablemin, const std::vector<double>* cablemax,
-                 const std::vector<double>* cableslength, const std::vector<double>* cablespoints,
-                 const std::string &plannerType, const float &numofuavs, const float &timelimit, std::string outputFile)
+class minCableObjective : public ob::OptimizationObjective
+{
+public:
+    minCableObjective(const ob::SpaceInformationPtr &si, const std::vector<double> &desiredCableStates) :
+        ob::OptimizationObjective(si),
+        desiredCableStates_(desiredCableStates)
+        {}
+
+    ob::Cost motionCost(const ob::State *s1, const ob::State *s2) const override {
+        return this->combineCosts(this->stateCost(s1), this->stateCost(s2));
+    }
+
+    ob::Cost stateCost(const ob::State* s) const override
+    {
+        const auto cablestates = s->as<ob::RealVectorStateSpace::StateType>();      
+        float cost = 0;
+        for (size_t i = 0; i < 3; ++i) {
+        cost += std::pow(desiredCableStates_[i] - cablestates->values[i],2); 
+        }
+        cost = std::sqrt(cost);
+        return ob::Cost(cost);
+    }
+
+private: 
+    std::vector<double> desiredCableStates_;
+};
+
+
+void cablesPayloadPlanner(const std::vector<double> start, const std::vector<double> goal,
+                 const std::vector<double> envmin, const std::vector<double> envmax,
+                 const std::vector<double> cablemin, const std::vector<double> cablemax,
+                 const std::vector<double> cableslength, const std::vector<double> cablespoints, const std::vector<double> desiredCableStates,
+                 const std::string &plannerType, const float &numofuavs, const float &timelimit, std::string &outputFile)
 {
     // construct compound state space SE(3) X (R^2)^2
     // SE3 for the payload
     auto payload(std::make_shared<ob::SE3StateSpace>());
     // orientation of the two cables: az1, elv1, az2, elv2
     auto cables(std::make_shared<ob::RealVectorStateSpace>(2*numofuavs));
-   
+
     ob::RealVectorBounds payloadbounds(3);
     // prepare the payload position bounds
-    for (size_t i=0; i < envmin->size(); ++i) {
-        payloadbounds.setLow(i, envmin->operator[](i));
-        payloadbounds.setHigh(i, envmax->operator[](i));
+    for (size_t i=0; i < envmin.size(); ++i) {
+        payloadbounds.setLow(i, envmin[i]);
+        payloadbounds.setHigh(i, envmax[i]);
     }
     payload->setBounds(payloadbounds);
-    
+
     ob::RealVectorBounds cablebounds(2*numofuavs);
     // prepare the cable elevation bounds
-    for (size_t i=0; i < cablemin->size(); ++i) {
-        cablebounds.setLow(i, cablemin->operator[](i));
-        cablebounds.setHigh(i, cablemax->operator[](i));
+    for (size_t i=0; i < cablemin.size(); ++i) {
+        cablebounds.setLow(i, cablemin[i]);
+        cablebounds.setHigh(i, cablemax[i]);
     }
     cables->setBounds(cablebounds);
-    auto space = payload +  cables;
-
+    auto space = payload + cables;
+    
     // construct an instance of space information from this state
     auto si(std::make_shared<ob::SpaceInformation>(space));
     // setup the state space information
@@ -85,14 +114,14 @@ void cablesPayloadPlanner(const std::vector<double>* start, const std::vector<do
 
     // create and set a start state
     auto startState = si->allocState();
-    si->getStateSpace()->copyFromReals(startState, *start);
+    si->getStateSpace()->copyFromReals(startState, start);
     si->enforceBounds(startState);
     pdef->addStartState(startState);
     si->freeState(startState);
     
     // create and set a goal state
     auto goalState = si->allocState();
-    si->getStateSpace()->copyFromReals(goalState, *goal);
+    si->getStateSpace()->copyFromReals(goalState, goal);
     si->enforceBounds(goalState);
     pdef->setGoalState(goalState);
     si->freeState(goalState);
@@ -109,9 +138,9 @@ void cablesPayloadPlanner(const std::vector<double>* start, const std::vector<do
         std::cout << "Wrong Planner!" << std::endl;
         exit(3);
     }
-
-
-    pdef->setOptimizationObjective(getPathLengthObjective(si));
+    // pdef->setOptimizationObjective(getPathLengthObjective(si));
+    auto objectCable(std::make_shared<minCableObjective>(si, desiredCableStates));
+    pdef->setOptimizationObjective(objectCable);
 
     // set the problem we are truing to solve for the planner
     planner->setProblemDefinition(pdef);
@@ -157,11 +186,11 @@ void cablesPayloadPlanner(const std::vector<double>* start, const std::vector<do
         out<< "  - cablelengths:" << std::endl;
         out<<"      - [";
                
-        for (size_t i = 0; i < cableslength->size(); ++i) {
+        for (size_t i = 0; i < cableslength.size(); ++i) {
        
-            out << cableslength->operator[](i);
+            out << cableslength[i];
        
-            if (i < cableslength->size()-1) {
+            if (i < cableslength.size()-1) {
                 out << ",";
             }
         }
@@ -170,11 +199,11 @@ void cablesPayloadPlanner(const std::vector<double>* start, const std::vector<do
         out<< "  - cablepoints:" << std::endl;
         out<<"      - [";
        
-        for (size_t i = 0; i < cablespoints->size(); ++i) {
+        for (size_t i = 0; i < cablespoints.size(); ++i) {
        
-            out << cablespoints->operator[](i);
+            out << cablespoints[i];
        
-            if (i < cablespoints->size()-1) {
+            if (i < cablespoints.size()-1) {
                 out << ",";
             }
         }
@@ -184,13 +213,12 @@ void cablesPayloadPlanner(const std::vector<double>* start, const std::vector<do
     else {
         std::cout << "No solution found" << std::endl;
     }
-
 }
 
-void yamltovec(std::vector<double> *vec, const YAML::Node &yamlvec) {
+void yamltovec(std::vector<double> &vec, const YAML::Node &yamlvec) {
     // helper function to convert yaml vec to  std::vec
     for (const auto& i : yamlvec) {
-        vec->push_back(i.as<double>());
+        vec.push_back(i.as<double>());
     }  
 }
 
@@ -229,54 +257,58 @@ int main(int argc, char* argv[])
     YAML::Node configFile = YAML::LoadFile(inputFile);
     
     // planner type
-    const std::string& plannerType = configFile["plannerType"].as<std::string>();
+    const std::string plannerType = configFile["plannerType"].as<std::string>();
     // timelimit to find a solution
-    const float& timelimit = configFile["timelimit"].as<float>();
+    const float timelimit = configFile["timelimit"].as<float>();
     
     // number of uavs
-    const float& numofuavs = configFile["numofuavs"].as<float>();
+    const float numofuavs = configFile["numofuavs"].as<float>();
 
     // start and goal states from config
-    const auto &startSt = configFile["payload"]["start"];
-    std::vector<double> *startvec = new std::vector<double>();
+    const auto& startSt = configFile["payload"]["start"];
+    std::vector<double> startvec;
     yamltovec(startvec, startSt);
     
     const auto& goalSt = configFile["payload"]["goal"];
-    std::vector<double> *goalvec = new std::vector<double>();
+    std::vector<double> goalvec;
     yamltovec(goalvec, goalSt);
    
     // extract environment bounds from config 
     const auto& envmincfg = configFile["environment"]["min"];    
-    std::vector<double> *envmin = new std::vector<double>();
+    std::vector<double> envmin;
     yamltovec(envmin, envmincfg);
 
     const auto& envmaxcfg = configFile["environment"]["max"];
-    std::vector<double> *envmax = new std::vector<double>();
+    std::vector<double> envmax;
     yamltovec(envmax, envmaxcfg);
 
     // minimum elevation
     const auto& cablesmincfg = configFile["cables"]["min"];
-    std::vector<double> *cablesmin = new std::vector<double>();
+    std::vector<double> cablesmin;
     yamltovec(cablesmin, cablesmincfg);
     // maximum elevation
     const auto& cablesmaxcfg = configFile["cables"]["max"];
-    std::vector<double> *cablesmax = new std::vector<double>();
+    std::vector<double> cablesmax;
     yamltovec(cablesmax, cablesmaxcfg);
 
     
     const auto& cableslengthcfg = configFile["cables"]["lengths"];
-    std::vector<double> *cableslength = new std::vector<double>();
+    std::vector<double> cableslength;
     yamltovec(cableslength, cableslengthcfg);
 
     const auto& cablespointscfg = configFile["cables"]["attachmentpoints"];
-    std::vector<double> *cablespoints = new std::vector<double>();
+    std::vector<double> cablespoints;
     yamltovec(cablespoints, cablespointscfg);
-  
+    
+    const auto& desiredCableStatescfg = configFile["cables"]["desired"];
+    std::vector<double> desiredCableStates;
+    yamltovec(desiredCableStates, desiredCableStatescfg);
 
     cablesPayloadPlanner(startvec, goalvec,
                          envmin, envmax, 
-                         cablesmin, cablesmax, 
-                        cableslength, cablespoints, plannerType, numofuavs, timelimit, outputFile);
+                         cablesmin, cablesmax,
+                         cableslength, cablespoints, desiredCableStates,  
+                         plannerType, numofuavs, timelimit, outputFile);
 
     std::cout << std::endl << std::endl;
 
