@@ -1,0 +1,3 @@
+[submodule "deps/fcl"]
+	path = deps/fcl
+	url = git@github.com:flexible-collision-library/fcl.git

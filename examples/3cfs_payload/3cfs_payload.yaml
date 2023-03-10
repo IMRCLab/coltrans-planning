@@ -1,12 +1,22 @@
 plannerType: 'rrtstar'
 timelimit: 3.0
-numofuavs: 3
+numofcables: 3
 environment:
   min: [0.0, 0.0, 0.0]
   max: [6.0, 6.0, 6.0]
+  obstacles:
+    - type: sphere
+      center: [0.5, 0.3, 0.2]
+      radius: 0.1
+    - type: sphere
+      center: [0.5, -0.3, 0.2]
+      radius: 0.1
 payload:
-  start: [0, 0, 0, 1, 0, 0, 0,  0, 0.78,  2.1, 0.78,  4.2, 0.78] # [xi, yi, zi, qwi,qxi,qyi,qzi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
-  goal : [1, 0, 0, 0.707, 0, 0 , 0.707, 0,  1.57, 2.1, 1.57, 4.2, 1.57] # [xf, yf, zf qwf,qxf,qyf,qzf, az1_f, elv1_f,...azn_f, elvn_f]  final azimuth(s) and elevation(s)
+  start: [1, 0, 0, 1, 0, 0, 0,  0, 0.78,  2.1, 0.78,  4.2, 0.78] # [xi, yi, zi, qwi,qxi,qyi,qzi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
+  goal : [2, 0, 0, 0.707, 0, 0 , 0.707, 0,  1.57, 2.1, 1.57, 4.2, 1.57] # [xf, yf, zf qwf,qxf,qyf,qzf, az1_f, elv1_f,...azn_f, elvn_f]  final azimuth(s) and elevation(s)
+  shape:
+    type: triangle
+    size: [0.08,0.08,0.005] 
 cables: 
   lengths: [0.5, 0.5, 0.5]
   attachmentpoints: [0.04, 0, 0.005, -0.04, 0.04, 0.005, -0.04, -0.04, 0.005]
