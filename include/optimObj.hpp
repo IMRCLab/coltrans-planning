@@ -11,6 +11,7 @@ namespace og = ompl::geometric;
 #include <ompl/base/objectives/PathLengthOptimizationObjective.h>
 #include <ompl/base/OptimizationObjective.h>
 
+#include <robots.hpp>
 // Objective to minimize the path length
 ob::OptimizationObjectivePtr getPathLengthObjective(const ob::SpaceInformationPtr& si)
 {
@@ -28,17 +29,21 @@ public:
 
     ob::Cost motionCost(const ob::State *s1, const ob::State *s2) const override
     {
-        return this->combineCosts(this->stateCost(s1), this->stateCost(s2));
+        return combineCosts(stateCost(s1), stateCost(s2));
     }
 
     ob::Cost stateCost(const ob::State* s) const override
     {
-        const auto cablestates = s->as<ob::RealVectorStateSpace::StateType>();      
+        auto st = s->as<StateSpace::StateType>();
+        size_t num_cables = si_->getStateSpace()->as<StateSpace>()->getNumCables();
+        Eigen::Vector3f basevec(0,1,0);
         float cost = 0;
-        for (size_t i = 0; i < 3; ++i) {
-        cost += std::pow(desiredCableStates_[i] - cablestates->values[i],2); 
+        for(size_t i = 0; i < num_cables; ++i) {
+            auto currentUnitVec =  st->getunitvec(i);
+            auto angle = acos(basevec.dot(currentUnitVec));
+            cost += abs(angle);
+            // std::cout <<"Cost: "<< cost <<std::endl;
         }
-        cost = std::sqrt(cost);
         return ob::Cost(cost);
     }
 

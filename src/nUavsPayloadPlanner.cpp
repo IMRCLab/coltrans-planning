@@ -32,7 +32,6 @@ bool isStateValid(const ob::State *state)
     auto fullstate = state->as<StateSpace::StateType>();
     Eigen::Vector3f attachmentpoint(0, 0.1, 0);
     const auto cablepos = fullstate->getCablePos(1, attachmentpoint, 0.5);
-    std::cout << cablepos << std::endl;
     // const auto payloadrot = fullstate->getPayloadRot();
     // std::cout << payloadrot << std::endl;
     // std::vector<double> position;
@@ -90,6 +89,7 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile)
     }
     // pdef->setOptimizationObjective(getPathLengthObjective(si));
     auto objectCable(std::make_shared<minCableObjective>(si, cfg.desiredCableStates));
+    objectCable->setCostThreshold(ob::Cost(1.0));
     pdef->setOptimizationObjective(objectCable);
 
     // set the problem we are truing to solve for the planner
