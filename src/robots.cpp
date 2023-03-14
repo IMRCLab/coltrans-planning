@@ -6,10 +6,7 @@ namespace ob = ompl::base;
 nCablesPayload::nCablesPayload(const plannerSettings& cfg)
 {
     // SE3 for the payload
-    auto payloadPos(std::make_shared<ob::RealVectorStateSpace>(3));
-    auto payloadRot(std::make_shared<ob::SO3StateSpace>());
-    // orientation of the two cables: az1, elv1, az2, elv2
-    auto cables(std::make_shared<ob::RealVectorStateSpace>(2*cfg.numofcables));
+    auto space(std::make_shared<StateSpace>(cfg.numofcables));
 
     ob::RealVectorBounds payloadbounds(3);
     // prepare the payload position bounds
@@ -17,7 +14,7 @@ nCablesPayload::nCablesPayload(const plannerSettings& cfg)
         payloadbounds.setLow(i, cfg.envmin[i]);
         payloadbounds.setHigh(i, cfg.envmax[i]);
     }
-    payloadPos->setBounds(payloadbounds);
+    space->setPositionBounds(payloadbounds);
 
     ob::RealVectorBounds cablebounds(2*cfg.numofcables);
     // prepare the cable elevation bounds
@@ -26,8 +23,7 @@ nCablesPayload::nCablesPayload(const plannerSettings& cfg)
         cablebounds.setLow(i, cfg.cablemin[i]);
         cablebounds.setHigh(i, cfg.cablemax[i]);
     }
-    cables->setBounds(cablebounds);
-    auto space = payloadPos +payloadRot + cables;
+    space->setCableBounds(cablebounds);
 
     // construct an instance of space information from this state
     si = std::make_shared<ob::SpaceInformation>(space);
