@@ -22,7 +22,7 @@ Eigen::VectorXf yamltoEigen(const YAML::Node &yamlvec)
     return vec;
 }
 
-Eigen::VectorXf stdtoEigen(std::vector<double> stdvec)
+Eigen::VectorXf stdtoEigen(const std::vector<double>& stdvec)
 {
     Eigen::VectorXf eigenvec(stdvec.size());
     for (size_t i = 0; i < stdvec.size(); ++i)
