@@ -12,6 +12,7 @@ namespace og = ompl::geometric;
 #include <ompl/base/OptimizationObjective.h>
 
 #include <robots.hpp>
+#include <helper.hpp>
 // Objective to minimize the path length
 ob::OptimizationObjectivePtr getPathLengthObjective(const ob::SpaceInformationPtr& si)
 {
@@ -22,9 +23,8 @@ ob::OptimizationObjectivePtr getPathLengthObjective(const ob::SpaceInformationPt
 class minCableObjective : public ob::OptimizationObjective
 {
 public:
-    minCableObjective(const ob::SpaceInformationPtr &si, const std::vector<double> &desiredCableStates) :
-        ob::OptimizationObjective(si),
-        desiredCableStates_(desiredCableStates)
+    minCableObjective(const ob::SpaceInformationPtr &si) :
+        ob::OptimizationObjective(si)
         {}
 
     ob::Cost motionCost(const ob::State *s1, const ob::State *s2) const override
@@ -36,17 +36,18 @@ public:
     {
         auto st = s->as<StateSpace::StateType>();
         size_t num_cables = si_->getStateSpace()->as<StateSpace>()->getNumCables();
-        Eigen::Vector3f basevec(0,1,0);
+        Eigen::Vector3f basevec(0,0,1);
         float cost = 0;
         for(size_t i = 0; i < num_cables; ++i) {
             auto currentUnitVec =  st->getunitvec(i);
             auto angle = acos(basevec.dot(currentUnitVec));
             cost += abs(angle);
-            // std::cout <<"Cost: "<< cost <<std::endl;
         }
-        return ob::Cost(cost);
-    }
+        // Still can't get the goal state here 
+        Eigen::Vector3f goalState(2,0,0);
+        Eigen::Vector3f payloadPos = st->getPayloadPos();
+        float costPos = norm(goalState - payloadPos);
 
-private: 
-    std::vector<double> desiredCableStates_;
+        return ob::Cost(cost + 100*costPos);
+    }
 };
