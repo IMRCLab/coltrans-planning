@@ -60,8 +60,8 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile)
 
     } else if (cfg.plannerType == "sst") 
     {
-        auto rrtstar = new og::SST(si);
-        planner.reset(rrtstar);
+        auto sst = new og::SST(si);
+        planner.reset(sst);
     } else 
     {
         std::cout << "Wrong Planner!" << std::endl;
