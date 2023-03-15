@@ -86,7 +86,24 @@ def main():
     numofuavs   = len(cablelengths)
     attpoints = motions['result'][2]['cablepoints'][0]
     numofAtts = len(attpoints)
-
+    ## draw obstacles
+    if (motions['result'][3]['obstacles']):
+        obstacles = motions['result'][3]['obstacles']
+        obsNum = 0
+        for obstacle in obstacles:
+            center = obstacle["center"]
+            radius = obstacle["radius"]
+            if obstacle["type"] == "cylinder":
+                height = obstacle["height"]
+                vis["obstacle"+str(obsNum)].set_object(g.Mesh(g.Cylinder(height, radius=radius)))
+                ai = np.pi/2
+                aj = 0 
+                ak = 0
+                vis["obstacle"+str(obsNum)].set_transform(tf.translation_matrix(center).dot(tf.euler_matrix(ai, aj, ak)))
+            elif obstacle["type"] == "sphere":
+                vis["obstacle"+str(obsNum)].set_object(g.Mesh(g.Sphere(radius)))
+                vis["obstacle"+str(obsNum)].set_transform(tf.translation_matrix(center))
+            obsNum+=1
     ## set objects for the uavs in a list
     uavsphere = []
     path  = mcconfigs['uav']['path']
