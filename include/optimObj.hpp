@@ -43,11 +43,6 @@ public:
             auto angle = acos(basevec.dot(currentUnitVec));
             cost += abs(angle);
         }
-        // Still can't get the goal state here 
-        Eigen::Vector3f goalState(2,0,0);
-        Eigen::Vector3f payloadPos = st->getPayloadPos();
-        float costPos = norm(goalState - payloadPos);
-
-        return ob::Cost(cost + 100*costPos);
+        return ob::Cost(cost);
     }
 };
