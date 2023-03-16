@@ -37,9 +37,7 @@ public:
         auto st2 = s2->as<StateSpace::StateType>();
         Eigen::Vector3f pos1 = st1->getPayloadPos();
         Eigen::Vector3f pos2 = st2->getPayloadPos();
-
         float distance = (pos1 - pos2).norm();
-
         return ob::Cost(c*distance);
     }
 
@@ -48,12 +46,12 @@ public:
         auto st = s->as<StateSpace::StateType>();
         size_t num_cables = si_->getStateSpace()->as<StateSpace>()->getNumCables();
         Eigen::Vector3f basevec(0,0,1);
-        float cost = 0;
+        float cost = 0;        
         for(size_t i = 0; i < num_cables; ++i) {
             auto currentUnitVec =  st->getunitvec(i);
-            auto angle = acos(basevec.dot(currentUnitVec));
-            cost += abs(angle);
+            cost += (1/(basevec.dot(currentUnitVec)));
         }
+        cost *= (1/num_cables);
         return ob::Cost(cost);
     }
 };
