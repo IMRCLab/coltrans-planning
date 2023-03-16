@@ -1,7 +1,7 @@
 // Planners
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <ompl/geometric/planners/rrt/RRTstar.h>
-
+#include<ompl/geometric/planners/sst/SST.h>
 #include <ompl/config.h>
 #include <fcl/fcl.h>
 #include <yaml-cpp/yaml.h>
@@ -12,49 +12,24 @@
 #include <helper.hpp>
 #include <optimObj.hpp>
 #include <robots.hpp>
+#include<fclStateValidityChecker.hpp>
 
 namespace ob = ompl::base;
 namespace og = ompl::geometric;
 
-bool isStateValid(const ob::State *state)
-{
-    // cast the abstract state type to the type we expect
-    const auto *se3state = state->as<ob::SE3StateSpace::StateType>();
-
-    // extract the first component of the state and cast it to what we expect
-    const auto *pos = se3state->as<ob::RealVectorStateSpace::StateType>(0);
-
-    // extract the second component of the state and cast it to what we expect
-    const auto *rot = se3state->as<ob::SO3StateSpace::StateType>(1);
-
-    // check validity of state defined by pos & rot
-
-    auto fullstate = state->as<StateSpace::StateType>();
-    Eigen::Vector3f attachmentpoint(0, 0.1, 0);
-    const auto cablepos = fullstate->getCablePos(1, attachmentpoint, 0.5);
-    // const auto payloadrot = fullstate->getPayloadRot();
-    // std::cout << payloadrot << std::endl;
-    // std::vector<double> position;
- 
-    // exit(3);
-    // return a value that is always true but uses the two variables we define, so we avoid compiler warnings
-    return (const void*)rot != (const void*)pos;
-}
-
-
-
 void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile)
 {
-    nCablesPayload nCablesPayload(cfg);   
-    nCablesPayload.addRobotParts(cfg);
-    Obstacles Obstacles(cfg.env);
+    std::shared_ptr<nCablesPayload> nCablesPayload = create_sys(cfg);   
+    nCablesPayload->addRobotParts(cfg);
+    std::shared_ptr<Obstacles> Obstacles = create_obs(cfg.env);
 
     // construct an instance of space information from this state
-    auto si = nCablesPayload.si;
+    auto si = nCablesPayload->si;
 
     // set state validity checking for this space
-    si->setStateValidityChecker(isStateValid);
-    
+    auto stateValidityChecker(std::make_shared<fclStateValidityChecker>(si, nCablesPayload, Obstacles, cfg.attachmentpoints, cfg.cablelengthVec));
+    si->setStateValidityChecker(stateValidityChecker);
+
      // create a problem instance
     auto pdef(std::make_shared<ob::ProblemDefinition>(si));
 
@@ -82,14 +57,19 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile)
     {
         auto rrtstar = new og::RRTstar(si);
         planner.reset(rrtstar);
+
+    } else if (cfg.plannerType == "sst") 
+    {
+        auto rrtstar = new og::SST(si);
+        planner.reset(rrtstar);
     } else 
     {
         std::cout << "Wrong Planner!" << std::endl;
         exit(3);
     }
     // pdef->setOptimizationObjective(getPathLengthObjective(si));
-    auto objectCable(std::make_shared<minCableObjective>(si, cfg.desiredCableStates));
-    objectCable->setCostThreshold(ob::Cost(1.0));
+    auto objectCable(std::make_shared<minCableObjective>(si));
+    // objectCable->setCostThreshold(ob::Cost(1.0));
     pdef->setOptimizationObjective(objectCable);
 
     // set the problem we are truing to solve for the planner
@@ -137,10 +117,10 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile)
         out<< "  - cablelengths:" << std::endl;
         out<<"      - [";
                
-        for (size_t i = 0; i < cfg.cableslength.size(); ++i) 
+        for (size_t i = 0; i < cfg.cablelengthVec.size(); ++i) 
         {
-            out << cfg.cableslength[i];
-            if (i < cfg.cableslength.size()-1) 
+            out << cfg.cablelengthVec[i];
+            if (i < cfg.cablelengthVec.size()-1) 
             {
                 out << ",";
             }
@@ -159,7 +139,17 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile)
             }
         }
         out << "]" <<std::endl;    
-
+        //stream out obstacle types, shapes and positions:
+        out<< "  - obstacles:" << std::endl;
+        for(size_t i = 0; i < cfg.env.size(); ++i) {
+            YAML::Node obs = cfg.env[i];
+            out<<"      - type: "<<obs["type"] <<"\n";   
+            out<<"        center: "<< obs["center"]<<"\n";   
+            out<<"        radius: "<< obs["radius"] <<"\n";   
+            if (obs["type"].as<std::string>() == "cylinder") {
+                out<<"        height: "<< obs["height"] <<"\n";   
+            }
+        }
     }
     else 
     {
@@ -229,12 +219,10 @@ int main(int argc, char* argv[])
     cfg.cablemax = yamltovec(configFile["cables"]["max"]);
 
     
-    cfg.cableslength = yamltovec(configFile["cables"]["lengths"]);
+    cfg.cablelengthVec = yamltovec(configFile["cables"]["lengths"]);
 
     cfg.attachmentpoints = yamltoEigen(configFile["cables"]["attachmentpoints"]);
     
-    cfg.desiredCableStates = yamltovec(configFile["cables"]["desired"]);
-
     // Extract obstacles
     cfg.env = configFile["environment"]["obstacles"];
 

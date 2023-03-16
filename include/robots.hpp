@@ -17,7 +17,7 @@ class Obstacles
 {
 public:
     Obstacles(const YAML::Node &env);
-    // void addObstacles();
+    size_t getObsNum();
     std::vector<fcl::CollisionObjectf *> obstacles;
     fcl::BroadPhaseCollisionManagerf* obsmanager;
 };
@@ -34,8 +34,7 @@ public:
     std::vector<double> envmax;
     std::vector<double> cablemin;
     std::vector<double> cablemax;
-    std::vector<double> cableslength;
-    std::vector<double> desiredCableStates;
+    std::vector<double> cablelengthVec;
     std::string plannerType;
     std::string payloadShape;
     size_t numofcables;
@@ -45,13 +44,31 @@ public:
 class nCablesPayload
 {
 public:
-    nCablesPayload(const plannerSettings& cfg);
-    void addRobotParts(const plannerSettings& cfg);
     std::shared_ptr<ob::SpaceInformation> si;
-    std::vector<fcl::CollisionObjectf *> systemParts;
+    
+    nCablesPayload(const plannerSettings& cfg);
+
+    void addRobotParts(const plannerSettings& cfg);
+    fcl::CollisionObjectf* payloadObj;
+    std::vector<fcl::CollisionObjectf *> cablesObj;
+    std::vector<fcl::CollisionObjectf *> uavObj;
+
+    fcl::Transform3f getPayloadTransform(const ompl::base::State *state);
+    fcl::Transform3f getCableTransform(const ompl::base::State *state, const size_t cableNum, Eigen::Vector3f& attachmentPoint,const double length);
+    fcl::Transform3f getUAVTransform(const ompl::base::State *state, const size_t cableNum, Eigen::Vector3f& attachmentPoint,const double length);
+    
+    void setPayloadTransformation(const ob::State *state);
+    void setCableTransformation(const ob::State *state, const size_t cableNum, Eigen::Vector3f& attachmentPoint,const double length);
+    void setUAVTransformation(const ob::State *state,   const size_t uavNum, Eigen::Vector3f& attachmentPoint,const double length);
+
     fcl::BroadPhaseCollisionManagerf* sysparts;
+    // fcl::BroadPhaseCollisionManagerf* cableuavpart;
+    // fcl::BroadPhaseCollisionManagerf* payloadpart;
+    void setSysParts();
 };
 
+std::shared_ptr<nCablesPayload> create_sys(const plannerSettings& cfg);
+std::shared_ptr<Obstacles> create_obs(const YAML::Node &env);
 
 class StateSpace : public ob::CompoundStateSpace
 {
@@ -93,16 +110,24 @@ public:
         rot->y = payload_quat.y();
         rot->z = payload_quat.z();
     } 
-    Eigen::Vector3f getCablePos(const size_t& cablenum, Eigen::Vector3f& attachmentPoint,const double& length) const
+    Eigen::Vector3f getCablePos(const size_t cableNum, Eigen::Vector3f& attachmentPoint,const double& length) const
     {    
-        Eigen::Vector3f unitvec = getunitvec(cablenum);
+        Eigen::Vector3f unitvec = getunitvec(cableNum);
         Eigen::Vector3f attPointInFixedFrame = getAttPointInFixedFrame(attachmentPoint);
         return attPointInFixedFrame + length*unitvec;
     }
 
-    Eigen::Vector3f getuavPos(const size_t& cablenum, Eigen::Vector3f& attachmentPoint,const double& length) const
+    Eigen::Quaternionf getCableQuat(size_t cableNum) const 
+    {
+        Eigen::Vector3f unitvec = getunitvec(cableNum);
+        Eigen::Vector3f basevec(0,0,1);
+        Eigen::Quaternionf quat = Eigen::Quaternionf::FromTwoVectors(basevec, unitvec);
+        return quat;
+    }
+
+    Eigen::Vector3f getuavPos(const size_t& cableNum, Eigen::Vector3f& attachmentPoint,const double& length) const
     {    
-        Eigen::Vector3f unitvec = getunitvec(cablenum);
+        Eigen::Vector3f unitvec = getunitvec(cableNum);
         Eigen::Vector3f attPointInFixedFrame = getAttPointInFixedFrame(attachmentPoint);
         return attPointInFixedFrame + (length+0.15)*unitvec;
     }
@@ -115,7 +140,6 @@ public:
         Eigen::Vector3f unitvec(std::cos(az)*std::sin(el), std::sin(az)*std::cos(el), std::sin(el));
         return unitvec;
     }
-
 protected:
 
     Eigen::Vector3f getAttPointInFixedFrame(Eigen::Vector3f& attachmentPoint) const
@@ -135,7 +159,7 @@ StateSpace(size_t numCables)
     type_ = ob::STATE_SPACE_TYPE_COUNT + 0;
     addSubspace(std::make_shared<ob::RealVectorStateSpace>(3), 1.0);      // position
     addSubspace(std::make_shared<ob::SO3StateSpace>(), 1.0);              // orientation
-    addSubspace(std::make_shared<ob::RealVectorStateSpace>(2*numCables), 0.1); // cable az and el
+    addSubspace(std::make_shared<ob::RealVectorStateSpace>(2*numCables), 1.0); // cable az and el
     lock();
 }
 

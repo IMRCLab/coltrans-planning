@@ -30,71 +30,135 @@ nCablesPayload::nCablesPayload(const plannerSettings& cfg)
     std::cout << "state space dimension : " <<si->getStateDimension()<<std::endl;
     // setup the state space information
     si->setup();
-
-
 }
 
 void nCablesPayload::addRobotParts(const plannerSettings& cfg)
 {
+    // add payload
+      std::shared_ptr<fcl::CollisionGeometryf> geom;
+    if (cfg.payloadShape == "rod")
+    {
+        geom.reset(new fcl::Cylinderf(0.025, 0.2));
+    } else if (cfg.payloadShape == " Triangle")
+    {
+        geom.reset(new fcl::Boxf(0.08, 0.08, 0.005));
+    }
+    else {
+        geom.reset(new fcl::Spheref(0.01));
+    }
+    payloadObj = new fcl::CollisionObjectf(geom);
+
     // parts are: n cables, n spheres for uavs, payload = 2*n+1
-    
     // add cables and uavs
     for (size_t i = 0; i < cfg.numofcables; ++i) 
     {
         std::shared_ptr<fcl::CollisionGeometryf> cablegeom;
-        cablegeom.reset(new fcl::Cylinderf(0.001, cfg.cableslength[i]));
+        cablegeom.reset(new fcl::Cylinderf(0.001, cfg.cablelengthVec[i]));
         auto cableco = new fcl::CollisionObjectf(cablegeom);
         cableco->setTranslation(fcl::Vector3f(0,0,0));
         cableco->computeAABB();
-        systemParts.push_back(cableco);
-        
+        cablesObj.push_back(cableco);
+
         std::shared_ptr<fcl::CollisionGeometryf> uavgeom;
         uavgeom.reset(new fcl::Spheref(0.15));
         auto uavco = new fcl::CollisionObjectf(uavgeom);
         uavco->setTranslation(fcl::Vector3f(0,0,0));
         uavco->computeAABB();
-        systemParts.push_back(uavco);
+        uavObj.push_back(uavco);
     }
 
-    // add payload
-    std::shared_ptr<fcl::CollisionGeometryf> payloadgeom;
-    if (cfg.payloadShape == "rod")
-    {
-        payloadgeom.reset(new fcl::Cylinderf(0.025, 0.2));
-    } else if (cfg.payloadShape == " Triangle")
-    {
-        payloadgeom.reset(new fcl::Boxf(0.08, 0.08, 0.005));
-    }
-    else {
-        payloadgeom.reset(new fcl::Spheref(0.01));
-    }
-    auto payloadco = new fcl::CollisionObjectf(payloadgeom);
-    payloadco->setTranslation(fcl::Vector3f(0,0,0));
-    payloadco->setQuatRotation(fcl::Quaternionf(1,0,0,0));
-    payloadco->computeAABB();
-    systemParts.push_back(payloadco);
-
-    systemParts.push_back(payloadco);
-    sysparts = new fcl::DynamicAABBTreeCollisionManagerf();
-    sysparts->registerObjects(systemParts);
-    sysparts->setup();
 }
 
 
+fcl::Transform3f nCablesPayload::getPayloadTransform(const ob::State *state)
+{
+    auto st = state->as<StateSpace::StateType>();
+    fcl::Transform3f transform;
+    Eigen::Vector3f pos = st->getPayloadPos();
+    transform = Eigen::Translation<float, 3>(fcl::Vector3f(pos(0), pos(1), pos(2)));
+    transform.rotate(st->getPayloadquat());
+    return transform;
+}
+
+fcl::Transform3f nCablesPayload::getCableTransform(const ob::State *state, const size_t cableNum, Eigen::Vector3f& attachmentPoint,const double length)
+{
+    auto st = state->as<StateSpace::StateType>();
+    fcl::Transform3f transform;
+    Eigen::Vector3f cablePos = st->getCablePos(cableNum, attachmentPoint, length);
+    Eigen::Quaternionf cablequat = st->getCableQuat(cableNum);
+    transform = Eigen::Translation<float, 3>(fcl::Vector3f(cablePos(0), cablePos(1), cablePos(2)));
+    transform.rotate(cablequat);
+    return transform;
+}
+
+fcl::Transform3f nCablesPayload::getUAVTransform(const ob::State *state, const size_t uavNum, Eigen::Vector3f& attachmentPoint,const double length)
+{
+    auto st = state->as<StateSpace::StateType>();
+    fcl::Transform3f transform;
+    Eigen::Vector3f uavPos = st->getuavPos(uavNum, attachmentPoint, length);
+    Eigen::Quaternionf uavquat(1,0,0,0);
+    transform = Eigen::Translation<float, 3>(fcl::Vector3f(uavPos(0), uavPos(1), uavPos(2)));
+    transform.rotate(uavquat);
+    return transform;
+}
+
+void nCablesPayload::setPayloadTransformation(const ob::State* state)
+{
+    const auto& transform = getPayloadTransform(state);
+    payloadObj->setTranslation(transform.translation());
+    payloadObj->setRotation(transform.rotation());
+    payloadObj->computeAABB();
+}
+
+void nCablesPayload::setCableTransformation(const ob::State* state, const size_t cableNum, Eigen::Vector3f& attachmentPoint,const double length)
+{
+    const auto& transform = getCableTransform(state, cableNum, attachmentPoint, length);
+    cablesObj[cableNum]->setTranslation(transform.translation());
+    cablesObj[cableNum]->setRotation(transform.rotation());
+    cablesObj[cableNum]->computeAABB();
+}   
+
+void nCablesPayload::setUAVTransformation(const ob::State* state, const size_t uavNum, Eigen::Vector3f& attachmentPoint,const double length)
+{
+    const auto& transform = getUAVTransform(state, uavNum, attachmentPoint, length);
+    uavObj[uavNum]->setTranslation(transform.translation());
+    uavObj[uavNum]->setRotation(transform.rotation());
+    uavObj[uavNum]->computeAABB();
+}
+
+void nCablesPayload::setSysParts() {
+    sysparts->registerObject(payloadObj);
+    sysparts->registerObjects(cablesObj);
+    sysparts->registerObjects(uavObj);
+    sysparts->setup();
+
+
+}
 Obstacles::Obstacles(const YAML::Node &env)
 {
-     for (const auto &obs : env)
-  {
+    for (const auto &obs : env)
+    {
     if (obs["type"].as<std::string>() == "sphere")
     {
-      const auto &radius = obs["radius"];
-      std::shared_ptr<fcl::CollisionGeometryf> geom;
-      geom.reset(new fcl::Spheref(radius.as<float>()));
-      const auto &center = obs["center"];
-      auto co = new fcl::CollisionObjectf(geom);
-      co->setTranslation(fcl::Vector3f(center[0].as<float>(), center[1].as<float>(), center[2].as<float>()));
-      co->computeAABB();
-      obstacles.push_back(co);
+        std::shared_ptr<fcl::CollisionGeometryf> geom;
+        const auto &radius = obs["radius"];
+        geom.reset(new fcl::Spheref(radius.as<float>()));      
+        const auto &center = obs["center"];
+        auto co = new fcl::CollisionObjectf(geom);
+        co->setTranslation(fcl::Vector3f(center[0].as<float>(), center[1].as<float>(), center[2].as<float>()));
+        co->computeAABB();
+        obstacles.push_back(co);    
+    } else if (obs["type"].as<std::string>() == "cylinder")
+    {
+        std::shared_ptr<fcl::CollisionGeometryf> geom;
+        const auto &radius = obs["radius"];
+        const auto &height = obs["height"];
+        geom.reset(new fcl::Cylinderf(radius.as<float>(), height.as<float>()));
+        const auto &center = obs["center"];
+        auto co = new fcl::CollisionObjectf(geom);
+        co->setTranslation(fcl::Vector3f(center[0].as<float>(), center[1].as<float>(), center[2].as<float>()));
+        co->computeAABB();
+        obstacles.push_back(co);    
     }
   }
   obsmanager = new fcl::DynamicAABBTreeCollisionManagerf();
@@ -102,7 +166,22 @@ Obstacles::Obstacles(const YAML::Node &env)
   obsmanager->setup();
 }
 
-// void obstacles::addObstacles(const YAML::Node &env)
-// {
+size_t Obstacles::getObsNum()
+{
+    return obstacles.size();
+}
 
-// }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+std::shared_ptr<nCablesPayload> create_sys(const plannerSettings& cfg)
+{
+    std::shared_ptr<nCablesPayload> cableRobotSys;
+    cableRobotSys.reset(new nCablesPayload(cfg));
+    return cableRobotSys;
+}
+
+std::shared_ptr<Obstacles> create_obs(const YAML::Node &env)
+{
+    std::shared_ptr<Obstacles> obstacles;
+    obstacles.reset(new Obstacles(env));
+    return obstacles;
+}

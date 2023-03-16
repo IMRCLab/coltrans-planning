@@ -42,3 +42,8 @@ std::vector<double> eigentoStd(const Eigen::VectorXf &eigenvec)
     }
     return stdvec;
 }
+
+float norm(Eigen::Vector3f vec) {
+    float norm2 = vec.dot(vec);
+    return std::sqrt(norm2);
+}
