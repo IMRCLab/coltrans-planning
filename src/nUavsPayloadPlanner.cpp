@@ -7,6 +7,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include <boost/program_options.hpp>
+#include <chrono>
 #include <iostream>
 #include <fstream>
 #include <helper.hpp>
@@ -60,8 +61,8 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile)
 
     } else if (cfg.plannerType == "sst") 
     {
-        auto rrtstar = new og::SST(si);
-        planner.reset(rrtstar);
+        auto sst = new og::SST(si);
+        planner.reset(sst);
     } else 
     {
         std::cout << "Wrong Planner!" << std::endl;
@@ -72,6 +73,15 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile)
     // objectCable->setCostThreshold(ob::Cost(1.0));
     pdef->setOptimizationObjective(objectCable);
 
+    bool has_solution = false;
+    std::chrono::steady_clock::time_point previous_solution;
+    pdef->setIntermediateSolutionCallback(
+        [&previous_solution, &has_solution](const ob::Planner *, const std::vector<const ob::State *> &, const ob::Cost cost)
+        {
+          std::cout << "Intermediate solution! " << cost.value() << std::endl;
+          has_solution = true;
+          previous_solution = std::chrono::steady_clock::now();
+        });
     // set the problem we are truing to solve for the planner
     planner->setProblemDefinition(pdef);
 
