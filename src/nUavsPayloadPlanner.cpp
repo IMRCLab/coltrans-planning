@@ -7,6 +7,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include <boost/program_options.hpp>
+#include <chrono>
 #include <iostream>
 #include <fstream>
 #include <helper.hpp>
@@ -69,9 +70,21 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile)
     }
     // pdef->setOptimizationObjective(getPathLengthObjective(si));
     auto objectCable(std::make_shared<minCableObjective>(si));
-    // objectCable->setCostThreshold(ob::Cost(1.0));
+    objectCable->setCostThreshold(ob::Cost(1.0));
     pdef->setOptimizationObjective(objectCable);
 
+    bool has_solution = false;
+    std::chrono::steady_clock::time_point previous_solution;
+    pdef->setIntermediateSolutionCallback(
+        [&previous_solution, &has_solution](const ob::Planner *, const std::vector<const ob::State *> &, const ob::Cost cost)
+        {
+          // double t = std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count();
+          // double dt = std::chrono::duration_cast<std::chrono::milliseconds>(now - previous_solution).count();
+          std::cout << "Intermediate solution! " << cost.value() << std::endl;
+          has_solution = true;
+          // last_solution_in_sec = dt / 1000.0f;
+          previous_solution = std::chrono::steady_clock::now();
+        });
     // set the problem we are truing to solve for the planner
     planner->setProblemDefinition(pdef);
 

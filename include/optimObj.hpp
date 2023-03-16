@@ -28,8 +28,19 @@ public:
         {}
 
     ob::Cost motionCost(const ob::State *s1, const ob::State *s2) const override
-    {
-        return combineCosts(stateCost(s1), stateCost(s2));
+    {   
+        float E1 = stateCost(s1).value();
+        float E2 = stateCost(s2).value();
+        float c = (E1+E2)/2;
+
+        auto st1 = s1->as<StateSpace::StateType>();
+        auto st2 = s2->as<StateSpace::StateType>();
+        Eigen::Vector3f pos1 = st1->getPayloadPos();
+        Eigen::Vector3f pos2 = st2->getPayloadPos();
+
+        float distance = (pos1 - pos2).norm();
+
+        return ob::Cost(c*distance);
     }
 
     ob::Cost stateCost(const ob::State* s) const override
