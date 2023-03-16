@@ -61,7 +61,7 @@ public:
     void setCableTransformation(const ob::State *state, const size_t cableNum, Eigen::Vector3f& attachmentPoint,const double length);
     void setUAVTransformation(const ob::State *state,   const size_t uavNum, Eigen::Vector3f& attachmentPoint,const double length);
 
-    fcl::BroadPhaseCollisionManagerf* sysparts;
+    std::shared_ptr<fcl::BroadPhaseCollisionManagerf> sysparts;
     // fcl::BroadPhaseCollisionManagerf* cableuavpart;
     // fcl::BroadPhaseCollisionManagerf* payloadpart;
     void setSysParts();

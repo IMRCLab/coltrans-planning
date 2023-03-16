@@ -166,10 +166,6 @@ Obstacles::Obstacles(const YAML::Node &env)
   obsmanager->setup();
 }
 
-size_t Obstacles::getObsNum()
-{
-    return obstacles.size();
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 std::shared_ptr<nCablesPayload> create_sys(const plannerSettings& cfg)

@@ -31,7 +31,7 @@ public:
       return false;
     }
     
-    robots_->sysparts = new fcl::DynamicAABBTreeCollisionManagerf();
+    robots_->sysparts.reset(new fcl::DynamicAABBTreeCollisionManagerf());
     robots_->setPayloadTransformation(state);
     auto cableNums = si_->getStateSpace()->as<StateSpace>()->getNumCables();
     for(size_t i = 0; i<cableNums; ++i) {
