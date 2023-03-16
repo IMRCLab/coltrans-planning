@@ -17,7 +17,6 @@ class Obstacles
 {
 public:
     Obstacles(const YAML::Node &env);
-    size_t getObsNum();
     std::vector<fcl::CollisionObjectf *> obstacles;
     fcl::BroadPhaseCollisionManagerf* obsmanager;
 };
