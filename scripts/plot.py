@@ -10,7 +10,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 FREQUENCY = 50 #Hz
 
 def derivative(vec, dt):
-    dvec = [[0,0,0]] # initial value = [0,0,0]
+    dvec  =[]
     for i in range(len(vec)-1):
         dvectmp = (vec[i+1]-vec[i])/dt
         dvec.append(dvectmp)
@@ -27,7 +27,7 @@ def qqmul(q, p):
 
 ## from: https://github.com/IMRCLab/crazyflie-firmware/blob/17ccb8e553d0dba0294ca4bc5e159ed279724814/src/modules/interface/math3d.h#L989
 def quat2omega(quat,dt):
-    omega = [[0,0,0]]
+    omega = []
     for i in range(len(quat)-1):
         q0 = quat[i]
         q1 = quat[i+1]
@@ -108,9 +108,10 @@ def main():
         axs[1].set_ylabel("vy [m/s]")
         axs[2].set_ylabel("vz [m/s]")
         axs[-1].set_xlabel("Time [s]")
-        axs[0].plot(time,  np.asarray([vel[0] for vel in velocity]), label='vel')
-        axs[1].plot(time,  np.asarray([vel[1] for vel in velocity]), label='vel')
-        axs[2].plot(time,  np.asarray([vel[2] for vel in velocity]), label='vel')
+
+        axs[0].plot(time[0:-1],  np.asarray([vel[0] for vel in velocity]), label='vel')
+        axs[1].plot(time[0:-1],  np.asarray([vel[1] for vel in velocity]), label='vel')
+        axs[2].plot(time[0:-1],  np.asarray([vel[2] for vel in velocity]), label='vel')
         axs[0].legend()
         pdf.savefig(fig)
         plt.close()
@@ -120,9 +121,9 @@ def main():
         axs[1].set_ylabel("ay [m/s^2]")
         axs[2].set_ylabel("az [m/s^2]")
         axs[-1].set_xlabel("Time [s]")
-        axs[0].plot(time,  np.asarray([acc[0] for acc in acceleration]), label='acc')
-        axs[1].plot(time,  np.asarray([acc[1] for acc in acceleration]), label='acc')
-        axs[2].plot(time,  np.asarray([acc[2] for acc in acceleration]), label='acc')
+        axs[0].plot(time[0:-2],  np.asarray([acc[0] for acc in acceleration]), label='acc')
+        axs[1].plot(time[0:-2],  np.asarray([acc[1] for acc in acceleration]), label='acc')
+        axs[2].plot(time[0:-2],  np.asarray([acc[2] for acc in acceleration]), label='acc')
         axs[0].legend()
         pdf.savefig(fig)
         plt.close()
@@ -145,9 +146,9 @@ def main():
         axs[1].set_ylabel("wy [rad/s]")
         axs[2].set_ylabel("wz [rad/s]")
         axs[-1].set_xlabel("Time [s]")
-        axs[0].plot(time,  np.asarray([w[0] for w in omega]), label='w')
-        axs[1].plot(time,  np.asarray([w[1] for w in omega]), label='w')
-        axs[2].plot(time,  np.asarray([w[2] for w in omega]), label='w')
+        axs[0].plot(time[0:-1],  np.asarray([w[0] for w in omega]), label='w')
+        axs[1].plot(time[0:-1],  np.asarray([w[1] for w in omega]), label='w')
+        axs[2].plot(time[0:-1],  np.asarray([w[2] for w in omega]), label='w')
         axs[0].legend()
         pdf.savefig(fig)
         plt.close()
