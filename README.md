@@ -26,3 +26,9 @@ cd scripts
 ```
 
 - For different payloads: currently we support: rod, cuboid, triangle and pointmass.
+
+## Plot
+```bash
+cd scripts
+ python3 plot.py ../examples/payload/output.yaml
+```
