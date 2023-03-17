@@ -23,6 +23,9 @@ public:
       , attachmentpoints_(attachmentpoints)
       , cablelengthVec_(cablelengthVec)
   {
+    robots_->sysparts.reset(new fcl::DynamicAABBTreeCollisionManagerf());
+    robots_->setSysParts();
+
   }
 
   bool isValid(const ompl::base::State* state) const override
@@ -40,7 +43,7 @@ public:
       robots_->setCableTransformation(state, i, attachmentpoint, length);
       robots_->setUAVTransformation(state, i, attachmentpoint, length);
     }
-    robots_->setSysParts();
+    robots_->sysparts->update();
    
     fcl::DefaultCollisionData<float> collision_data;
     robots_->sysparts->collide(obstacles_->obsmanager, &collision_data, fcl::DefaultCollisionFunction<float>);
