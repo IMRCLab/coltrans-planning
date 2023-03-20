@@ -135,8 +135,9 @@ public:
     {    
         auto az = as<ob::RealVectorStateSpace::StateType>(2)->values[0+2*cablenum];
         auto el = as<ob::RealVectorStateSpace::StateType>(2)->values[1+2*cablenum];
-        
-        Eigen::Vector3f unitvec(std::cos(az)*std::sin(el), std::sin(az)*std::cos(el), std::sin(el));
+        // azimuth and elevation --> unit vec
+        // source https://math.stackexchange.com/questions/1150232/finding-the-unit-direction-vector-given-azimuth-and-elevation
+        Eigen::Vector3f unitvec(sin(az)*cos(el), cos(az)*cos(el), sin(el));
         return unitvec;
     }
 protected:
