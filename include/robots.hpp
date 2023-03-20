@@ -61,8 +61,6 @@ public:
     void setUAVTransformation(const ob::State *state,   const size_t uavNum, Eigen::Vector3f& attachmentPoint,const double length);
 
     std::shared_ptr<fcl::BroadPhaseCollisionManagerf> sysparts;
-    // fcl::BroadPhaseCollisionManagerf* cableuavpart;
-    // fcl::BroadPhaseCollisionManagerf* payloadpart;
     void setSysParts();
 };
 
@@ -113,7 +111,7 @@ public:
     {    
         Eigen::Vector3f unitvec = getunitvec(cableNum);
         Eigen::Vector3f attPointInFixedFrame = getAttPointInFixedFrame(attachmentPoint);
-        return attPointInFixedFrame + length*unitvec;
+        return attPointInFixedFrame + (length/2)*unitvec;
     }
 
     Eigen::Quaternionf getCableQuat(size_t cableNum) const 
@@ -128,7 +126,7 @@ public:
     {    
         Eigen::Vector3f unitvec = getunitvec(cableNum);
         Eigen::Vector3f attPointInFixedFrame = getAttPointInFixedFrame(attachmentPoint);
-        return attPointInFixedFrame + (length+0.15)*unitvec;
+        return attPointInFixedFrame + ((length/2)+0.15)*unitvec;
     }
 
     Eigen::Vector3f getunitvec(size_t cablenum) const
@@ -137,7 +135,7 @@ public:
         auto el = as<ob::RealVectorStateSpace::StateType>(2)->values[1+2*cablenum];
         // azimuth and elevation --> unit vec
         // source https://math.stackexchange.com/questions/1150232/finding-the-unit-direction-vector-given-azimuth-and-elevation
-        Eigen::Vector3f unitvec(sin(az)*cos(el), cos(az)*cos(el), sin(el));
+        Eigen::Vector3f unitvec(sin(az)*sin(el), cos(az)*sin(el), cos(el));
         return unitvec;
     }
 protected:
