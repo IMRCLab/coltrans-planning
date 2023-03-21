@@ -32,10 +32,11 @@ def quat2omega(quat,dt):
         q0 = quat[i]
         q1 = quat[i+1]
         q_dot =[
+            (q1[0] - q0[0]) / dt,
             (q1[1] - q0[1]) / dt,
             (q1[2] - q0[2]) / dt,
-            (q1[3] - q0[3]) / dt,
-            (q1[0] - q0[0]) / dt]
+            (q1[3] - q0[3]) / dt
+            ]
         
         q_inv = qinv(q0);
         r = qqmul(q_dot, q_inv)
