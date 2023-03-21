@@ -1,0 +1,18 @@
+#pragma once
+
+#include <ompl/base/OptimizationObjective.h>
+
+namespace ob = ompl::base;
+
+// Class to optimize the cable angles to a desired value
+class minCableObjective : public ob::OptimizationObjective
+{
+public:
+    minCableObjective(const ob::SpaceInformationPtr &si);
+
+    ob::Cost motionCost(const ob::State *s1, const ob::State *s2) const override;
+    ob::Cost stateCost(const ob::State*) const override;
+
+protected:
+    float requiredForceMagnitude(const ob::State* s) const;
+};

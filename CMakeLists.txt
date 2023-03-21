@@ -27,6 +27,8 @@ include_directories(
 add_executable(nUavsPayloadPlanner
   src/nUavsPayloadPlanner.cpp
   src/robots.cpp
+  src/fclStateValidityChecker.cpp
+  src/optimObj.cpp
 )
 target_include_directories(nUavsPayloadPlanner
   PRIVATE ${CMAKE_BINARY_DIR}/deps/fcl/include

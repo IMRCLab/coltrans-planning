@@ -1,27 +1,28 @@
+#include <chrono>
+#include <iostream>
+#include <fstream>
+
 // Planners
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <ompl/geometric/planners/rrt/RRTstar.h>
-#include<ompl/geometric/planners/sst/SST.h>
+#include <ompl/geometric/planners/sst/SST.h>
 #include <ompl/config.h>
 #include <fcl/fcl.h>
 #include <yaml-cpp/yaml.h>
 
 #include <boost/program_options.hpp>
-#include <chrono>
-#include <iostream>
-#include <fstream>
+
 #include <helper.hpp>
-#include <optimObj.hpp>
-#include <robots.hpp>
-#include<fclStateValidityChecker.hpp>
+#include "optimObj.h"
+#include "robots.h"
+#include "fclStateValidityChecker.h"
 
 namespace ob = ompl::base;
 namespace og = ompl::geometric;
 
 void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile)
 {
-    std::shared_ptr<nCablesPayload> nCablesPayload = create_sys(cfg);   
-    nCablesPayload->addRobotParts(cfg);
+    std::shared_ptr<RobotsWithPayload> nCablesPayload = create_robots(cfg);   
     std::shared_ptr<Obstacles> Obstacles = create_obs(cfg.env);
 
     // construct an instance of space information from this state
