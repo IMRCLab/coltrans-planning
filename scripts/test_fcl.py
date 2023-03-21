@@ -58,7 +58,9 @@ def main():
                 basevec = [0,1,0]
                 quat = np.flip(rn.vector_vector_rotation(unitvector, basevec))
                 vis["obstacle"+str(obsNum)].set_transform(tf.translation_matrix(center).dot(tf.quaternion_matrix(quat)))
-
+            elif obstacle["type"] == "sphere":
+                vis['obstacle'+str(obsNum)].set_object(g.Mesh(g.Sphere(radius=radius)))
+                vis["obstacle"+str(obsNum)].set_transform(tf.translation_matrix(center))
             obsNum+=1
         
             vis['payload'].set_object(g.Mesh(g.Sphere(payload["radius"])))

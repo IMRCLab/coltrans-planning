@@ -75,7 +75,22 @@ int main(int argc, char* argv[]) {
       co->setRotation(transform.rotation());
       co->computeAABB();
       obstacles.push_back(co);
-    } else {
+    } else if (obs["type"].as<std::string>() == "sphere") {
+      std::shared_ptr<fcl::CollisionGeometryf> geom;
+      const auto radius = obs["radius"].as<float>();
+
+      geom.reset(new fcl::Spheref(radius));
+      const auto& center = obs["center"];
+      auto co = new fcl::CollisionObjectf(geom);
+      std::cout << "pos obs:" << "\n" << center << std::endl;
+      fcl::Transform3f transform;
+      transform = Eigen::Translation<float, 3>(fcl::Vector3f(center[0].as<float>(), center[1].as<float>(), center[2].as<float>()));
+
+      co->setTranslation(transform.translation());
+      co->computeAABB();
+      obstacles.push_back(co);
+    }
+     else { 
       throw std::runtime_error("Unknown obstacle type!");
     }
   }
