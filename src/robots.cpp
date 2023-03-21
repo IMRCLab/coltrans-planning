@@ -35,7 +35,7 @@ RobotsWithPayload::RobotsWithPayload(const plannerSettings& cfg)
     addRobotParts(cfg);
     col_mgr_all.reset(new fcl::DynamicAABBTreeCollisionManagerf());
     col_mgr_all->registerObject(payloadObj);
-    col_mgr_all->registerObjects(cablesObj);
+    // col_mgr_all->registerObjects(cablesObj);
     col_mgr_all->registerObjects(uavObj);
     col_mgr_all->setup();
 }
@@ -60,12 +60,12 @@ void RobotsWithPayload::addRobotParts(const plannerSettings& cfg)
     // add cables and uavs
     for (size_t i = 0; i < cfg.numofcables; ++i) 
     {
-        std::shared_ptr<fcl::CollisionGeometryf> cablegeom;
-        cablegeom.reset(new fcl::Cylinderf(0.001, cfg.cablelengthVec[i]));
-        auto cableco = new fcl::CollisionObjectf(cablegeom);
-        cableco->setTranslation(fcl::Vector3f(0,0,0));
-        cableco->computeAABB();
-        cablesObj.push_back(cableco);
+        // std::shared_ptr<fcl::CollisionGeometryf> cablegeom;
+        // cablegeom.reset(new fcl::Cylinderf(0.001, cfg.cablelengthVec[i]));
+        // auto cableco = new fcl::CollisionObjectf(cablegeom);
+        // cableco->setTranslation(fcl::Vector3f(0,0,0));
+        // cableco->computeAABB();
+        // cablesObj.push_back(cableco);
 
         std::shared_ptr<fcl::CollisionGeometryf> uavgeom;
         uavgeom.reset(new fcl::Spheref(0.15));
