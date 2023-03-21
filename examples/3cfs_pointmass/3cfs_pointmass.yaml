@@ -1,5 +1,5 @@
 plannerType: 'rrtstar'
-timelimit: 30.0
+timelimit: 120.0
 numofcables: 3
 environment:
   min: [-0.5, -2, -1.0]
