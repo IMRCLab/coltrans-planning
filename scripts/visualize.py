@@ -20,9 +20,9 @@ def polartovector(cablestate, attpoint, length, plstate):
     plquat = plstate[3:7]
     # azimuth and elevation --> unit vec
     # source https://math.stackexchange.com/questions/1150232/finding-the-unit-direction-vector-given-azimuth-and-elevation
-    unitvec = np.array([np.cos(az)*np.sin(el),
-                        np.sin(az)*np.sin(el),
-                        np.cos(el)]) 
+    unitvec = np.array([np.cos(az)*np.cos(el),
+                        np.sin(az)*np.cos(el),
+                        np.sin(el)]) 
 
     attpInfixedFr = plpos + rn.rotate(plquat, attpoint) # attachment point in fixed frame
     uavpos = attpInfixedFr + length*unitvec 

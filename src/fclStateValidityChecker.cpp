@@ -36,8 +36,13 @@ bool fclStateValidityChecker::isValid(const ompl::base::State* state) const
   fcl::DefaultCollisionData<float> collision_data;
   robots_->col_mgr_all->collide(obstacles_->obsmanager, &collision_data, fcl::DefaultCollisionFunction<float>);
   // Inter-robot collision is still not implemented
-  robots_->col_mgr_all->collide(&collision_data, fcl::DefaultCollisionFunction<float>);
+  fcl::DefaultCollisionData<float> collision_data_robot;
+  robots_->col_mgr_all->collide(&collision_data_robot, fcl::DefaultCollisionFunction<float>);
+  
   if (collision_data.result.isCollision()) {
+    return false;
+  }
+  if (collision_data_robot.result.isCollision()) {
     return false;
   }
   return true;
