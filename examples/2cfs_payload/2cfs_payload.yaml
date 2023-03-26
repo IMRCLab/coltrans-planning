@@ -6,16 +6,16 @@ environment:
   max: [2,  1, 1.5]
   obstacles:
     - type: cylinder
-      center: [1.0, 0.5, 0.0]
-      radius: 0.1
-      height: 1.0
+      center: [1.0, 0.4, 0.0]
+      radius: 0.2
+      height: 10.0
     - type: cylinder
-      center: [1.0, -0.5, 0.0]
-      radius: 0.1
-      height: 1.0
+      center: [1.0, -0.4, 0.0]
+      radius: 0.2
+      height: 10.0
 payload:
-  start: [0, 0, 0, 1, 0, 0, 0, 1.57, 0.78,  4.71, 0.78] # [xi, yi, zi, qwi,qxi,qyi,qzi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
-  goal : [2, 0, 0, 1, 0, 0, 0, 1.57, 0.78,  4.71, 0.78] # [xf, yf, zf qwf,qxf,qyf,qzf, az1_f, elv1_f,...azn_f, elvn_f]  final azimuth(s) and elevation(s)
+  start: [0, 0, 0, 1, 0, 0, 0, 1.57,  1.0,  4.71, 1.0] # [xi, yi, zi, qwi,qxi,qyi,qzi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
+  goal : [2, 0, 0, 1, 0, 0, 0, 1.57,  1.0,  4.71, 1.0] # [xf, yf, zf qwf,qxf,qyf,qzf, az1_f, elv1_f,...azn_f, elvn_f]  final azimuth(s) and elevation(s)
   # goal : [1, 0, 0, 0.70710678, 0, 0 , 0.70710678, 1.57,  1.57, 4.71, 1.57] # [xf, yf, zf qwf,qxf,qyf,qzf, az1_f, elv1_f,...azn_f, elvn_f]  final azimuth(s) and elevation(s)
   shape: 
     type: rod
@@ -23,5 +23,5 @@ payload:
 cables: 
   lengths: [0.5, 0.5]
   attachmentpoints: [0, 0.1, 0, 0, -0.1, 0]
-  min: [0, -1.57, 0, -1.57] # minimum az_i, elv_i for each ith cable 
+  min: [0, 0, 0, 0] # minimum az_i, elv_i for each ith cable 
   max: [6.28, 1.57, 6.28, 1.57] # maximum az_i, elv_i for each ith cable  
