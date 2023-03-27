@@ -39,11 +39,9 @@ bool fclStateValidityChecker::isValid(const ompl::base::State* state) const
   fcl::DefaultCollisionData<float> collision_data_robot;
   robots_->col_mgr_all->collide(&collision_data_robot, fcl::DefaultCollisionFunction<float>);
   
-  if (collision_data.result.isCollision()) {
+  if (collision_data.result.isCollision() || collision_data_robot.result.isCollision()) {
     return false;
   }
-  if (collision_data_robot.result.isCollision()) {
-    return false;
-  }
+
   return true;
 }
