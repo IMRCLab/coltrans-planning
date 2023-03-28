@@ -1,7 +1,6 @@
 
 #include "robots.h" 
 namespace ob = ompl::base;
-namespace ob = ompl::base;
 
 RobotsWithPayload::RobotsWithPayload(const plannerSettings& cfg)
 {
@@ -263,13 +262,13 @@ Eigen::Vector3f StateSpace::StateType::getAttPointInFixedFrame(Eigen::Vector3f& 
 }
 
 
-StateSpace::StateSpace(size_t numCables)
+StateSpace::StateSpace(size_t numCables, double cable_weight)
 {
     setName("Quadrotor" + getName());
     type_ = ob::STATE_SPACE_TYPE_COUNT + 0;
     addSubspace(std::make_shared<ob::RealVectorStateSpace>(3), 1.0);      // position
     addSubspace(std::make_shared<ob::SO3StateSpace>(), 1.0);              // orientation
-    addSubspace(std::make_shared<ob::RealVectorStateSpace>(2*numCables), 1.0); // cable az and el
+    addSubspace(std::make_shared<ob::RealVectorStateSpace>(2*numCables), cable_weight); // cable az and el
     lock();
 }
 
@@ -283,14 +282,19 @@ void StateSpace::setPositionBounds(const ob::RealVectorBounds &bounds)
     as<ob::RealVectorStateSpace>(0)->setBounds(bounds);
 }
 
+const ob::RealVectorBounds& StateSpace::getPositionBounds() const
+{
+    return as<ob::RealVectorStateSpace>(0)->getBounds();
+}
+
 void StateSpace::setCableBounds(const ob::RealVectorBounds &bounds) 
 {
     as<ob::RealVectorStateSpace>(2)->setBounds(bounds);
 }
 
-const ob::RealVectorBounds& StateSpace::getPositionBounds() const
+const ob::RealVectorBounds& StateSpace::getCableBounds() const
 {
-    return as<ob::RealVectorStateSpace>(0)->getBounds();
+    return as<ob::RealVectorStateSpace>(2)->getBounds();
 }
 
 ob::State* StateSpace::allocState() const
