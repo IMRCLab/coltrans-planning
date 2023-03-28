@@ -15,14 +15,13 @@ make
 
 ```bash
 cd build
-./payloadPlanner --input ../examples/payload/payload.yaml --output ../examples/payload/output.yaml
+./nUavsPayloadPlanner --input ../examples/2cfs_pointmass/2cfs_pointmass.yaml --output output.yaml
 ```
 
 ## Visualize
 
 ```bash
-cd scripts
- python3 visualize.py ../examples/payload/output.yaml rod
+python3 ../scripts/visualize.py output.yaml pointmass
 ```
 
 - For different payloads: currently we support: rod, cuboid, triangle and pointmass.
@@ -30,6 +29,5 @@ cd scripts
 ## Plot
 
 ```bash
-cd scripts
- python3 plot.py ../examples/payload/output.yaml
+ python3 ../scripts/plot.py output.yaml
 ```
