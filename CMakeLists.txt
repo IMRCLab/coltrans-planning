@@ -8,18 +8,20 @@ find_package(Eigen3 REQUIRED)
 find_package(PkgConfig)
 pkg_check_modules(OMPL ompl REQUIRED)
 pkg_check_modules(YAMLCPP yaml-cpp REQUIRED)
+pkg_check_modules(FCL fcl REQUIRED)
 # Enable C++17 and warnings
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
-add_subdirectory(deps/fcl EXCLUDE_FROM_ALL)
+# add_subdirectory(deps/fcl EXCLUDE_FROM_ALL)
 
 include_directories(
   ${EIGEN3_INCLUDE_DIR}
   ${OMPL_INCLUDE_DIRS}
   ${YAMLCPP_INCLUDE_DIRS}
+  ${FCL_INCLUDE_DIRS}
   include
   )
 
@@ -38,8 +40,8 @@ target_include_directories(nUavsPayloadPlanner
 target_link_libraries(nUavsPayloadPlanner
   ${Boost_LIBRARIES}
   ${OMPL_LIBRARIES}
-  fcl
   ${YAMLCPP_LIBRARIES}
+  ${FCL_LIBRARIES}
 )
 
 ## test_fcl
@@ -52,6 +54,6 @@ target_include_directories(test_fcl
 )
 target_link_libraries(test_fcl
   ${Boost_LIBRARIES}
-  fcl
-  yaml-cpp
+  ${YAMLCPP_LIBRARIES}
+  ${FCL_LIBRARIES}
 )
