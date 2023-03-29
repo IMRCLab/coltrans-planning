@@ -25,7 +25,7 @@ bool fclStateValidityChecker::isValid(const ompl::base::State* state) const
     return false;
   }
   
-  robots_->setPayloadTransformation(state);
+  robots_->setPayloadTransformation(state, payloadShape_);
   auto cableNums = si_->getStateSpace()->as<StateSpace>()->getNumCables();
   for(size_t i = 0; i<cableNums; ++i) {
     double length = cablelengthVec_[i];
