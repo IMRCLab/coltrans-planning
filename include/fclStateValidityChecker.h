@@ -11,7 +11,8 @@ public:
       std::shared_ptr<RobotsWithPayload> robots,
       std::shared_ptr<Obstacles> obstacles,
       const Eigen::VectorXf& attachmentpoints,
-      const std::vector<double>& cablelengthVec);
+      const std::vector<double>& cablelengthVec,
+      const std::string& payloadShape);
 
   bool isValid(const ompl::base::State* state) const override;
 
@@ -20,4 +21,5 @@ private:
   std::shared_ptr<Obstacles> obstacles_;
   const Eigen::VectorXf attachmentpoints_;
   std::vector<double> cablelengthVec_;
+  const std::string& payloadShape_;
 };
