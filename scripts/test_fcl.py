@@ -14,9 +14,9 @@ def unitvec(az, el):
     # returns the points to be visualized for the cable 
     # azimuth and elevation --> unit vec
     # source https://math.stackexchange.com/questions/1150232/finding-the-unit-direction-vector-given-azimuth-and-elevation
-    unitvec = np.array([np.sin(az)*np.sin(el),
-                        np.cos(az)*np.sin(el),
-                        np.cos(el)])     
+    unitvec = np.array([np.cos(az)*np.cos(el),
+                        np.sin(az)*np.cos(el),
+                        np.sin(el)])     
     return unitvec
 
 
@@ -56,7 +56,7 @@ def main():
                 rotation = obstacle["rotation"]
                 unitvector = unitvec(rotation[0], rotation[1])
                 basevec = [0,1,0]
-                quat = np.flip(rn.vector_vector_rotation(unitvector, basevec))
+                quat = rn.vector_vector_rotation(basevec, unitvector)
                 vis["obstacle"+str(obsNum)].set_transform(tf.translation_matrix(center).dot(tf.quaternion_matrix(quat)))
             elif obstacle["type"] == "sphere":
                 vis['obstacle'+str(obsNum)].set_object(g.Mesh(g.Sphere(radius=radius)))
