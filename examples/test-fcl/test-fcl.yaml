@@ -1,15 +1,15 @@
 environment:
   obstacles: 
     - type: cylinder
-      center: [1.0, 0.0, 0.0]
-      rotation: [0, 0]
+      center: [0.0, 0.0, 0.0]
+      rotation: [1.57, 0.1]
       radius: 0.01
       height: 10.0
-    - type: cylinder
-      center: [-1.0, 0.0, 0.0]
-      rotation: [1, 0.78]
-      radius: 0.01
-      height: 10.0
+    # - type: cylinder
+    #   center: [-1.0, 0.0, 0.0]
+    #   rotation: [1, 0.78]
+    #   radius: 0.01
+    #   height: 10.0
 
 payload:
   center: [0.0, 3.0, 0.0]

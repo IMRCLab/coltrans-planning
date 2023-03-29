@@ -15,7 +15,7 @@ Eigen::Vector3f getunitvec(float az, float el)
 {    
     // azimuth and elevation --> unit vec
     // source https://math.stackexchange.com/questions/1150232/finding-the-unit-direction-vector-given-azimuth-and-elevation
-    Eigen::Vector3f unitvec(sin(az)*sin(el), cos(az)*sin(el), cos(el));
+    Eigen::Vector3f unitvec(cos(az)*cos(el), sin(az)*cos(el), sin(el));
     return unitvec;
 }
 
