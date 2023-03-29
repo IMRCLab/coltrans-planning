@@ -29,7 +29,7 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile)
     auto si = nCablesPayload->si;
 
     // set state validity checking for this space
-    auto stateValidityChecker(std::make_shared<fclStateValidityChecker>(si, nCablesPayload, Obstacles, cfg.attachmentpoints, cfg.cablelengthVec));
+    auto stateValidityChecker(std::make_shared<fclStateValidityChecker>(si, nCablesPayload, Obstacles, cfg.attachmentpoints, cfg.cablelengthVec , cfg.payloadShape));
     si->setStateValidityChecker(stateValidityChecker);
 
      // create a problem instance

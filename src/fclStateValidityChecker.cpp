@@ -6,13 +6,15 @@ fclStateValidityChecker::fclStateValidityChecker(
     std::shared_ptr<RobotsWithPayload> robots,
     std::shared_ptr<Obstacles> obstacles,
     const Eigen::VectorXf& attachmentpoints,
-    const std::vector<double>& cablelengthVec)
+    const std::vector<double>& cablelengthVec,
+    const std::string& payloadShape)
     
     : ompl::base::StateValidityChecker(si)
     , robots_(robots)
     , obstacles_(obstacles)
     , attachmentpoints_(attachmentpoints)
     , cablelengthVec_(cablelengthVec)
+    , payloadShape_(payloadShape)
 {
 
 }
