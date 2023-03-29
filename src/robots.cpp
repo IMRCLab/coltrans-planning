@@ -78,13 +78,22 @@ void RobotsWithPayload::addRobotParts(const plannerSettings& cfg)
 }
 
 
-fcl::Transform3f RobotsWithPayload::getPayloadTransform(const ob::State *state)
+fcl::Transform3f RobotsWithPayload::getPayloadTransform(const ob::State *state, const std::string& payloadShape)
 {
     auto st = state->as<StateSpace::StateType>();
     fcl::Transform3f transform;
-    Eigen::Vector3f pos = st->getPayloadPos();
+    Eigen::Vector3f pos(st->getPayloadPos());
     transform = Eigen::Translation<float, 3>(fcl::Vector3f(pos(0), pos(1), pos(2)));
-    transform.rotate(st->getPayloadquat());
+    Eigen::Quaternionf payload_quat(st->getPayloadquat());
+    if (payloadShape == "rod") {
+        Eigen::Quaternionf payload_quat = st->getPayloadquat();
+        const Eigen::Quaternionf fclInmeshcat(0.7073883, -0.7068252, 0, 0);
+        Eigen::Matrix3f payload_rotmat = fclInmeshcat.normalized().toRotationMatrix() * payload_quat.normalized().toRotationMatrix();
+        Eigen::Quaternionf payload_quat_in_fcl(payload_rotmat);
+        transform.rotate(payload_quat_in_fcl);
+        return transform;
+    }
+    transform.rotate(payload_quat);
     return transform;
 }
 
@@ -110,9 +119,9 @@ fcl::Transform3f RobotsWithPayload::getUAVTransform(const ob::State *state, cons
     return transform;
 }
 
-void RobotsWithPayload::setPayloadTransformation(const ob::State* state)
+void RobotsWithPayload::setPayloadTransformation(const ob::State* state, const std::string& payloadShape)
 {
-    const auto& transform = getPayloadTransform(state);
+    const auto& transform = getPayloadTransform(state, payloadShape);
     payloadObj->setTranslation(transform.translation());
     payloadObj->setRotation(transform.rotation());
     payloadObj->computeAABB();
