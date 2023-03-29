@@ -17,7 +17,7 @@ def polartovector(cablestate, attpoint, length, plstate):
     az = cablestate[0]
     el = cablestate[1]
     plpos = plstate[0:3]
-    plquat = plstate[3:7]
+    plquat = np.array([plstate[6], plstate[3], plstate[4], plstate[5]])
     # azimuth and elevation --> unit vec
     # source https://math.stackexchange.com/questions/1150232/finding-the-unit-direction-vector-given-azimuth-and-elevation
     unitvec = np.array([np.cos(az)*np.cos(el),
@@ -118,9 +118,10 @@ def main():
     while True:
         for motion in motions.values():
             for plstate in motion[0]["states"]:
+                payload_quat = np.array([plstate[6], plstate[3], plstate[4], plstate[5]])
                 vis["payload"].set_transform(
                             tf.translation_matrix(plstate[0:3]).dot(
-                    tf.quaternion_matrix(plstate[3:7])))                
+                    tf.quaternion_matrix(payload_quat)))                
                 # visualization of uavs, constraint spheres, and cables
                 cablestates = plstate[7::]
                 for cablecounter, attcounter, length, uavcounter in zip(range(0,numofCables,2), range(0,numofAtts,3), cablelengths, range(numofuavs)):

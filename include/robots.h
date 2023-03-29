@@ -46,11 +46,11 @@ public:
     RobotsWithPayload(const plannerSettings& cfg);
 
 
-    fcl::Transform3f getPayloadTransform(const ompl::base::State *state);
+    fcl::Transform3f getPayloadTransform(const ompl::base::State *state, const std::string& payloadType);
     fcl::Transform3f getCableTransform(const ompl::base::State *state, const size_t cableNum, Eigen::Vector3f& attachmentPoint,const double length);
     fcl::Transform3f getUAVTransform(const ompl::base::State *state, const size_t cableNum, Eigen::Vector3f& attachmentPoint,const double length);
     
-    void setPayloadTransformation(const ob::State *state);
+    void setPayloadTransformation(const ob::State *state, const std::string& payloadType);
     void setCableTransformation(const ob::State *state, const size_t cableNum, Eigen::Vector3f& attachmentPoint,const double length);
     void setUAVTransformation(const ob::State *state,   const size_t uavNum, Eigen::Vector3f& attachmentPoint,const double length);
 
