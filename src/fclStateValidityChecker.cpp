@@ -47,18 +47,15 @@ bool fclStateValidityChecker::isValid(const ompl::base::State* state) const
   fcl::DefaultCollisionData<float> collision_data_robot;
   robots_->col_mgr_all->collide(&collision_data_robot, fcl::DefaultCollisionFunction<float>);
   
-
-  auto angle_min = cfg_.angle_min;
-  auto angle_max = cfg_.angle_max;
   auto st = state->as<StateSpace::StateType>();
   auto payload_quat = st->getPayloadquat();
   Eigen::Vector3f e3(0,0,1);
   Eigen::Vector3f v(qvrot(payload_quat, e3));
   auto angle = acosf(e3.dot(v));
   
-  if (angle > angle_max) {
+  if (angle > cfg_.angle_max) {
     return false;
-  } else if (angle < angle_min) {
+  } else if (angle < cfg_.angle_min) {
     return false;
   }
   if (collision_data.result.isCollision() || collision_data_robot.result.isCollision()) {
