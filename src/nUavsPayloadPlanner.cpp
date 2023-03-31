@@ -29,7 +29,7 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile)
     auto si = nCablesPayload->si;
 
     // set state validity checking for this space
-    auto stateValidityChecker(std::make_shared<fclStateValidityChecker>(si, nCablesPayload, Obstacles, cfg.attachmentpoints, cfg.cablelengthVec , cfg.payloadShape));
+    auto stateValidityChecker(std::make_shared<fclStateValidityChecker>(si, nCablesPayload, Obstacles, cfg));
     si->setStateValidityChecker(stateValidityChecker);
 
      // create a problem instance
@@ -234,6 +234,10 @@ int main(int argc, char* argv[])
 
     cfg.attachmentpoints = yamltoEigen(configFile["cables"]["attachmentpoints"]);
     
+    if (cfg.payloadShape == "rod" || cfg.payloadShape == "triangle") {
+        cfg.angle_min = configFile["payload"]["angle_min"].as<float>();
+        cfg.angle_max = configFile["payload"]["angle_max"].as<float>();
+    }
     // Extract obstacles
     cfg.env = configFile["environment"]["obstacles"];
 

@@ -38,6 +38,8 @@ public:
     std::string payloadShape;
     size_t numofcables;
     float timelimit;
+    float angle_min;
+    float angle_max;
 };
 
 class RobotsWithPayload

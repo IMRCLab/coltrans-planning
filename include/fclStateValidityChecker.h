@@ -10,16 +10,13 @@ public:
       ompl::base::SpaceInformationPtr si,
       std::shared_ptr<RobotsWithPayload> robots,
       std::shared_ptr<Obstacles> obstacles,
-      const Eigen::VectorXf& attachmentpoints,
-      const std::vector<double>& cablelengthVec,
-      const std::string& payloadShape);
+      const plannerSettings& cfg);
 
   bool isValid(const ompl::base::State* state) const override;
 
-private:
+protected:
   std::shared_ptr<RobotsWithPayload> robots_;
   std::shared_ptr<Obstacles> obstacles_;
-  const Eigen::VectorXf attachmentpoints_;
-  std::vector<double> cablelengthVec_;
-  const std::string& payloadShape_;
+  const plannerSettings cfg_;
+  Eigen::Vector3f qvrot(const Eigen::Quaternionf &q, const Eigen::Vector3f &v) const;
 };
