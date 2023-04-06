@@ -40,6 +40,7 @@ public:
     float timelimit;
     float angle_min;
     float angle_max;
+    float interpolate;
 };
 
 class RobotsWithPayload

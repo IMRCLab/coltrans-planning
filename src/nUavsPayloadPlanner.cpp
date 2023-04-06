@@ -102,7 +102,7 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile)
         std::cout << "found solution!" << std::endl;
         auto path = pdef->getSolutionPath()->as<og::PathGeometric>();
         path->print(std::cout);
-        path->interpolate();
+        path->interpolate(cfg.interpolate);
 
         // stream the solution to the output file
         std::ofstream out(outputFile);
@@ -234,6 +234,7 @@ int main(int argc, char* argv[])
 
     cfg.attachmentpoints = yamltoEigen(configFile["cables"]["attachmentpoints"]);
     
+    cfg.interpolate = configFile["interpolate"].as<int>();
     if (cfg.payloadShape == "rod" || cfg.payloadShape == "triangle") {
         cfg.angle_min = configFile["payload"]["angle_min"].as<float>();
         cfg.angle_max = configFile["payload"]["angle_max"].as<float>();
