@@ -1,6 +1,7 @@
 plannerType: 'rrtstar'
 timelimit: 300.0
 numofcables: 3
+interpolate: 1000
 environment:
   min: [-1, -1, -0.1]
   max: [2,   1,  2]
