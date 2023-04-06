@@ -83,7 +83,7 @@ def main():
 
     # payload orientation
     quat     = [state[3:7] for state in states]
-    euler    = rn.to_euler(rn.normalize(quat))
+    euler    = rn.to_euler(rn.normalize(quat), convention='xyz')
    
    # payload omega
     omega    = quat2omega(quat, dt)
@@ -134,9 +134,9 @@ def main():
         axs[1].set_ylabel("p [rad]")
         axs[2].set_ylabel("y [rad]")
         axs[-1].set_xlabel("Time [s]")
-        axs[0].plot(time,  np.asarray([angle[0] for angle in euler]), label='rpy')
-        axs[1].plot(time,  np.asarray([angle[1] for angle in euler]), label='rpy')
-        axs[2].plot(time,  np.asarray([angle[2] for angle in euler]), label='rpy')
+        axs[0].plot(time,  np.asarray([np.degrees(angle[0]) for angle in euler]), label='rpy')
+        axs[1].plot(time,  np.asarray([np.degrees(angle[1]) for angle in euler]), label='rpy')
+        axs[2].plot(time,  np.asarray([np.degrees(angle[2]) for angle in euler]), label='rpy')
         axs[0].legend()
         pdf.savefig(fig)
         plt.close()
