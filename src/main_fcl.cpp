@@ -139,11 +139,11 @@ int main(int argc, char* argv[]) {
   envObs->collide(payload.get(), &collision_data, fcl::DefaultCollisionFunction<float>);
   
   std::cout << collision_data.result.isCollision() << std::endl;
-  std::cout<<"robot-obstacle collision: "<<collision_data.result.isCollision()<<std::endl;
+  std::cout<<"payload-obstacle collision: "<<collision_data.result.isCollision()<<std::endl;
 
   fcl::DefaultCollisionData<float> inter_collision_data;
   envObs->collide(&inter_collision_data, fcl::DefaultCollisionFunction<float>);
-  std::cout <<  "inter-collision: "<<inter_collision_data.result.isCollision() << std::endl;
+  std::cout <<  "obs-obs-collision: "<<inter_collision_data.result.isCollision() << std::endl;
   
   return 0;
 }
