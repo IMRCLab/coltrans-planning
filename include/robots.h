@@ -62,6 +62,7 @@ public:
     std::vector<fcl::CollisionObjectf *> cablesObj;
     std::vector<fcl::CollisionObjectf *> uavObj;
     std::shared_ptr<fcl::BroadPhaseCollisionManagerf> col_mgr_all;
+    std::shared_ptr<fcl::BroadPhaseCollisionManagerf> col_mgr_cables;
 
 protected:
     void addRobotParts(const plannerSettings& cfg);

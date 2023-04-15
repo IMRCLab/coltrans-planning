@@ -1,5 +1,5 @@
 plannerType: 'rrtstar'
-timelimit: 300.0
+timelimit: 150.0
 numofcables: 3
 interpolate: 1000
 environment:
@@ -16,12 +16,12 @@ environment:
       height: 10.0
 payload:
   start: [-0.5, 0, 0, 0, 0, 0, 1, 0,  1.0, 2.1, 1.0, 4.2, 1.0] # [xi, yi, zi, qwi,qxi,qyi,qzi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
-  goal : [1.5, 0, 0, 0, 0, 0, 1, 0,  1.0, 2.1, 1.0, 4.2, 1.0] # [xf, yf, zf qwf,qxf,qyf,qzf, az1_f, elv1_f,...azn_f, elvn_f]  final azimuth(s) and elevation(s)
+  goal : [1.5, 0, 0,  0, 0, 0, 1, 0,  1.0, 2.1, 1.0, 4.2, 1.0] # [xf, yf, zf qwf,qxf,qyf,qzf, az1_f, elv1_f,...azn_f, elvn_f]  final azimuth(s) and elevation(s)
   shape:
     type: triangle
     size: [0.08,0.08,0.005] 
-  angle_min: -0.523599 # (rad)
-  angle_max: 0.523599 # (rad)
+  angle_min: -0.7 # (rad)
+  angle_max: 0.7 # (rad)
 cables: 
   lengths: [0.5, 0.5, 0.5]
   attachmentpoints: [0.04, 0, 0.005, -0.04, 0.04, 0.005, -0.04, -0.04, 0.005]

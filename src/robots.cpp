@@ -35,9 +35,13 @@ RobotsWithPayload::RobotsWithPayload(const plannerSettings& cfg)
     addRobotParts(cfg);
     col_mgr_all.reset(new fcl::DynamicAABBTreeCollisionManagerf());
     col_mgr_all->registerObject(payloadObj);
-    // col_mgr_all->registerObjects(cablesObj);
     col_mgr_all->registerObjects(uavObj);
     col_mgr_all->setup();
+
+    col_mgr_cables.reset(new fcl::DynamicAABBTreeCollisionManagerf());
+    col_mgr_cables->registerObjects(cablesObj);
+    col_mgr_cables->setup();
+
 }
 
 void RobotsWithPayload::addRobotParts(const plannerSettings& cfg)
@@ -60,12 +64,12 @@ void RobotsWithPayload::addRobotParts(const plannerSettings& cfg)
     // add cables and uavs
     for (size_t i = 0; i < cfg.numofcables; ++i) 
     {
-        // std::shared_ptr<fcl::CollisionGeometryf> cablegeom;
-        // cablegeom.reset(new fcl::Cylinderf(0.001, cfg.cablelengthVec[i]));
-        // auto cableco = new fcl::CollisionObjectf(cablegeom);
-        // cableco->setTranslation(fcl::Vector3f(0,0,0));
-        // cableco->computeAABB();
-        // cablesObj.push_back(cableco);
+        std::shared_ptr<fcl::CollisionGeometryf> cablegeom;
+        cablegeom.reset(new fcl::Cylinderf(0.001, cfg.cablelengthVec[i]));
+        auto cableco = new fcl::CollisionObjectf(cablegeom);
+        cableco->setTranslation(fcl::Vector3f(0,0,0));
+        cableco->computeAABB();
+        cablesObj.push_back(cableco);
 
         std::shared_ptr<fcl::CollisionGeometryf> uavgeom;
         uavgeom.reset(new fcl::Spheref(0.15));
@@ -86,8 +90,7 @@ fcl::Transform3f RobotsWithPayload::getPayloadTransform(const ob::State *state, 
     transform = Eigen::Translation<float, 3>(fcl::Vector3f(pos(0), pos(1), pos(2)));
     Eigen::Quaternionf payload_quat(st->getPayloadquat());
     if (payloadShape == "rod") {
-        Eigen::Quaternionf payload_quat = st->getPayloadquat();
-        const Eigen::Quaternionf fclInmeshcat(0.7073883, -0.7068252, 0, 0);
+        const Eigen::Quaternionf fclInmeshcat(0.7071068, -0.7071068, 0, 0);
         Eigen::Matrix3f payload_rotmat = fclInmeshcat.normalized().toRotationMatrix() * payload_quat.normalized().toRotationMatrix();
         Eigen::Quaternionf payload_quat_in_fcl(payload_rotmat);
         transform.rotate(payload_quat_in_fcl);
@@ -103,8 +106,12 @@ fcl::Transform3f RobotsWithPayload::getCableTransform(const ob::State *state, co
     fcl::Transform3f transform;
     Eigen::Vector3f cablePos = st->getCablePos(cableNum, attachmentPoint, length);
     Eigen::Quaternionf cablequat = st->getCableQuat(cableNum);
+    // cable initial vector (1,0,0)-> fcl initial vector (0,0,1)
+    const Eigen::Quaternionf fclInmeshcat(0.7071068, 0, 0.7071068, 0);
+    Eigen::Matrix3f cable_rotmat = fclInmeshcat.normalized().toRotationMatrix() * cablequat.normalized().toRotationMatrix();
+    Eigen::Quaternionf cable_quat_in_fcl(cable_rotmat);    
+    transform.rotate(cable_quat_in_fcl);
     transform = Eigen::Translation<float, 3>(fcl::Vector3f(cablePos(0), cablePos(1), cablePos(2)));
-    transform.rotate(cablequat);
     return transform;
 }
 
@@ -212,13 +219,13 @@ Eigen::Vector3f StateSpace::StateType::getCablePos(const size_t cableNum, Eigen:
 {    
     Eigen::Vector3f unitvec = getunitvec(cableNum);
     Eigen::Vector3f attPointInFixedFrame = getAttPointInFixedFrame(attachmentPoint);
-    return attPointInFixedFrame + length*unitvec;
+    return attPointInFixedFrame + (length/2)*unitvec;
 }
 
 Eigen::Quaternionf StateSpace::StateType::getCableQuat(size_t cableNum) const 
 {
     Eigen::Vector3f unitvec = getunitvec(cableNum);
-    Eigen::Vector3f basevec(0,0,1);
+    Eigen::Vector3f basevec(1,0,0);
     Eigen::Quaternionf quat = Eigen::Quaternionf::FromTwoVectors(basevec, unitvec);
     return quat;
 }
