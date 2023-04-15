@@ -48,11 +48,13 @@ bool fclStateValidityChecker::isValid(const ompl::base::State* state) const
   fcl::DefaultCollisionData<float> collision_data_robot;
   robots_->col_mgr_all->collide(&collision_data_robot, fcl::DefaultCollisionFunction<float>);
   
-  fcl::DefaultCollisionData<float> collision_data_cables;
-  // inter-cable collision
-  robots_->col_mgr_cables->collide(&collision_data_cables, fcl::DefaultCollisionFunction<float>);
   // cables/obstacles collision
-  robots_->col_mgr_cables->collide(&obstacles_->obsmanager,fcl::DefaultCollisionFunction<float>);
+  fcl::DefaultCollisionData<float> collision_data_cables_obs;
+  robots_->col_mgr_cables->collide(obstacles_->obsmanager, &collision_data_cables_obs, fcl::DefaultCollisionFunction<float>);
+  
+  // inter-cable collision
+  fcl::DefaultCollisionData<float> collision_data_cables;
+  robots_->col_mgr_cables->collide(&collision_data_cables, fcl::DefaultCollisionFunction<float>);
 
   auto st = state->as<StateSpace::StateType>();
   auto payload_quat = st->getPayloadquat();
@@ -65,7 +67,7 @@ bool fclStateValidityChecker::isValid(const ompl::base::State* state) const
   } else if (angle < cfg_.angle_min) {
     return false;
   }
-  if (collision_data.result.isCollision() || collision_data_robot.result.isCollision() || collision_data_cables.result.isCollision()) {
+  if (collision_data.result.isCollision() || collision_data_robot.result.isCollision() || collision_data_cables.result.isCollision() || collision_data_cables_obs.result.isCollision()) {
     return false;
   }
 
