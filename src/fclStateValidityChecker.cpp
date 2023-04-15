@@ -36,17 +36,24 @@ bool fclStateValidityChecker::isValid(const ompl::base::State* state) const
   for(size_t i = 0; i<cableNums; ++i) {
     double length = cfg_.cablelengthVec[i];
     Eigen::Vector3f attachmentpoint(cfg_.attachmentpoints(0+3*i), cfg_.attachmentpoints(1+3*i), cfg_.attachmentpoints(2+3*i));
-    // robots_->setCableTransformation(state, i, attachmentpoint, length);
     robots_->setUAVTransformation(state, i, attachmentpoint, length);
+    robots_->setCableTransformation(state, i, attachmentpoint, length);
   }
   robots_->col_mgr_all->update();
-  
+  robots_->col_mgr_cables->update();
+  // robot-obstacle collision 
   fcl::DefaultCollisionData<float> collision_data;
   robots_->col_mgr_all->collide(obstacles_->obsmanager, &collision_data, fcl::DefaultCollisionFunction<float>);
-  // Inter-robot collision is still not implemented
+  // Inter-robot collision 
   fcl::DefaultCollisionData<float> collision_data_robot;
   robots_->col_mgr_all->collide(&collision_data_robot, fcl::DefaultCollisionFunction<float>);
   
+  fcl::DefaultCollisionData<float> collision_data_cables;
+  // inter-cable collision
+  robots_->col_mgr_cables->collide(&collision_data_cables, fcl::DefaultCollisionFunction<float>);
+  // cables/obstacles collision
+  robots_->col_mgr_cables->collide(&obstacles_->obsmanager,fcl::DefaultCollisionFunction<float>);
+
   auto st = state->as<StateSpace::StateType>();
   auto payload_quat = st->getPayloadquat();
   Eigen::Vector3f e3(0,0,1);
@@ -58,7 +65,7 @@ bool fclStateValidityChecker::isValid(const ompl::base::State* state) const
   } else if (angle < cfg_.angle_min) {
     return false;
   }
-  if (collision_data.result.isCollision() || collision_data_robot.result.isCollision()) {
+  if (collision_data.result.isCollision() || collision_data_robot.result.isCollision() || collision_data_cables.result.isCollision()) {
     return false;
   }
 
