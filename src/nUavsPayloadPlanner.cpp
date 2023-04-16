@@ -20,7 +20,7 @@
 namespace ob = ompl::base;
 namespace og = ompl::geometric;
 
-void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile)
+void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile, std::string &statsFile)
 {
     std::shared_ptr<RobotsWithPayload> nCablesPayload = create_robots(cfg);   
     std::shared_ptr<Obstacles> Obstacles = create_obs(cfg.env);
@@ -74,14 +74,20 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile)
     // objectCable->setCostThreshold(ob::Cost(1.0));
     pdef->setOptimizationObjective(objectCable);
 
-    bool has_solution = false;
-    std::chrono::steady_clock::time_point previous_solution;
+    // empty stats file
+    std::ofstream stats(statsFile);
+    stats << "stats:" << std::endl;
+
+    auto start = std::chrono::steady_clock::now();
+
     pdef->setIntermediateSolutionCallback(
-        [&previous_solution, &has_solution](const ob::Planner *, const std::vector<const ob::State *> &, const ob::Cost cost)
+        [&start, &stats](const ob::Planner *, const std::vector<const ob::State *> &, const ob::Cost cost)
         {
-          std::cout << "Intermediate solution! " << cost.value() << std::endl;
-          has_solution = true;
-          previous_solution = std::chrono::steady_clock::now();
+            auto now = std::chrono::steady_clock::now();
+            double t = std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count();
+            stats << "  - t: " << t/1000.0f << std::endl;
+            stats << "    cost: " << cost.value() << std::endl;
+            std::cout << "Intermediate solution! " << cost.value() << " " << t/1000.0f << std::endl;
         });
     // set the problem we are truing to solve for the planner
     planner->setProblemDefinition(pdef);
@@ -180,11 +186,13 @@ int main(int argc, char* argv[])
     po::options_description desc("Allowed options");
     std::string inputFile;
     std::string outputFile;
+    std::string statsFile;
 
     desc.add_options()
         ("help", "produce help message")
         ("input,i", po::value<std::string>(&inputFile)->required(), "input file (yaml)")
-        ("output,o", po::value<std::string>(&outputFile)->required(), "output file (yaml)");
+        ("output,o", po::value<std::string>(&outputFile)->required(), "output file (yaml)")
+        ("stats", po::value<std::string>(&statsFile)->default_value("ompl_stats.yaml"), "output file (yaml)");
 
     try {
         po::variables_map vm;
@@ -242,7 +250,7 @@ int main(int argc, char* argv[])
     // Extract obstacles
     cfg.env = configFile["environment"]["obstacles"];
 
-    cablesPayloadPlanner(cfg, outputFile);
+    cablesPayloadPlanner(cfg, outputFile, statsFile);
 
     std::cout << std::endl << std::endl;
 

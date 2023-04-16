@@ -105,12 +105,7 @@ fcl::Transform3f RobotsWithPayload::getCableTransform(const ob::State *state, co
     auto st = state->as<StateSpace::StateType>();
     fcl::Transform3f transform;
     Eigen::Vector3f cablePos = st->getCablePos(cableNum, attachmentPoint, length);
-    Eigen::Quaternionf cablequat = st->getCableQuat(cableNum);
-    // cable initial vector (1,0,0)-> fcl initial vector (0,0,1)
-    const Eigen::Quaternionf fclInmeshcat(0.7071068, 0, 0.7071068, 0);
-    Eigen::Matrix3f cable_rotmat = fclInmeshcat.normalized().toRotationMatrix() * cablequat.normalized().toRotationMatrix();
-    Eigen::Quaternionf cable_quat_in_fcl(cable_rotmat);    
-    transform.rotate(cable_quat_in_fcl);
+    transform.rotate(st->getCableQuat(cableNum));
     transform = Eigen::Translation<float, 3>(fcl::Vector3f(cablePos(0), cablePos(1), cablePos(2)));
     return transform;
 }
@@ -225,7 +220,7 @@ Eigen::Vector3f StateSpace::StateType::getCablePos(const size_t cableNum, Eigen:
 Eigen::Quaternionf StateSpace::StateType::getCableQuat(size_t cableNum) const 
 {
     Eigen::Vector3f unitvec = getunitvec(cableNum);
-    Eigen::Vector3f basevec(1,0,0);
+    Eigen::Vector3f basevec(0,0,1);
     Eigen::Quaternionf quat = Eigen::Quaternionf::FromTwoVectors(basevec, unitvec);
     return quat;
 }

@@ -61,13 +61,15 @@ bool fclStateValidityChecker::isValid(const ompl::base::State* state) const
   Eigen::Vector3f e3(0,0,1);
   Eigen::Vector3f v(qvrot(payload_quat, e3));
   auto angle = acosf(e3.dot(v));
-  
-  if (angle > cfg_.angle_max) {
-    return false;
-  } else if (angle < cfg_.angle_min) {
-    return false;
+
+  if (cfg_.payloadShape == "triangle" || cfg_.payloadShape == "rod") {
+    if (angle > cfg_.angle_max) {
+      return false;
+    } else if (angle < cfg_.angle_min) {
+      return false;
+    }
   }
-  if (collision_data.result.isCollision() || collision_data_robot.result.isCollision() || collision_data_cables.result.isCollision() || collision_data_cables_obs.result.isCollision()) {
+  if (collision_data.result.isCollision() || collision_data_robot.result.isCollision()  || collision_data_cables.result.isCollision() || collision_data_cables_obs.result.isCollision()) {
     return false;
   }
 
