@@ -3,3 +3,4 @@ build/
 output.yaml
 takeoff_2cfs_payload_output.yaml
 *.pdf
+stats/
