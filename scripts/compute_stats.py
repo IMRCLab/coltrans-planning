@@ -41,28 +41,25 @@ def main():
             for yamlnum, timelimit in zip(yamlnums, timelimits):
                 with open("../examples/forest/"+str(yamlnum)+"cfs.yaml") as forestyaml:
                     forestcfg = yaml.load(forestyaml, Loader=yaml.FullLoader)
-                obstacle = []
-                for Obs in range(numOfObs):
-                    min_env = compute_stats["forest"]["min_env"]
-                    max_env = compute_stats["forest"]["max_env"]
-                    tol     = compute_stats["forest"]["tol"]
-                    center = [np.random.uniform(low=min_env, high=max_env), np.random.uniform(low=min_env, high=max_env), np.random.uniform(low=-0.01, high=0.01)]
-                    feasible = False
-                    while not feasible:
-                        start_tol = np.linalg.norm(np.asarray(center) - np.asarray(forestcfg["payload"]["start"][0:3]))
-                        goal_tol  = np.linalg.norm(np.asarray(center) - np.asarray(forestcfg["payload"]["goal"][0:3]))
-                        if start_tol <= tol or goal_tol <= tol:
-                            center = [np.random.uniform(low=min_env, high=max_env), np.random.uniform(low=min_env, high=max_env), np.random.uniform(low=-0.01, high=0.01)]
-                        else:
-                            feasible = True
-                    obstacle.append({'type' : "cylinder",  
-                                    'center' : center, 
-                                    'radius' : 0.1,
-                                    'height' : 3.0})
-                forestcfg['environment']['obstacles'] = obstacle
+                
+                with open("obstacles_final.yaml") as obstaclesyaml:
+                    obstaclecfg = yaml.load(obstaclesyaml, Loader=yaml.FullLoader)
+                
+                forestcfg['environment']['obstacles'] = obstaclecfg['obstacles']
                 forestcfg['timelimit'] = timelimit
                 forestcfg['environment']['min'] = environment_min
                 forestcfg['environment']['max'] = environment_max
+                start_tmp = np.asarray(forestcfg['payload']['start'])
+                start_cfg = compute_stats["forest"]["start"]
+                start_tmp[0:3] = np.asarray(start_cfg)
+                forestcfg['payload']['start'] = start_tmp.tolist()
+
+                goal_tmp = np.asarray(forestcfg['payload']['goal'])
+                goal_cfg = compute_stats["forest"]["goal"]
+                goal_tmp[0:3] = np.asarray(goal_cfg)
+                forestcfg['payload']['goal'] = goal_tmp.tolist()
+
+                # forestcfg['payload']['start'] = 
                 forestfile=open("../examples/forest/"+str(yamlnum)+"cfs.yaml","w")
                 yaml.dump(forestcfg,forestfile, default_flow_style=True)
                 forestfile.close()
@@ -75,13 +72,14 @@ def main():
                 problemcfg['timelimit'] = timelimit
                 problemcfg['environment']['min'] = environment_min
                 problemcfg['environment']['max'] = environment_max
+                if problem == 'maze':
+                    problemcfg['environment']['obstacles'] = compute_stats[problem]["environment"]['obstacles']
                 problemfile=open("../examples/"+problem+"/"+str(yamlnum)+"cfs.yaml","w")
                 yaml.dump(problemcfg,problemfile, default_flow_style=True)
                 problemfile.close()
 
 
     # start worker processes
-
     all_settings = []
     problem_num = 0
     for file, yamlDir in zip(files, yamlDirs):
