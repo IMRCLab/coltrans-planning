@@ -5,4 +5,4 @@
   payload: {angle_max: 0.7, angle_min: -0.7, goal: [2.0, 0, 0, 0, 0, 0, 1, 0, 1.2,
       1.2, 1.2, 2.5, 1.2, 3.75, 1.2], shape: {size: [0.08, 0.08, 0.005], type: triangle},
     start: [-0.5, 0, 0, 0, 0, 0, 1, 0, 1.2, 1.2, 1.2, 2.5, 1.2, 3.75, 1.2]}, plannerType: rrtstar,
-  timelimit: 2}
+  timelimit: 600}

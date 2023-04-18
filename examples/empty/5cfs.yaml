@@ -5,4 +5,4 @@
   interpolate: 1000, numofcables: 5, payload: {angle_max: 0.5, angle_min: -0.5, goal: [
       1.5, 0, 0, 0, 0, 0, 1, 0, 1.0, 1.25, 1.0, 2.5, 1.0, 3.75, 1.0, 5.0, 1.0], shape: {
       size: [0.08, 0.08, 0.005], type: triangle}, start: [-0.5, 0, 0, 0, 0, 0, 1,
-      0, 1.0, 1.25, 1.0, 2.5, 1.0, 3.75, 1.0, 5.0, 1.0]}, plannerType: rrtstar, timelimit: 2}
+      0, 1.0, 1.25, 1.0, 2.5, 1.0, 3.75, 1.0, 5.0, 1.0]}, plannerType: rrtstar, timelimit: 600}
