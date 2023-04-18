@@ -72,7 +72,7 @@ void RobotsWithPayload::addRobotParts(const plannerSettings& cfg)
         cablesObj.push_back(cableco);
 
         std::shared_ptr<fcl::CollisionGeometryf> uavgeom;
-        uavgeom.reset(new fcl::Spheref(0.15));
+        uavgeom.reset(new fcl::Spheref(0.1));
         auto uavco = new fcl::CollisionObjectf(uavgeom);
         uavco->setTranslation(fcl::Vector3f(0,0,0));
         uavco->computeAABB();
@@ -105,7 +105,8 @@ fcl::Transform3f RobotsWithPayload::getCableTransform(const ob::State *state, co
     auto st = state->as<StateSpace::StateType>();
     fcl::Transform3f transform;
     Eigen::Vector3f cablePos = st->getCablePos(cableNum, attachmentPoint, length);
-    transform.rotate(st->getCableQuat(cableNum));
+    Eigen::Quaternionf cablequat = st->getCableQuat(cableNum);
+    transform.rotate(cablequat);
     transform = Eigen::Translation<float, 3>(fcl::Vector3f(cablePos(0), cablePos(1), cablePos(2)));
     return transform;
 }

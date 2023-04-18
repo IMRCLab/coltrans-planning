@@ -41,3 +41,19 @@ cd tests/
 ```bash
  python3 ../scripts/plot.py output.yaml
 ```
+
+## Compute Statistics
+
+```bash
+cd scripts/
+python3 compute_stats.py
+```
+- To change configuration, check `scripts/compute_stats.yaml`. Three scenarios (the configs are in examples folder) are provided: empty, maze and forest. All of them have the same config parameters (i.e., runs, rangeofRobots: which number of robots to include) except forest, has some extra ones like the number of Obstacles, [min_env, max_env]: the minimum and maximum space where the random obstacles can be.
+- The stats for the latest run is found inside `exampls/forest/stats`
+- The output of each run to visualize can be found inside examples/forest/stats/run3
+- The script generates a dict output: `stadtdict.yaml`.
+- To visualize any result, choose scenario and which run and which number of robots (i.e., output6.yaml means for 6 robots, output3.yaml, 3 robots and so on):
+```bash
+cd scripts
+python3 visualize.py ../examples/maze/run4/output6.yaml triangle
+```
