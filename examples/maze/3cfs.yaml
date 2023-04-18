@@ -6,4 +6,4 @@
   numofcables: 3, payload: {angle_max: 0.7, angle_min: -0.7, goal: [1.5, 0, 0, 0,
       0, 0, 1, 0, 1.0, 2.1, 1.0, 4.2, 1.0], shape: {size: [0.08, 0.08, 0.005], type: triangle},
     start: [-0.5, 0, 0, 0, 0, 0, 1, 0, 1.0, 2.1, 1.0, 4.2, 1.0]}, plannerType: rrtstar,
-  timelimit: 80}
+  timelimit: 600}
