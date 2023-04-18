@@ -4,6 +4,14 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import yaml
 import argparse
+from multiprocessing import Pool
+
+def run_exp(settings):
+    file, yamlnum, run = settings
+    print(run) 
+    print('Solving: '  + str(yamlnum) + " " + file)
+    subprocess.run(['../tests/./' + file + " " +str(yamlnum) + " " + str(yamlnum) + " " + str(run)], shell=True)
+    print('Completed '  + str(yamlnum) + " " + file)
 
 def main():
 
@@ -71,6 +79,22 @@ def main():
                 yaml.dump(problemcfg,problemfile, default_flow_style=True)
                 problemfile.close()
 
+
+    # start worker processes
+
+    all_settings = []
+    problem_num = 0
+    for file, yamlDir in zip(files, yamlDirs):
+        for yamlnum in yamlnums:
+            for run in range(runs[problem_num]):
+                all_settings.append((file, yamlnum, run))
+        problem_num+=1
+
+    with Pool(processes=32) as pool:
+        for i in pool.imap_unordered(run_exp, all_settings):
+            pass
+
+    # collect some stats
     problem_num = 0
     for file, yamlDir in zip(files, yamlDirs):
         statsdict.update({file: {}})
@@ -85,11 +109,11 @@ def main():
             for run in range(runs[problem_num]):    
                 print(run) 
                 statsdict[file][yamlnum].update({run: {}})
-                print('Solving: '  + str(yamlnum) + " " + file)
-                subprocess.run(['../tests/./' + file + " " +str(yamlnum) + " " + str(yamlnum) + " " + str(run)], shell=True)
-                print('Completed '  + str(yamlnum) + " " + file)
+                # print('Solving: '  + str(yamlnum) + " " + file)
+                # subprocess.run(['../tests/./' + file + " " +str(yamlnum) + " " + str(yamlnum) + " " + str(run)], shell=True)
+                # print('Completed '  + str(yamlnum) + " " + file)
                 print('add stats in dict')
-                with open("../examples/"+yamlDir+"/ompl_stats"+str(yamlnum)+'.yaml') as stats_file:
+                with open("../examples/"+yamlDir+"/run"+str(run)+"/ompl_stats"+str(yamlnum)+'.yaml') as stats_file:
                     stats_ = yaml.load(stats_file, Loader=yaml.FullLoader)
                 if stats_['stats'] != None:
                     statsdict[file][yamlnum][run].update({'stats' : stats_['stats']})

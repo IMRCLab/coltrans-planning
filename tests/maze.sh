@@ -21,4 +21,4 @@ then
 fi
 
 cd ../../../build
-./nUavsPayloadPlanner --input ../examples/maze/$2cfs.yaml --output ../examples/maze/$FOLDER1/$FOLDER2/output$1.yaml --stats ../examples/maze/$FOLDER1/$FILE
+./nUavsPayloadPlanner --input ../examples/maze/$2cfs.yaml --output ../examples/maze/$FOLDER1/$FOLDER2/output$1.yaml --stats ../examples/maze/$FOLDER1/$FOLDER2/ompl_stats$1.yaml
