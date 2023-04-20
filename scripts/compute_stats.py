@@ -37,7 +37,6 @@ def main():
         environment_min = compute_stats[problem]["environment"]["min"]
         environment_max = compute_stats[problem]["environment"]["max"]
         if problem == "forest":
-            numOfObs = compute_stats[problem]["numofObs"]
             for yamlnum, timelimit in zip(yamlnums, timelimits):
                 with open("../examples/forest/"+str(yamlnum)+"cfs.yaml") as forestyaml:
                     forestcfg = yaml.load(forestyaml, Loader=yaml.FullLoader)
