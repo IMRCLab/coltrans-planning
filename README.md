@@ -52,6 +52,12 @@ python3 compute_stats.py
 - The stats for the latest run is found inside `exampls/forest/stats`
 - The output of each run to visualize can be found inside examples/forest/stats/run3
 - The script generates a dict output: `stadtdict.yaml`.
+- For the forest example, we provide a random generation obstacles script `compute_obs.py, that generates and visualizes obstacles.yaml.
+- In case the obstacles.yaml is a good example rename the file to obstacles_final.yaml.
+ ``` bash
+cp -a obstacles.yaml obstacles_final.yaml
+```
+- otherwise, the compute_stats.py will complain about not finding the `obstacles_final.yaml`
 - To visualize any result, choose scenario and which run and which number of robots (i.e., output6.yaml means for 6 robots, output3.yaml, 3 robots and so on):
 ```bash
 cd scripts
