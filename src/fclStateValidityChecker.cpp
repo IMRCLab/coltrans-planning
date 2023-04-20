@@ -42,11 +42,11 @@ bool fclStateValidityChecker::isValid(const ompl::base::State* state) const
   robots_->col_mgr_all->update();
   robots_->col_mgr_cables->update();
   // robot-obstacle collision 
-  fcl::DefaultCollisionData<float> collision_data;
-  robots_->col_mgr_all->collide(obstacles_->obsmanager, &collision_data, fcl::DefaultCollisionFunction<float>);
+  fcl::DefaultCollisionData<float> collision_data_robot_obs;
+  robots_->col_mgr_all->collide(obstacles_->obsmanager, &collision_data_robot_obs, fcl::DefaultCollisionFunction<float>);
   // Inter-robot collision 
-  fcl::DefaultCollisionData<float> collision_data_robot;
-  robots_->col_mgr_all->collide(&collision_data_robot, fcl::DefaultCollisionFunction<float>);
+  fcl::DefaultCollisionData<float> collision_data_robots;
+  robots_->col_mgr_all->collide(&collision_data_robots, fcl::DefaultCollisionFunction<float>);
   
   // cables/obstacles collision
   fcl::DefaultCollisionData<float> collision_data_cables_obs;
@@ -69,7 +69,7 @@ bool fclStateValidityChecker::isValid(const ompl::base::State* state) const
       return false;
     }
   }
-  if (collision_data.result.isCollision() || collision_data_robot.result.isCollision()  || collision_data_cables.result.isCollision() || collision_data_cables_obs.result.isCollision()) {
+  if (collision_data_robots.result.isCollision() || collision_data_robot_obs.result.isCollision()  || collision_data_cables.result.isCollision() || collision_data_cables_obs.result.isCollision()) {
     return false;
   }
 
