@@ -1,8 +1,8 @@
-{cables: {attachmentpoints: [0.04, 0, 0.005, 0.04, 0, 0.005, -0.04, 0.04, 0.005, -0.04,
-      -0.04, 0.005], lengths: [0.5, 0.5, 0.5, 0.5], max: [6.28, 1.57, 6.28, 1.57,
-      6.28, 1.57, 6.28, 1.57], min: [0, 0, 0, 0, 0, 0, 0, 0]}, environment: {max: [
-      2, 1, 1], min: [-1, -1, -0.1], obstacles: []}, interpolate: 1000, numofcables: 4,
-  payload: {angle_max: 0.7, angle_min: -0.7, goal: [2.0, 0, 0, 0, 0, 0, 1, 0, 1.2,
-      1.2, 1.2, 2.5, 1.2, 3.75, 1.2], shape: {size: [0.08, 0.08, 0.005], type: triangle},
-    start: [-0.5, 0, 0, 0, 0, 0, 1, 0, 1.2, 1.2, 1.2, 2.5, 1.2, 3.75, 1.2]}, plannerType: rrtstar,
-  timelimit: 600}
+{cables: {attachmentpoints: [0.04, 0.004, 0.005, 0.04, -0.004, 0.005, -0.04, 0.04,
+      0.005, -0.04, -0.04, 0.005], lengths: [0.5, 0.5, 0.5, 0.5], max: [6.28, 1.57,
+      6.28, 1.57, 6.28, 1.57, 6.28, 1.57], min: [0, 0, 0, 0, 0, 0, 0, 0]}, environment: {
+    max: [4, 1.0, 1], min: [-0.6, -1.0, -0.1], obstacles: []}, interpolate: 1000,
+  numofcables: 4, payload: {angle_max: 0.7, angle_min: -0.7, goal: [3.5, 0.0, 0.0,
+      0.0, 0.0, 0.0, 1.0, 0.0, 0.78, 5.0, 0.78, 3.14, 0.78, 4.0, 0.78], shape: {size: [
+        0.08, 0.08, 0.005], type: triangle}, start: [-0.5, 0.0, 0.0, 0.0, 0.0, 0.0,
+      1.0, 0.0, 0.78, 5.0, 0.78, 3.14, 0.78, 4.0, 0.78]}, plannerType: rrtstar, timelimit: 3}

@@ -1,32 +1,22 @@
 {cables: {attachmentpoints: [0.04, 0, 0.005, -0.04, 0.04, 0.005, -0.04, -0.04, 0.005],
     lengths: [0.5, 0.5, 0.5], max: [6.28, 1.57, 6.28, 1.57, 6.28, 1.57], min: [0,
-      0, 0, 0, 0, 0]}, environment: {max: [3, 1.0, 1], min: [0.8, -1.0, -0.1], obstacles: [
-      {center: [0.4443878382749675, -0.6029056159928057, -5.992289904434283e-05],
-        height: 3.0, radius: 0.05, type: cylinder}, {center: [0.9446805023075177,
-          0.8195525885745876, 1.7605112939629916e-05], height: 3.0, radius: 0.05,
-        type: cylinder}, {center: [0.7981629677661948, -1.058301152418375, 1.8077979028130467e-05],
-        height: 3.0, radius: 0.05, type: cylinder}, {center: [0.5250952968293758,
-          0.58836921273195, 6.225559310654443e-05], height: 3.0, radius: 0.05, type: cylinder},
-      {center: [1.0930246972032527, -0.5316700559504668, 9.688832751468447e-05], height: 3.0,
-        radius: 0.05, type: cylinder}, {center: [1.4734167533200644, 0.6213456395394474,
-          5.742321442845238e-05], height: 3.0, radius: 0.05, type: cylinder}, {center: [
-          0.7414540445113591, -0.6367976321053078, -8.425308128132792e-05], height: 3.0,
-        radius: 0.05, type: cylinder}, {center: [1.3958652088662513, 0.12368044262690114,
-          3.365299869218491e-05], height: 3.0, radius: 0.05, type: cylinder}, {center: [
-          1.3932521644192233, -0.49490418614918363, -1.1732985892837802e-05], height: 3.0,
-        radius: 0.05, type: cylinder}, {center: [1.1715664350198476, -1.0503788791460473,
-          2.2755232162310204e-05], height: 3.0, radius: 0.05, type: cylinder}, {center: [
-          0.4868626270070055, 1.202807545373921, -6.0661828125504004e-05], height: 3.0,
-        radius: 0.05, type: cylinder}, {center: [0.919512954399504, 0.04602437477296917,
-          -5.298487232771172e-05], height: 3.0, radius: 0.05, type: cylinder}, {center: [
-          0.2007155155350731, -0.9697063371814993, -5.9088509229724754e-05], height: 3.0,
-        radius: 0.05, type: cylinder}, {center: [1.097733153464798, 1.4719643622264522,
-          -2.2957823498239533e-05], height: 3.0, radius: 0.05, type: cylinder}, {
-        center: [0.09012597444071369, 0.27339204250137916, 3.2771243503487124e-05],
-        height: 3.0, radius: 0.05, type: cylinder}, {center: [0.9684089678613084,
-          0.47402637218030064, -2.1765083710304617e-05], height: 3.0, radius: 0.05,
-        type: cylinder}]}, interpolate: 1000, numofcables: 3, payload: {angle_max: 0.5,
-    angle_min: -0.5, goal: [2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 2.1, 1.0,
-      4.2, 1.0], shape: {size: [0.08, 0.08, 0.005], type: triangle}, start: [-0.5,
-      0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 2.1, 1.0, 4.2, 1.0]}, plannerType: rrtstar,
-  timelimit: 600}
+      0, 0, 0, 0, 0]}, environment: {max: [4, 1.0, 1], min: [-0.6, -1.0, -0.1], obstacles: [
+      {center: [2.725976047684628, -0.39382233350157236, 0.0], height: 3.0, radius: 0.03,
+        type: cylinder}, {center: [2.948541008077671, 0.4941422646588314, 0.0], height: 3.0,
+        radius: 0.03, type: cylinder}, {center: [1.6648505097835962, 0.442715733992169,
+          0.0], height: 3.0, radius: 0.03, type: cylinder}, {center: [2.1289219207698893,
+          1.170505128705196, 0.0], height: 3.0, radius: 0.03, type: cylinder}, {center: [
+          0.2356816993697911, -0.11161967061722122, 0.0], height: 3.0, radius: 0.03,
+        type: cylinder}, {center: [1.9970518647347388, -0.931801475509838, 0.0], height: 3.0,
+        radius: 0.03, type: cylinder}, {center: [0.5602133393654078, 0.7521356075788701,
+          0.0], height: 3.0, radius: 0.03, type: cylinder}, {center: [1.3511921418210524,
+          -0.4059376470834053, 0.0], height: 3.0, radius: 0.03, type: cylinder}, {
+        center: [0.26105005825639893, -1.1016431318815383, 0.0], height: 3.0, radius: 0.03,
+        type: cylinder}, {center: [1.1294065258181605, -1.199732220535121, 0.0], height: 3.0,
+        radius: 0.03, type: cylinder}, {center: [1.2891979169304766, 1.1849768839627417,
+          0.0], height: 3.0, radius: 0.03, type: cylinder}, {center: [2.9800400069263744,
+          -1.1775549080438417, 0.0], height: 3.0, radius: 0.03, type: cylinder}]},
+  interpolate: 1000, numofcables: 3, payload: {angle_max: 0.7, angle_min: -0.7, goal: [
+      3.5, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 2.1, 1.0, 4.2, 1.0], shape: {size: [
+        0.08, 0.08, 0.005], type: triangle}, start: [-0.5, 0.0, 0.0, 0.0, 0.0, 0.0,
+      1.0, 0.0, 1.0, 2.1, 1.0, 4.2, 1.0]}, plannerType: rrtstar, timelimit: 3}
