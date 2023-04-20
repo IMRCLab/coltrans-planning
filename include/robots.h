@@ -87,7 +87,6 @@ public:
         Eigen::Quaternionf getCableQuat(size_t cableNum) const;
         Eigen::Vector3f getuavPos(const size_t& cableNum, Eigen::Vector3f& attachmentPoint,const double& length) const;
         Eigen::Vector3f getunitvec(size_t cablenum) const;
-    protected:
         Eigen::Vector3f getAttPointInFixedFrame(Eigen::Vector3f& attachmentPoint) const;
     };
 
