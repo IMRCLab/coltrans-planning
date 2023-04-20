@@ -7,37 +7,40 @@ import meshcat.transformations as tf
 
 
 def main():
+    # Define boundaries
+    boundaries_min = np.array([0, -1.2, 0])
+    boundaries_max = np.array([3, 1.2, 0])
+
+    # Define tolerance for minimum distance between points
+    tolerance = 0.8
+
+    # Initialize points array
+    points = np.empty((0, 3))
+
+    # Initialize obstacles list
     obstacles = []
-    numOfObs = 16
-    for Obs in range(numOfObs):
-        min_env = [0,  -1.5]
-        max_env = [1.5, 1.5]
-        tol_stg = 0.5
-        tol     = 0.3
-        center = [np.random.uniform(low=min_env[0], high=max_env[0]), np.random.uniform(low=min_env[1], high=max_env[1]), np.random.uniform(low=-0.0001, high=0.0001)]
-        feasible = False
-        while not feasible:
-            start_tol = np.linalg.norm(np.asarray(center) - np.asarray([-0.5, 0, 0]))
-            goal_tol  = np.linalg.norm(np.asarray(center) - np.asarray([2.0, 0, 0]))    
-            if Obs > 0:
-                currentObs = [obs_['center'] for obs_ in obstacles] 
-                isdisBetweenObs = False
-                while not isdisBetweenObs:
-                    for obst in currentObs:
-                        if np.linalg.norm((np.asarray(center))- (np.asarray(obst))) < tol or start_tol < tol_stg or goal_tol < tol_stg:
-                            print('not correct')
-                            center = [np.random.uniform(low=min_env[0], high=max_env[0]), np.random.uniform(low=min_env[1], high=max_env[1]), np.random.uniform(low=-0.0001, high=0.0001)]
-                            isdisBetweenObs = False
-                        else:
-                            isdisBetweenObs = True
-                feasible = True
-            else:
-                feasible = True
-        obstacles.append({'type' : "cylinder",  
-                        'center' : center, 
-                        'radius' : 0.05,
-                        'height' : 3.0})
-    
+
+    # Generate points and corresponding obstacles
+    for i in range(10000):
+        # Generate a new point
+        new_point = np.concatenate((np.random.uniform(low=boundaries_min[:2], high=boundaries_max[:2]), [0]))
+
+        # Check distance to all existing points
+        distances = np.linalg.norm(points[:, :2] - new_point[:2], axis=1)
+
+        # Add new point to list if distance is greater than the tolerance
+        if np.all(distances > tolerance):
+            # Append new obstacle to the list
+            obstacles.append({'type': 'cylinder',
+                            'center': new_point.tolist(),
+                            'radius': 0.03,
+                            'height': 3.0})
+            
+            # Append new point to the list of points
+            points = np.vstack((points, new_point))
+    print(len(obstacles))
+    # Convert list of points to NumPy array
+    points = np.array(points)
     
     obstaclesdict = {'obstacles': obstacles}
     obstacleYaml=open("obstacles.yaml","w")
