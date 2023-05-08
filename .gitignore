@@ -1,5 +1,7 @@
 build/
 .vscode
-output.yaml
+output*
 takeoff_2cfs_payload_output.yaml
 *.pdf
+stats/
+statsdict.yaml

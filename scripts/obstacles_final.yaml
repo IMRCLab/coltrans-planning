@@ -1,0 +1,15 @@
+{obstacles: [{center: [2.725976047684628, -0.39382233350157236, 0.0], height: 3.0,
+      radius: 0.03, type: cylinder}, {center: [2.948541008077671, 0.4941422646588314,
+        0.0], height: 3.0, radius: 0.03, type: cylinder}, {center: [1.6648505097835962,
+        0.442715733992169, 0.0], height: 3.0, radius: 0.03, type: cylinder}, {center: [
+        2.1289219207698893, 1.170505128705196, 0.0], height: 3.0, radius: 0.03, type: cylinder},
+    {center: [0.2356816993697911, -0.11161967061722122, 0.0], height: 3.0, radius: 0.03,
+      type: cylinder}, {center: [1.9970518647347388, -0.931801475509838, 0.0], height: 3.0,
+      radius: 0.03, type: cylinder}, {center: [0.5602133393654078, 0.7521356075788701,
+        0.0], height: 3.0, radius: 0.03, type: cylinder}, {center: [1.3511921418210524,
+        -0.4059376470834053, 0.0], height: 3.0, radius: 0.03, type: cylinder}, {center: [
+        0.26105005825639893, -1.1016431318815383, 0.0], height: 3.0, radius: 0.03,
+      type: cylinder}, {center: [1.1294065258181605, -1.199732220535121, 0.0], height: 3.0,
+      radius: 0.03, type: cylinder}, {center: [1.2891979169304766, 1.1849768839627417,
+        0.0], height: 3.0, radius: 0.03, type: cylinder}, {center: [2.9800400069263744,
+        -1.1775549080438417, 0.0], height: 3.0, radius: 0.03, type: cylinder}]}

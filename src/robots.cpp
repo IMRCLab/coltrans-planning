@@ -72,7 +72,7 @@ void RobotsWithPayload::addRobotParts(const plannerSettings& cfg)
         cablesObj.push_back(cableco);
 
         std::shared_ptr<fcl::CollisionGeometryf> uavgeom;
-        uavgeom.reset(new fcl::Spheref(0.15));
+        uavgeom.reset(new fcl::Spheref(0.1));
         auto uavco = new fcl::CollisionObjectf(uavgeom);
         uavco->setTranslation(fcl::Vector3f(0,0,0));
         uavco->computeAABB();
@@ -104,14 +104,11 @@ fcl::Transform3f RobotsWithPayload::getCableTransform(const ob::State *state, co
 {
     auto st = state->as<StateSpace::StateType>();
     fcl::Transform3f transform;
-    Eigen::Vector3f cablePos = st->getCablePos(cableNum, attachmentPoint, length);
+    Eigen::Vector3f attpoint = st->getAttPointInFixedFrame(attachmentPoint);
     Eigen::Quaternionf cablequat = st->getCableQuat(cableNum);
-    // cable initial vector (1,0,0)-> fcl initial vector (0,0,1)
-    const Eigen::Quaternionf fclInmeshcat(0.7071068, 0, 0.7071068, 0);
-    Eigen::Matrix3f cable_rotmat = fclInmeshcat.normalized().toRotationMatrix() * cablequat.normalized().toRotationMatrix();
-    Eigen::Quaternionf cable_quat_in_fcl(cable_rotmat);    
-    transform.rotate(cable_quat_in_fcl);
-    transform = Eigen::Translation<float, 3>(fcl::Vector3f(cablePos(0), cablePos(1), cablePos(2)));
+    Eigen::Vector3f rotatez = cablequat*fcl::Vector3f(0,0,0.5*length);
+    transform = Eigen::Translation<float, 3>(attpoint + rotatez);
+    transform.rotate(cablequat.toRotationMatrix());
     return transform;
 }
 
@@ -223,11 +220,11 @@ Eigen::Vector3f StateSpace::StateType::getCablePos(const size_t cableNum, Eigen:
 }
 
 Eigen::Quaternionf StateSpace::StateType::getCableQuat(size_t cableNum) const 
-{
-    Eigen::Vector3f unitvec = getunitvec(cableNum);
-    Eigen::Vector3f basevec(1,0,0);
-    Eigen::Quaternionf quat = Eigen::Quaternionf::FromTwoVectors(basevec, unitvec);
-    return quat;
+{      
+    Eigen::Vector3f v1 = getunitvec(cableNum);
+    Eigen::Vector3f v2(0,0,1);
+    Eigen::Quaternionf q_rotation = Eigen::Quaternionf::FromTwoVectors(v2, v1);
+    return q_rotation;
 }
 
 Eigen::Vector3f StateSpace::StateType::getuavPos(const size_t& cableNum, Eigen::Vector3f& attachmentPoint,const double& length) const
@@ -252,7 +249,7 @@ Eigen::Vector3f StateSpace::StateType::getAttPointInFixedFrame(Eigen::Vector3f& 
     Eigen::Vector3f payloadPos = getPayloadPos();
     Eigen::Quaternionf payload_quat = getPayloadquat();
 
-    Eigen::Vector3f attPointInFixedFrame = payloadPos + payload_quat.normalized().toRotationMatrix() * attachmentPoint;
+    Eigen::Vector3f attPointInFixedFrame = payloadPos + payload_quat.normalized() * attachmentPoint;
     return attPointInFixedFrame;
 }
 

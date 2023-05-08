@@ -129,6 +129,13 @@ int main(int argc, char* argv[]) {
     payload.reset(new fcl::CollisionObjectf(geomLoad));
     payload->setTranslation(fcl::Vector3f(centerLoad[0].as<float>(), centerLoad[1].as<float>(), centerLoad[2].as<float>()));
     payload->computeAABB();
+  } else if (test_fcl["payload"]["type"].as<std::string>() == "box") {
+    std::shared_ptr<fcl::CollisionGeometryf> geomLoad;
+    geomLoad.reset(new fcl::Boxf(0.08, 0.08, 0.005));
+    const auto& centerLoad = test_fcl["payload"]["center"];
+    payload.reset(new fcl::CollisionObjectf(geomLoad));
+    payload->setTranslation(fcl::Vector3f(centerLoad[0].as<float>(), centerLoad[1].as<float>(), centerLoad[2].as<float>()));
+    payload->computeAABB();
   } else {
     throw std::runtime_error("Unknown payload type!");
   }

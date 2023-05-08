@@ -62,9 +62,12 @@ def main():
                 vis['obstacle'+str(obsNum)].set_object(g.Mesh(g.Sphere(radius=radius)))
                 vis["obstacle"+str(obsNum)].set_transform(tf.translation_matrix(center))
             obsNum+=1
-        
-            vis['payload'].set_object(g.Mesh(g.Sphere(payload["radius"])))
-            vis["payload"].set_transform(tf.translation_matrix(payload["center"]))
+            if payload['type'] == 'sphere':
+                vis['payload'].set_object(g.Mesh(g.Sphere(payload["radius"])))
+                vis["payload"].set_transform(tf.translation_matrix(payload["center"]))
+            elif payload['type'] == 'box':
+                vis['payload'].set_object(g.Mesh(g.Box([0.08, 0.08, 0.005])))
+                vis["payload"].set_transform(tf.translation_matrix(payload["center"]))
 
 if __name__ == "__main__": 
     main()
