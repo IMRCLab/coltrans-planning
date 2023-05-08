@@ -20,7 +20,23 @@ touch ompl_stats.yaml
 cd ../../build
 ./nUavsPayloadPlanner --input ../examples/2cfs_pointmass/2cfs_pointmass.yaml --output output.yaml --stats ../examples/2cfs_pointmass/stats/ompl_stats.yaml
 ```
-
+## Scenarios
+- you can run it using the commands above or for maze, forest and empty:
+```bash 
+   cd tests/
+   ./maze 0 3
+   ./forest 3 4
+   ./empty 5 8
+```
+- The first argument is the experiment number (you can have multiple experiments to compare).
+- The second argument is the number of uavs. Now we support from 3 uavs to 8.
+- If you want to run any of the other tests you do not need any arguments (i.e., it is only needed for the scenarios): 
+  ```bash
+  cd tests/
+  ./2cfs_payload
+  ./3cfs_payload
+  ./3cfs_pointmass
+  ```
 ## Visualize
 
 ```bash
