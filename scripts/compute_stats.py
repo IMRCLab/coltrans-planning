@@ -71,6 +71,18 @@ def main():
                 problemcfg['timelimit'] = timelimit
                 problemcfg['environment']['min'] = environment_min
                 problemcfg['environment']['max'] = environment_max
+                if problem == 'empty':
+                    start_tmp = np.asarray(problemcfg['payload']['start'])
+                    start_cfg = compute_stats["empty"]["start"]
+                    start_tmp[0:3] = np.asarray(start_cfg)
+                    problemcfg['payload']['start'] = start_tmp.tolist()
+
+                    goal_tmp = np.asarray(problemcfg['payload']['goal'])
+                    goal_cfg = compute_stats["empty"]["goal"]
+                    goal_tmp[0:3] = np.asarray(goal_cfg)
+                    problemcfg['payload']['goal'] = goal_tmp.tolist()
+
+
                 if problem == 'maze':
                     problemcfg['environment']['obstacles'] = compute_stats[problem]["environment"]['obstacles']
                 problemfile=open("../examples/"+problem+"/"+str(yamlnum)+"cfs.yaml","w")
