@@ -19,9 +19,9 @@
         radius: 0.03, type: cylinder}, {center: [1.2891979169304766, 1.1849768839627417,
           0.0], height: 3.0, radius: 0.03, type: cylinder}, {center: [2.9800400069263744,
           -1.1775549080438417, 0.0], height: 3.0, radius: 0.03, type: cylinder}]},
-  interpolate: 1000, numofcables: 8, payload: {angle_max: 0.5, angle_min: -0.5, goal: [
+  interpolate: 1000, numofcables: 8, payload: {angle_max: 0.7, angle_min: -0.7, goal: [
       3.5, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.57, 1.0, 0.785, 1.0, 0.0, 1.0, 2.35, 1.0,
       3.14, 1.0, 3.92, 1.0, 4.71, 1.0, 5.49, 1.0], shape: {size: [0.08, 0.08, 0.005],
       type: triangle}, start: [-0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.57, 1.0, 0.785,
       1.0, 0.0, 1.0, 2.35, 1.0, 3.14, 1.0, 3.92, 1.0, 4.71, 1.0, 5.49, 1.0]}, plannerType: rrtstar,
-  timelimit: 3}
+  timelimit: 850}
