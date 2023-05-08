@@ -5,6 +5,9 @@ import yaml
 import argparse
 np.set_printoptions(linewidth=np.inf)
 np.set_printoptions(suppress=True)
+from matplotlib.backends.backend_pdf import PdfPages
+
+
 def main(): 
     parser = argparse.ArgumentParser()
     parser.add_argument("input", type=str, help="yaml file for the table")
@@ -21,7 +24,7 @@ def main():
     numofRobots = finalnumberofRobots - startnumofRobots + 2
     print(r"%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     print(r"% Generated table, do not edit!")
-    print(r"\begin{tabular}{l||c||c||c||c||c||c||c||c}")
+    print(r"\begin{tabular}{l||l||l||l||l||l||l||l||c}")
     print("Environment & Metrics &"+ r" & ".join([str(cfnum)  + " robots" for cfnum in range(startnumofRobots, finalnumberofRobots+1)]) + r" & \\")
 
     for file in files:
@@ -30,12 +33,12 @@ def main():
         filename = file.replace('.sh','').capitalize()
         print(r"\hline")
 
-        print(" & Cost & "+ " & ".join(["{:.3f} {{\\color{{gray}} \\tiny {:.3f} }}".format(np.mean(statsdict[file][cfnum]['initcosts']),np.std(statsdict[file][cfnum]['initcosts']))
-            if statsdict[file][cfnum].get('initcosts') else " - " for cfnum in cfnums])  + r" & \\")
-        print(filename + " & Time [min] & "+ " & ".join(["{:.1f} {{\\color{{gray}}\\tiny {:.1f} }}".format(np.mean(statsdict[file][cfnum]['inittimes'])/60, np.std(statsdict[file][cfnum]['inittimes'])/60) 
-                if statsdict[file][cfnum].get('initcosts') else " - " for cfnum in cfnums])  + r" & \\")
-        print(" & Success Rate [\%] & "+ " & ".join(["{:.1f}".format((10*statsdict[file][cfnum]['successRuns'])) 
-        if statsdict[file][cfnum].get('initcosts') else " - " for cfnum in cfnums]) + r" & \\")
+        print(" & Cost & "+ " & ".join(["{:.2f} {{\\color{{gray}} \\tiny {:.2f} }}".format(np.mean(statsdict[file][cfnum]['initcosts']),np.std(statsdict[file][cfnum]['initcosts']))
+            if statsdict[file][cfnum].get('initcosts') else "\\hspace{0.4cm}- " for cfnum in cfnums])  + r" & \\")
+        print(filename + " & Time [sec] & "+ " & ".join(["{:.2f} {{\\color{{gray}}\\tiny {:.2f} }}".format(np.mean(statsdict[file][cfnum]['inittimes']), np.std(statsdict[file][cfnum]['inittimes'])) 
+                if statsdict[file][cfnum].get('initcosts') else "\\hspace{0.4cm}- " for cfnum in cfnums])  + r" & \\")
+        print(" & Success Rate [\%] & "+ " & ".join(["{:.2f}".format((10*statsdict[file][cfnum]['successRuns'])) 
+        if statsdict[file][cfnum].get('initcosts') else "\\hspace{0.4cm}- " for cfnum in cfnums]) + r" & \\")
 
     
     print(r"\end{tabular}")
@@ -43,53 +46,61 @@ def main():
 
 
     # ################### Plot ###########################
-    # ## Maze for 3 robots
-    # print('\n\n\n\n')
-    # maze_stat = statsdict['maze.sh'][3]
-    # maze_stat.pop('initcosts')
-    # maze_stat.pop('inittimes')
-    # maze_stat.pop('successRuns')
 
-    # totalcost = []
-    # totaltime = []
-    # shortest_sol_size = 100
-      
-    # for run in maze_stat.keys():
-    #     if maze_stat[run].get('stats') !=  None:
-    #         stats = maze_stat[run]
-    #         if shortest_sol_size > len(list(stats.values())[0]):
-    #             shortest_sol_size = len(list(stats.values())[0])
+    numRobots = [3, 5]
+    envs = ['forest.sh', 'maze.sh']
+    labels = [ 'Forest: 4 robots', 'Maze: 5 robots']
+    meancolors = ['r', 'g']
+    stdcolors = ['r','g']
+    with PdfPages('result_logscale.pdf') as pdf:   
+        fig, ax = plt.subplots()
+        ax.grid('True', which='both', axis='x', linestyle='dashed')
+        ax.grid(which='major', axis='y', linestyle='dashed')
+        for env, robot, label, color, stdcolor in zip(envs, numRobots, labels, meancolors, stdcolors):
+            allstat = statsdict[env][robot]
+            if allstat.get('initcosts'):
+                allstat.pop('initcosts')
+                allstat.pop('inittimes')
+                allstat.pop('successRuns')
+            T = 750 
+            dt = 0.1
+            costs = []
+            for run in allstat.keys():
+                costsperrun = np.zeros(int(T / dt)) * np.nan
+                if allstat[run].get('stats') !=  None:    # ## Maze for 3 robots
+                    for d in allstat[run]['stats']:
+                        idx =  int(d["t"] / dt)
+                        costsperrun[idx:] = d["cost"]
+                    costs.append(costsperrun)
+            times = np.arange(0, T, dt)
+            
+            costs = np.array(costs)
+            rs = costs.shape[0]
+            cs = costs.shape[1]
+            indices = []
+            for c in range(cs):
+                nanNums = 0
+                for r in range(rs):
+                    if np.isnan(costs[r, c]): 
+                        nanNums += 1
+                if nanNums > 5:
+                    indices.append(c)
 
-    # totalcost = np.zeros((10, shortest_sol_size))
-    # totaltime = np.zeros((10, shortest_sol_size))
-    # for run in maze_stat.keys():
-    #     costcounter = 0
-    #     if maze_stat[run].get('stats') !=  None:
-    #         stats = maze_stat[run]['stats']
-    #         for stat in  stats:
-    #             if costcounter < shortest_sol_size:
-    #                 totalcost[run, costcounter] = stat['cost']
-    #                 totaltime[run, costcounter] = stat['t']
-    #             costcounter+=1
+            costs = np.delete(costs, indices, axis=1)
+            times = np.delete(times, indices, axis=0)
+            
+            mean = np.nanmean(costs, axis=0)
+            std = np.nanstd(costs, axis=0)
 
-    # meancost = np.mean(totalcost, axis=0)
-    # meancost = meancost[meancost != 0]
-    
-    # stdcost = np.std(totalcost, axis=0)
-    # stdcost = stdcost[stdcost != 0]
-    
-    # meantime = np.mean(totaltime, axis=0)
-    # meantime = meantime[meantime != 0]
-    # print(meancost)
-    # print(meantime)
-    # plt.plot(meantime, meancost, color='blue', label='mean')
-    # plt.fill_between(meantime, meancost-stdcost, meancost+stdcost, color='lightblue', alpha=0.5, label='std')
-    # plt.legend()
-    # plt.xlabel('Time')
-    # plt.ylabel('Value')
-    # plt.title('Mean and Std over Time')
-    # plt.show()
-    # # print(np.mean(totaltime, axis=1))
+            ax.plot(times, mean, label=label, color=color, lw=2.5)
+            ax.set_xscale('log')
+            ax.fill_between(times, mean+std, mean-std, color=stdcolor, alpha=0.1)
+            ax.legend()
+            ax.set_xlabel("Time [s]")
+            ax.set_ylabel("Cost [s]")
+        plt.show()
+        pdf.savefig(fig)
+        plt.close()
 
 if __name__ == "__main__": 
     main()
