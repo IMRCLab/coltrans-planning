@@ -1,0 +1,3 @@
+[submodule "deps/dynoplan"]
+	path = deps/dynoplan
+	url = git@github.com:IMRCLab/dynoplan.git

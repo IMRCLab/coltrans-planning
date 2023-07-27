@@ -1,5 +1,20 @@
 # Colaborative Transportation Planning
 
+## Preparing
+
+* Install OMPL (tested with 1.6)
+* Install Crocodyll
+  
+  ```
+  sudo tee /etc/apt/sources.list.d/robotpkg.list << EOF
+  deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -sc) robotpkg
+  EOF
+
+  curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | sudo apt-key add -
+  sudo apt update
+  sudo apt install robotpkg-py310-crocoddyl -y
+  ```
+
 ## Building
 
 Tested on Ubuntu 22.04.
@@ -7,8 +22,8 @@ Tested on Ubuntu 22.04.
 ```bash
 mkdir build
 cd build
-cmake ..
-make
+cmake .. -DCMAKE_PREFIX_PATH="/opt/openrobots/"
+make -j
 ```
 
 ## Running
