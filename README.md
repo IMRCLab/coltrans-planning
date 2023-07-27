@@ -103,3 +103,8 @@ deps/dynoplan/main_optimization --env_file ../deps/dynoplan/dynobench/envs/unicy
 
 python3 ../deps/dynoplan/dynobench/utils/viewer/viewer_cli.py --robot unicycle1 --env ../deps/dynoplan/dynobench/envs/unicycle2_v0/parallelpark_0.yaml --result opt.yaml.trajopt.yaml -i
 ```
+
+
+```
+python3 ../deps/dynoplan/dynobench/utils/viewer/viewer_cli.py --robot acrobot --env ../deps/dynoplan/dynobench/envs/acrobot_v0/swing_up_empty.yaml --result ../deps/dynoplan/dynobench/envs/acrobot_v0/trajectories/swing_up_empty_init_guess.yaml -i
+```
