@@ -94,3 +94,12 @@ cp -a obstacles.yaml obstacles_final.yaml
 cd scripts
 python3 visualize.py ../examples/maze/run4/output6.yaml triangle
 ```
+
+
+## Dynoplan Notes
+
+```
+deps/dynoplan/main_optimization --env_file ../deps/dynoplan/dynobench/envs/unicycle2_v0/parallelpark_0.yaml --models_base_path ../deps/dynoplan/dynobench/models/ --init_file ../deps/dynoplan/dynobench/data/unicycle2_0_parallelark_guess_0.yaml --results_file opt.yaml
+
+python3 ../deps/dynoplan/dynobench/utils/viewer/viewer_cli.py --robot unicycle1 --env ../deps/dynoplan/dynobench/envs/unicycle2_v0/parallelpark_0.yaml --result opt.yaml.trajopt.yaml -i
+```
