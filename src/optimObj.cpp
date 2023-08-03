@@ -13,7 +13,7 @@ float minCableObjective::requiredForceMagnitude(const ob::State* s) const
     float cost = 0;        
     for(size_t i = 0; i < num_cables; ++i) {
         auto currentUnitVec =  st->getunitvec(i);
-        cost += (1.0f/(basevec.dot(currentUnitVec)));
+        cost += (1.0f/(basevec.dot(currentUnitVec.cwiseAbs())));
     }
     cost *= (1.0/num_cables);
     return cost;
@@ -31,6 +31,7 @@ ob::Cost minCableObjective::motionCost(const ob::State *s1, const ob::State *s2)
     float distance = (pos1 - pos2).norm();
 
     float c = (E1+E2)/2 * distance;
+    std::cout << c << std::endl;
     return ob::Cost(c);
 }
 
