@@ -31,7 +31,6 @@ ob::Cost minCableObjective::motionCost(const ob::State *s1, const ob::State *s2)
     float distance = (pos1 - pos2).norm();
 
     float c = (E1+E2)/2 * distance;
-    std::cout << c << std::endl;
     return ob::Cost(c);
 }
 
