@@ -1,6 +1,6 @@
 meshcat: 
   openWindow: true
-  timestep: 0.0 # timestep in secs
+  timestep: 0.1 # timestep in secs
   finalstep: 2  # sleep at final step
 
 uav: 
