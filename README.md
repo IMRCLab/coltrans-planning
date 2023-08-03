@@ -88,7 +88,7 @@ python3 compute_stats.py
  ``` bash
 cp -a obstacles.yaml obstacles_final.yaml
 ```
-- otherwise, the compute_stats.py will complain about not finding the `obstacles_final.yaml`
+- Otherwise, the compute_stats.py will complain about not finding the `obstacles_final.yaml`
 - To visualize any result, choose scenario and which run and which number of robots (i.e., output6.yaml means for 6 robots, output3.yaml, 3 robots and so on):
 ```bash
 cd scripts
@@ -107,4 +107,14 @@ python3 ../deps/dynoplan/dynobench/utils/viewer/viewer_cli.py --robot unicycle1 
 
 ```
 python3 ../deps/dynoplan/dynobench/utils/viewer/viewer_cli.py --robot acrobot --env ../deps/dynoplan/dynobench/envs/acrobot_v0/swing_up_empty.yaml --result ../deps/dynoplan/dynobench/envs/acrobot_v0/trajectories/swing_up_empty_init_guess.yaml -i
+```
+
+### quad2dpole
+
+```
+deps/dynoplan/main_optimization --env_file ../deps/dynoplan/dynobench/envs/quad2dpole_v0/test.yaml --models_base_path ../deps/dynoplan/dynobench/models/ --init_file ../deps/dynoplan/dynobench/envs/quad2dpole_v0/down/idbastar_v0_db_solution_v0.yaml --results_file opt.yaml
+
+python3 ../deps/dynoplan/dynobench/utils/viewer/viewer_cli.py --robot quad2dpole --env ../deps/dynoplan/dynobench/envs/quad2dpole_v0/test.yaml --result opt.yaml.trajopt.yaml -i
+
+python3 ../deps/dynoplan/dynobench/utils/viewer/viewer_cli.py --robot quad2dpole --env ../deps/dynoplan/dynobench/envs/quad2dpole_v0/test.yaml --result ../deps/dynoplan/dynobench/envs/quad2dpole_v0/down/idbastar_v0_db_solution_v0.yaml -i
 ```
