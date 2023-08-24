@@ -20,9 +20,9 @@ def polartovector(cablestate, attpoint, length, plstate):
     plquat = np.array([plstate[6], plstate[3], plstate[4], plstate[5]])
     # azimuth and elevation --> unit vec
     # source https://math.stackexchange.com/questions/1150232/finding-the-unit-direction-vector-given-azimuth-and-elevation
-    unitvec = np.array([np.cos(az)*np.sin(el),
+    unitvec = np.array([np.cos(az)*np.cos(el),
                         np.sin(az)*np.cos(el),
-                        np.cos(el)]) 
+                        np.sin(el)]) 
 
     attpInfixedFr = plpos + rn.rotate(plquat, attpoint) # attachment point in fixed frame
     uavpos = attpInfixedFr + length*unitvec 
@@ -92,8 +92,8 @@ def main():
         obsNum = 0
         for obstacle in obstacles:
             center = obstacle["center"]
-            radius = obstacle["radius"]
             if obstacle["type"] == "cylinder":
+                radius = obstacle["radius"]
                 height = obstacle["height"]
                 vis["obstacle"+str(obsNum)].set_object(g.Mesh(g.Cylinder(height, radius=radius)))
                 ai = np.pi/2
@@ -101,8 +101,14 @@ def main():
                 ak = 0
                 vis["obstacle"+str(obsNum)].set_transform(tf.translation_matrix(center).dot(tf.euler_matrix(ai, aj, ak)))
             elif obstacle["type"] == "sphere":
+                radius = obstacle["radius"]
                 vis["obstacle"+str(obsNum)].set_object(g.Mesh(g.Sphere(radius)))
                 vis["obstacle"+str(obsNum)].set_transform(tf.translation_matrix(center))
+            elif obstacle["type"] == "box":
+                size = obstacle["size"]
+                vis["obstacle"+str(obsNum)].set_object(g.Mesh(g.Box(size)))
+                vis["obstacle"+str(obsNum)].set_transform(tf.translation_matrix(center))
+
             obsNum+=1
     ## set objects for the uavs in a list
     uavsphere = []

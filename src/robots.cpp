@@ -172,6 +172,15 @@ Obstacles::Obstacles(const YAML::Node &env)
         co->setTranslation(fcl::Vector3f(center[0].as<float>(), center[1].as<float>(), center[2].as<float>()));
         co->computeAABB();
         obstacles.push_back(co);    
+    } else if (obs["type"].as<std::string>() == "box") {
+        std::shared_ptr<fcl::CollisionGeometryf> geom;
+        const auto &size = obs["size"];
+        geom.reset(new fcl::Boxf(size[0].as<float>(), size[1].as<float>(), size[2].as<float>()));
+        const auto &center = obs["center"];
+        auto co = new fcl::CollisionObjectf(geom);
+        co->setTranslation(fcl::Vector3f(center[0].as<float>(), center[1].as<float>(), center[2].as<float>()));
+        co->computeAABB();
+        obstacles.push_back(co);    
     }
   }
   obsmanager = new fcl::DynamicAABBTreeCollisionManagerf();
@@ -240,7 +249,7 @@ Eigen::Vector3f StateSpace::StateType::getunitvec(size_t cablenum) const
     auto el = as<ob::RealVectorStateSpace::StateType>(2)->values[1+2*cablenum];
     // azimuth and elevation --> unit vec
     // source https://math.stackexchange.com/questions/1150232/finding-the-unit-direction-vector-given-azimuth-and-elevation
-    Eigen::Vector3f unitvec(cos(az)*sin(el), sin(az)*cos(el), cos(el));    
+    Eigen::Vector3f unitvec(cos(az)*cos(el), sin(az)*cos(el), sin(el));    
     return unitvec;
 }
 
