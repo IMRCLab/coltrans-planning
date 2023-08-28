@@ -65,7 +65,7 @@ void RobotsWithPayload::addRobotParts(const plannerSettings& cfg)
     for (size_t i = 0; i < cfg.numofcables; ++i) 
     {
         std::shared_ptr<fcl::CollisionGeometryf> cablegeom;
-        cablegeom.reset(new fcl::Cylinderf(0.001, cfg.cablelengthVec[i]));
+        cablegeom.reset(new fcl::Cylinderf(0.001, cfg.cablelengthVec[i] - 0.01));
         auto cableco = new fcl::CollisionObjectf(cablegeom);
         cableco->setTranslation(fcl::Vector3f(0,0,0));
         cableco->computeAABB();
@@ -167,6 +167,15 @@ Obstacles::Obstacles(const YAML::Node &env)
         const auto &radius = obs["radius"];
         const auto &height = obs["height"];
         geom.reset(new fcl::Cylinderf(radius.as<float>(), height.as<float>()));
+        const auto &center = obs["center"];
+        auto co = new fcl::CollisionObjectf(geom);
+        co->setTranslation(fcl::Vector3f(center[0].as<float>(), center[1].as<float>(), center[2].as<float>()));
+        co->computeAABB();
+        obstacles.push_back(co);    
+    } else if (obs["type"].as<std::string>() == "box") {
+        std::shared_ptr<fcl::CollisionGeometryf> geom;
+        const auto &size = obs["size"];
+        geom.reset(new fcl::Boxf(size[0].as<float>(), size[1].as<float>(), size[2].as<float>()));
         const auto &center = obs["center"];
         auto co = new fcl::CollisionObjectf(geom);
         co->setTranslation(fcl::Vector3f(center[0].as<float>(), center[1].as<float>(), center[2].as<float>()));

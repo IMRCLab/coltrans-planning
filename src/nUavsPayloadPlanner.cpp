@@ -161,11 +161,17 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile, s
             YAML::Node obs = cfg.env[i];
             out<<"      - type: "<<obs["type"] <<"\n";   
             out<<"        center: "<< obs["center"]<<"\n";   
-            out<<"        radius: "<< obs["radius"] <<"\n";   
-            if (obs["type"].as<std::string>() == "cylinder") {
+            if (obs["type"].as<std::string>() == "sphere"){
+                out<<"        radius: "<< obs["radius"] <<"\n";   
+            } else if (obs["type"].as<std::string>() == "cylinder") {
+                out<<"        radius: "<< obs["radius"] <<"\n";   
                 out<<"        height: "<< obs["height"] <<"\n";   
+            } else if (obs["type"].as<std::string>() == "box") {
+                out<<"        size: "<< obs["size"] <<"\n";   
             }
         }
+        out<< "  - payload: "<< std::endl;
+        out <<"      - type: "<< cfg.payloadShape<< std::endl;
     }
     else 
     {
