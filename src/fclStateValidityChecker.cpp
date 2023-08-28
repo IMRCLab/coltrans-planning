@@ -34,7 +34,7 @@ bool fclStateValidityChecker::isValid(const ompl::base::State* state) const
   robots_->setPayloadTransformation(state, cfg_.payloadShape);
   auto cableNums = si_->getStateSpace()->as<StateSpace>()->getNumCables();
   for(size_t i = 0; i<cableNums; ++i) {
-    double length = cfg_.cablelengthVec[i]+0.001;
+    double length = cfg_.cablelengthVec[i];
     Eigen::Vector3f attachmentpoint(cfg_.attachmentpoints(0+3*i), cfg_.attachmentpoints(1+3*i), cfg_.attachmentpoints(2+3*i));
     robots_->setUAVTransformation(state, i, attachmentpoint, length);
     robots_->setCableTransformation(state, i, attachmentpoint, length);

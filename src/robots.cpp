@@ -65,7 +65,7 @@ void RobotsWithPayload::addRobotParts(const plannerSettings& cfg)
     for (size_t i = 0; i < cfg.numofcables; ++i) 
     {
         std::shared_ptr<fcl::CollisionGeometryf> cablegeom;
-        cablegeom.reset(new fcl::Cylinderf(0.001, cfg.cablelengthVec[i]));
+        cablegeom.reset(new fcl::Cylinderf(0.001, cfg.cablelengthVec[i] - 0.01));
         auto cableco = new fcl::CollisionObjectf(cablegeom);
         cableco->setTranslation(fcl::Vector3f(0,0,0));
         cableco->computeAABB();
