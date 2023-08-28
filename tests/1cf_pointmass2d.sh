@@ -14,6 +14,6 @@ then
 fi
 
 cd ../../../build
-./nUavsPayloadPlanner --input ../examples/1cf_pointmass2d/1cf_pointmass2d.yaml --output ../examples/1cf_pointmass2d/output.yaml --stats ../examples/1cf_pointmass2d/stats/$FILE
+./nUavsPayloadPlanner --input ../examples/1cfs_pointmass2d/1cfs_pointmass2d.yaml --output ../examples/1cfs_pointmass2d/output.yaml --stats ../examples/1cfs_pointmass2d/stats/$FILE
 cd ../scripts
-python3 visualize.py ../examples/1cf_pointmass2d/output.yaml pointmass
+python3 visualize.py ../examples/1cfs_pointmass2d/output.yaml pointmass
