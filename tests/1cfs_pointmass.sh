@@ -1,4 +1,4 @@
-cd ../examples/1cf_pointmass
+cd ../examples/1cfs_pointmass
 FOLDER=stats
 
 if [ ! -d $FOLDER ] 
