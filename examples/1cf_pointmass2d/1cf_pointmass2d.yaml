@@ -1,3 +1,4 @@
+## TODO: REMOVE THIS EXAMPLE
 plannerType: 'rrtstar'
 timelimit: 2.0
 numofcables: 1
@@ -11,6 +12,7 @@ environment:
       radius: 0.5
       height: 0.01
 payload:
+  # THE INITIAL GUESS IS BASED ON QUIM"S COORDINATES FOR 2D QUADPOLE EXAMPLE
   start: [0, 0, -1.25, 0, 0, 0,  1, 0,   3.14] # [xi, yi, zi, qwi,qxi,qyi,qzi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
   goal:  [0, 0,  1.25, 0, 0, 0,  1, 0, 0] # [xi, yi, zi, qwi,qxi,qyi,qzi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
   shape:
