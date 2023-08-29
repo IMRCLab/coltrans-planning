@@ -198,9 +198,11 @@ def main():
             for qc_, wc_ in zip(qc, wc): 
                 tmp.extend(qc_)
                 tmp.extend(wc_)
+            for i in range(num_of_cables):
                 tmp.extend(quat)
                 tmp.extend(w)
             finalState = [*pos.tolist(), *vel.tolist(), *tmp]
+            
             finalStates.append(finalState)
     output = {}
     output["feasible"] = 0
