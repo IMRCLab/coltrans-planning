@@ -7,16 +7,20 @@ class RobotsWithPayloadGoal : public ompl::base::GoalSampleableRegion
 {
 public:
     RobotsWithPayloadGoal(const ompl::base::SpaceInformationPtr &si, 
-    const ompl::base::SE3StateSpace::StateType& goal);
+    ompl::base::State* goal);
 
-    bool isSatisfied (const State *st) const override;
+    ~RobotsWithPayloadGoal() override;
+    // bool isSatisfied (const State *st) const override;
 
-    double distanceGoal (const State *st) const override;
+    double distanceGoal (const ompl::base::State *st) const override;
 
-    void sampleGoal (State *st) const override;
+    void sampleGoal (ompl::base::State *st) const override;
  
     unsigned int maxSampleCount () const override;
 
 private:
-    ompl::base::SE3StateSpace::StateType goal_;
+    // ompl::base::SE3StateSpace::StateType goal_;
+    ompl::base::State* goalState_;
+    ompl::base::State* tmpState_;
+    ompl::base::StateSamplerPtr sampler_;
 };

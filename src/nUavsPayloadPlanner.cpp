@@ -17,6 +17,7 @@
 #include "optimObj.h"
 #include "robots.h"
 #include "fclStateValidityChecker.h"
+#include "goal.h"
 
 namespace ob = ompl::base;
 namespace og = ompl::geometric;
@@ -48,13 +49,16 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile, s
     si->getStateSpace()->copyFromReals(goalState, eigentoStd(cfg.goal));
     si->enforceBounds(goalState);
 
-    auto space_goal(std::make_shared<StateSpace>(cfg.numofcables, /*cable_weight*/0.0));
-    space_goal->setPositionBounds(si->getStateSpace()->as<StateSpace>()->getPositionBounds());
-    space_goal->setCableBounds(si->getStateSpace()->as<StateSpace>()->getCableBounds());
-    auto si_goal(std::make_shared<ob::SpaceInformation>(space_goal));
-    si_goal->setup();
-    auto goal(std::make_shared<ob::GoalState>(si_goal));
-    goal->setState(goalState);
+    // auto space_goal(std::make_shared<StateSpace>(cfg.numofcables, /*cable_weight*/0.0));
+    // space_goal->setPositionBounds(si->getStateSpace()->as<StateSpace>()->getPositionBounds());
+    // space_goal->setCableBounds(si->getStateSpace()->as<StateSpace>()->getCableBounds());
+    // auto si_goal(std::make_shared<ob::SpaceInformation>(space_goal));
+    // si_goal->setup();
+    // auto goal(std::make_shared<ob::GoalState>(si_goal));
+    // goal->setState(goalState);
+
+    auto goal(std::make_shared<RobotsWithPayloadGoal>(si, goalState));
+    goal->setThreshold(0.01);
     pdef->setGoal(goal);
 
     // pdef->setGoalState(goalState);
