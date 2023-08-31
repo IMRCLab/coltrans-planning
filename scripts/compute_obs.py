@@ -31,10 +31,9 @@ def main():
         # Add new point to list if distance is greater than the tolerance
         if np.all(distances > tolerance):
             # Append new obstacle to the list
-            obstacles.append({'type': 'cylinder',
+            obstacles.append({'type': 'box',
                             'center': new_point.tolist(),
-                            'radius': 0.03,
-                            'height': 3.0})
+                            'size': [0.03,0.03, 3.0]})
             
             # Append new point to the list of points
             points = np.vstack((points, new_point))
@@ -43,8 +42,8 @@ def main():
     points = np.array(points)
     
     obstaclesdict = {'obstacles': obstacles}
-    obstacleYaml=open("obstacles.yaml","w")
-    yaml.dump(obstaclesdict, obstacleYaml, default_flow_style=True)
+    obstacleYaml=open("obstacles_final.yaml","w")
+    yaml.safe_dump(obstaclesdict, obstacleYaml, default_flow_style=None)
     obstacleYaml.close()
     print("YAML file saved.")
 
@@ -54,13 +53,12 @@ def main():
         obsNum = 0
         for obstacle in obstacles:
             center = obstacle["center"]
-            radius = obstacle["radius"]
-            height = obstacle["height"]
-            vis["obstacle"+str(obsNum)].set_object(g.Mesh(g.Cylinder(height, radius=radius)))
-            ai = np.pi/2
-            aj = 0 
-            ak = 0
-            vis["obstacle"+str(obsNum)].set_transform(tf.translation_matrix(center).dot(tf.euler_matrix(ai, aj, ak)))
+            size   = obstacle["size"]
+            vis["obstacle"+str(obsNum)].set_object(g.Mesh(g.Box(size)))
+            # ai = np.pi/2
+            # aj = 0 
+            # ak = 0
+            vis["obstacle"+str(obsNum)].set_transform(tf.translation_matrix(center))
             obsNum+=1
 
 if __name__ == "__main__":
