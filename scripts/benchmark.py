@@ -31,6 +31,26 @@ def run_geom(filename_env, folder, timelimit):
 	except Exception as e:
 		print(e)
 
+def run_init_guess(folder):
+	folder = Path(folder)
+	subprocess.run(["python3",
+		 "../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
+			"-cff", "-w",
+			"--out", folder / "init_guess.yaml"
+		 ], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"})
+
+def run_opt(filename_init, filename_env, folder, timelimit):
+	folder = Path(folder)
+	try:
+		with open(folder / "log.txt", 'w') as f:
+			out = subprocess.run(["./deps/dynoplan/main_optimization",
+						"--init_file", filename_init,
+						"--env_file", filename_env,
+						"--models_base_path", "../deps/dynoplan/dynobench/models/",
+						"--results_file", folder / "output"],
+						stdout=f, stderr=f, timeout=timelimit)
+	except Exception as e:
+		print(e)
 
 def execute_task(task: ExecutionTask):
 	results_path = Path("../results")
@@ -47,6 +67,9 @@ def execute_task(task: ExecutionTask):
 
 	if task.alg == "geom":
 		run_geom(str(env), str(result_folder), task.timelimit)
+	if task.alg == "opt":
+		run_init_guess(result_folder)
+		run_opt(result_folder / "init_guess.yaml", "../deps/dynoplan/dynobench/envs/quad3d_payload/quad3d_payload_one_obs/quad3d_payload_one_obs_0_2_pm_hard.yaml", str(result_folder), task.timelimit)
 
 def main():
 	parallel = True
@@ -55,6 +78,7 @@ def main():
 	]
 	algs = [
 		"geom",
+		"opt",
 	]
 	trials = 1
 	timelimit = 5*60
