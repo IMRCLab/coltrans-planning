@@ -38,6 +38,15 @@ def run_init_guess(folder):
 			"-cff", "-w",
 			"--out", folder / "init_guess.yaml"
 		 ], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"})
+	
+def run_visualizer(filename_env, filename_result, filename_output):
+	subprocess.run(["python3",
+		 "../deps/dynoplan/dynobench/utils/viewer/viewer_cli.py",
+		 	"--robot", "point",
+			"--env", str(filename_env),
+			"--result", str(filename_result),
+			"--output", str(filename_output)
+		 ])
 
 def run_opt(filename_init, filename_env, folder, timelimit):
 	folder = Path(folder)
@@ -69,6 +78,7 @@ def execute_task(task: ExecutionTask):
 		run_geom(str(env), str(result_folder), task.timelimit)
 	if task.alg == "opt":
 		run_init_guess(result_folder)
+		run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/quad3d_payload_one_obs/quad3d_payload_one_obs_0_2_pm_hard.yaml", result_folder / "init_guess.yaml", result_folder / "init_guess.html")
 		run_opt(result_folder / "init_guess.yaml", "../deps/dynoplan/dynobench/envs/quad3d_payload/quad3d_payload_one_obs/quad3d_payload_one_obs_0_2_pm_hard.yaml", str(result_folder), task.timelimit)
 
 def main():
