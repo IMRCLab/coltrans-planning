@@ -3,7 +3,7 @@ import yaml
 import argparse
 import rowan as rn
 import math as mt
-FREQUENCY = 10 #Hz
+FREQUENCY = 100 #Hz
 
 def derivative(vec, dt):
     dvec  =[[0,0,0]]
@@ -210,6 +210,7 @@ def main():
     output["result"] = {}
     output["result"]["states"] = finalStates
     output["result"]["actions"] = actions 
+    output["result"]["dt"] = dt
 
     if write:
         with open(args.out, 'w') as file:
