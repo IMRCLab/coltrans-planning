@@ -46,7 +46,7 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile, s
     auto goalState = si->allocState();
     si->getStateSpace()->copyFromReals(goalState, eigentoStd(cfg.goal));
     si->enforceBounds(goalState);
-    pdef->setGoalState(goalState);
+    pdef->setGoalState(goalState, 0.01);
     si->freeState(goalState);
 
     std::shared_ptr<ob::Planner> planner;
