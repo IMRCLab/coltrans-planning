@@ -31,18 +31,39 @@ def run_geom(filename_env, folder, timelimit):
 	except Exception as e:
 		print(e)
 
-def run_init_guess(folder):
+def gen_ref_init_guess(folder, flag):
+	folder = Path(folder)
+	if flag == "-r":
+		traj = "geom_ref_traj.yaml"
+		out = subprocess.run(["python3",
+			"../scripts/init_guess.py",
+			"--inp", folder / "output.yaml",
+			"--out", folder / traj,
+			"-w",
+			flag])
+
+	else: 
+		traj = "init_guess.yaml"
+	out = subprocess.run(["python3",
+			"../scripts/init_guess.py",
+			"--inp", folder / "output.yaml",
+			"--out", folder / traj,
+			"-w"])
+
+def run_controller(folder, reftrajectory, output):
 	folder = Path(folder)
 	subprocess.run(["python3",
 		 "../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
 			"-cff", "-w",
-			"--out", folder / "init_guess.yaml"
+			"--inp", folder / reftrajectory,
+			"--out", folder / output,
 		 ], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"})
 	
-def run_visualizer(filename_env, filename_result, filename_output):
+def run_visualizer(filename_env, reference_traj, filename_result, filename_output):
 	subprocess.run(["python3",
 		 "../deps/dynoplan/dynobench/utils/viewer/viewer_cli.py",
 		 	"--robot", "point",
+			"--ref", str(reference_traj),
 			"--env", str(filename_env),
 			"--result", str(filename_result),
 			"--output", str(filename_output)
@@ -75,11 +96,25 @@ def execute_task(task: ExecutionTask):
 	result_folder.mkdir(parents=True, exist_ok=False)
 
 	if task.alg == "geom":
+		# run_geom -> input:env output: output.yaml
 		run_geom(str(env), str(result_folder), task.timelimit)
+		# gen_ref_init_guess -> inp: output.yaml + "-r" , output: reference trajectory geom_ref_traj.yaml
+		gen_ref_init_guess(str(result_folder), "")
+		#run_controller -> input: reference trajecetory to be tracked (geom_init_guess.yaml), output: controller output (trajectory_geom.yaml)
+		run_controller(result_folder, "init_guess.yaml", "trajectory_geom.yaml")
+		# visualize: reference trajectory from the geometric planner, output of controller tracking the ref traj
+		run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/quad3d_payload_one_obs/quad3d_payload_one_obs_0_2_pm_hard.yaml",result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
+	
 	if task.alg == "opt":
-		run_init_guess(result_folder)
-		run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/quad3d_payload_one_obs/quad3d_payload_one_obs_0_2_pm_hard.yaml", result_folder / "init_guess.yaml", result_folder / "init_guess.html")
+		run_geom(str(env), str(result_folder), task.timelimit)
+		# gen_ref_init_guess -> inp: output.yaml, output: initial guess for optimizer
+		gen_ref_init_guess(str(result_folder), "")
+		# filename_init, filename_env, folder, timelimit
 		run_opt(result_folder / "init_guess.yaml", "../deps/dynoplan/dynobench/envs/quad3d_payload/quad3d_payload_one_obs/quad3d_payload_one_obs_0_2_pm_hard.yaml", str(result_folder), task.timelimit)
+		# run_controller -> input: reference trajecetory to be tracked (output.trajopt.yaml), output: controller output (trajectory_opt.yaml)
+		run_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml")
+		# filename_env, reference_traj, filename_result, filename_output
+		run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/quad3d_payload_one_obs/quad3d_payload_one_obs_0_2_pm_hard.yaml", result_folder / "output.trajopt.yaml", result_folder / "trajectory_opt.yaml", result_folder / "trajectory_opt.html")
 
 def main():
 	parallel = True
