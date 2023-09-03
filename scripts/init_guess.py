@@ -143,6 +143,9 @@ def main():
     parser.add_argument("--inp", type=str, help="yaml file for the table")
     parser.add_argument("--out", default=None,  type=str, help="yaml file for the table")
     parser.add_argument("-w", "--write", action="store_true")  # on/off flag: write yaml file
+    # on/off flag: if it's a reference trajecotry then it should be activated
+    # if it's an initial guess to the optimizer then it should be deactivated
+    parser.add_argument("-r", "--ref", action="store_true")  
 
     args = parser.parse_args()
     write = args.write
@@ -163,7 +166,7 @@ def main():
     p_load = np.asarray([state[0:3] for state in states])   
     # payload velocity 
     v_load = derivative(p_load, dt)
-
+    a_load = derivative(v_load, dt)
     # cables states
     cableSt = np.empty(3,)
     if payloadType == "sphere":
@@ -185,7 +188,7 @@ def main():
     finalStates = []
     actions = []
     oldStateRep = False
-    for i, (pos, vel, qc, wc) in enumerate(zip(p_load, v_load, qcs, cable_omegas)):
+    for i, (pos, vel, acc, qc, wc) in enumerate(zip(p_load, v_load, a_load, qcs, cable_omegas)):
         if i < len(v_load)-1:
             actions.append(np.ones(4*num_of_cables,).tolist())
         quat = [0,0,0,1]
@@ -201,8 +204,10 @@ def main():
             for i in range(num_of_cables):
                 tmp.extend(quat)
                 tmp.extend(w)
-            finalState = [*pos.tolist(), *vel.tolist(), *tmp]
-            
+            if args.ref:
+                finalState = [*pos.tolist(), *vel.tolist(), *acc.tolist(), *tmp]
+            else:
+                finalState = [*pos.tolist(), *vel.tolist(), *tmp]
             finalStates.append(finalState)
     output = {}
     output["feasible"] = 0
