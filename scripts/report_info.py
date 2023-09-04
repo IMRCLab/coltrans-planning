@@ -120,11 +120,8 @@ class Report:
             out += r"\end{tabular}" + "\n"
             out += r"\end{document}" 
             f.write(out)
-            # out = subprocess.run(["pdflatex", self.result_path / self.tableName], check=True)
+            subprocess.run(["pdflatex", self.tableName], check=True, cwd=self.result_path)
 
-            
     def plot_info(self, info):
-        
-
         pass
 
