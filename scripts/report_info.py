@@ -91,7 +91,6 @@ class Report:
             f.write("\n")
             out = r" "
             for instance in instances:    
-                print("INSTANCE: ", instance)          
                 if "_" in instance: 
                     instance_ = instance.replace("_", " ")
                 else: 
@@ -121,7 +120,7 @@ class Report:
             out += r"\end{tabular}" + "\n"
             out += r"\end{document}" 
             f.write(out)
-            out = subprocess.run(["pdflatex", self.result_path / self.tableName], check=True)
+            # out = subprocess.run(["pdflatex", self.result_path / self.tableName], check=True)
 
             
     def plot_info(self, info):
