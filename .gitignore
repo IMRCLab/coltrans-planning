@@ -7,3 +7,5 @@ stats/
 stat*dict*.yaml
 buildDebug/
 build_release
+results/
+

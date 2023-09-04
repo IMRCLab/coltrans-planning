@@ -1,3 +1,6 @@
 [submodule "deps/dynoplan"]
 	path = deps/dynoplan
 	url = git@github.com:IMRCLab/dynoplan.git
+[submodule "deps/crazyflie-firmware"]
+	path = deps/crazyflie-firmware
+	url = git@github.com:IMRCLab/crazyflie-firmware.git
