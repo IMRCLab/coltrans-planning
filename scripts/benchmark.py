@@ -122,23 +122,23 @@ def execute_task(task: ExecutionTask):
 def main():
 	parallel = True
 	instances = [
-		# "2cfs_pointmass",
+		"2cfs_pointmass",
 		"3cfs_pointmass"
 	]
 	envs = [
-		# "2robots.yaml",
+		"2robots.yaml",
 		"3robots.yaml"
 	]
 	num_robots = [
-		# 2,
+		2,
 		3
 	]
 	algs = [
-		# "geom",
+		"geom",
 		"opt",
 	]
 	trials = 1
-	timelimit = 5*300
+	timelimit = 5*100
 
 	tasks = []
 	for instance, env, num_robot in zip(instances, envs, num_robots):
@@ -155,6 +155,7 @@ def main():
 	else:
 		for task in tasks:
 			execute_task(task)
-	compute_errors(instances, algs, trials)
+	trials_ = ["00"+str(i) for i in range(trials)]
+	compute_errors(instances, algs, trials_)
 if __name__ == '__main__':
 	main()
