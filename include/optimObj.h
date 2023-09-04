@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ompl/base/OptimizationObjective.h>
+#include "robots.h"
 
 namespace ob = ompl::base;
 
@@ -8,11 +9,13 @@ namespace ob = ompl::base;
 class minCableObjective : public ob::OptimizationObjective
 {
 public:
-    minCableObjective(const ob::SpaceInformationPtr &si);
+    minCableObjective(const ob::SpaceInformationPtr &si, const plannerSettings& cfg);
 
     ob::Cost motionCost(const ob::State *s1, const ob::State *s2) const override;
     ob::Cost stateCost(const ob::State*) const override;
 
 protected:
     float requiredForceMagnitude(const ob::State* s) const;
+
+    const plannerSettings cfg_;
 };

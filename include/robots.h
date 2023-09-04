@@ -90,13 +90,16 @@ public:
         Eigen::Vector3f getAttPointInFixedFrame(Eigen::Vector3f& attachmentPoint) const;
     };
 
-    StateSpace(size_t numCables);
+    StateSpace(size_t numCables, double cable_weight = 1.0);
     ~StateSpace() override = default;
 
     size_t getNumCables() const;
     void setPositionBounds(const ob::RealVectorBounds &bounds);
-    void setCableBounds(const ob::RealVectorBounds &bounds);
     const ob::RealVectorBounds &getPositionBounds() const;
+    
+    void setCableBounds(const ob::RealVectorBounds &bounds);
+    const ob::RealVectorBounds &getCableBounds() const;
+
     ob::State *allocState() const override;
     void freeState(ob::State *state) const override;
     void registerProjections();

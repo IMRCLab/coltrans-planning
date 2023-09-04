@@ -23,7 +23,7 @@ def main():
     runs = [compute_stats[filename]['runs'] for filename in compute_stats.keys() if compute_stats[filename]['enable'] == True]
     
     statsdict = dict()
-
+    solveProb = False
     ## This part is responsible to set some values in the config files of each number of robots based on compute_stats.yaml
     ## For forest problem: it  is responsible to generate the forest environment with random obstacles
             # it makes sure that the obstacle is not centered at start or goal
@@ -60,7 +60,7 @@ def main():
 
                 # forestcfg['payload']['start'] = 
                 forestfile=open("../examples/forest/"+str(yamlnum)+"cfs.yaml","w")
-                yaml.dump(forestcfg,forestfile, default_flow_style=True)
+                yaml.safe_dump(forestcfg,forestfile, default_flow_style=None)
                 forestfile.close()
         
         else:
@@ -86,59 +86,59 @@ def main():
                 if problem == 'maze':
                     problemcfg['environment']['obstacles'] = compute_stats[problem]["environment"]['obstacles']
                 problemfile=open("../examples/"+problem+"/"+str(yamlnum)+"cfs.yaml","w")
-                yaml.dump(problemcfg,problemfile, default_flow_style=True)
+                yaml.safe_dump(problemcfg,problemfile, default_flow_style=None)
                 problemfile.close()
 
+    if solveProb: 
+        # start worker processes
+        all_settings = []
+        problem_num = 0
+        for file, yamlDir in zip(files, yamlDirs):
+            for yamlnum in yamlnums:
+                for run in range(runs[problem_num]):
+                    all_settings.append((file, yamlnum, run))
+            problem_num+=1
 
-    # start worker processes
-    all_settings = []
-    problem_num = 0
-    for file, yamlDir in zip(files, yamlDirs):
-        for yamlnum in yamlnums:
-            for run in range(runs[problem_num]):
-                all_settings.append((file, yamlnum, run))
-        problem_num+=1
+        with Pool(processes=32) as pool:
+            for i in pool.imap_unordered(run_exp, all_settings):
+                pass
 
-    with Pool(processes=32) as pool:
-        for i in pool.imap_unordered(run_exp, all_settings):
-            pass
+        # collect some stats
+        problem_num = 0
+        for file, yamlDir in zip(files, yamlDirs):
+            statsdict.update({file: {}})
 
-    # collect some stats
-    problem_num = 0
-    for file, yamlDir in zip(files, yamlDirs):
-        statsdict.update({file: {}})
+            for yamlnum in yamlnums:
+                statsdict[file].update({yamlnum : {}})
+                avcost = 0
+                avtime = 0
+                successRuns = 0
+                initcosts = []
+                inittimes = []
+                for run in range(runs[problem_num]):    
+                    print(run) 
+                    statsdict[file][yamlnum].update({run: {}})
+                    # print('Solving: '  + str(yamlnum) + " " + file)
+                    # subprocess.run(['../tests/./' + file + " " +str(yamlnum) + " " + str(yamlnum) + " " + str(run)], shell=True)
+                    # print('Completed '  + str(yamlnum) + " " + file)
+                    print('add stats in dict')
+                    with open("../examples/"+yamlDir+"/run"+str(run)+"/ompl_stats"+str(yamlnum)+'.yaml') as stats_file:
+                        stats_ = yaml.load(stats_file, Loader=yaml.FullLoader)
+                    if stats_['stats'] != None:
+                        statsdict[file][yamlnum][run].update({'stats' : stats_['stats']})
+                        successRuns+=1
+                        initcosts.append(statsdict[file][yamlnum][run]['stats'][0]['cost'])
+                        inittimes.append(statsdict[file][yamlnum][run]['stats'][0]['t'])
+                if successRuns > 0:
+                    statsdict[file][yamlnum].update({'initcosts' : initcosts})
+                    statsdict[file][yamlnum].update({'inittimes' : inittimes})
+                    statsdict[file][yamlnum].update({'successRuns' : successRuns})
+            problem_num+=1
 
-        for yamlnum in yamlnums:
-            statsdict[file].update({yamlnum : {}})
-            avcost = 0
-            avtime = 0
-            successRuns = 0
-            initcosts = []
-            inittimes = []
-            for run in range(runs[problem_num]):    
-                print(run) 
-                statsdict[file][yamlnum].update({run: {}})
-                # print('Solving: '  + str(yamlnum) + " " + file)
-                # subprocess.run(['../tests/./' + file + " " +str(yamlnum) + " " + str(yamlnum) + " " + str(run)], shell=True)
-                # print('Completed '  + str(yamlnum) + " " + file)
-                print('add stats in dict')
-                with open("../examples/"+yamlDir+"/run"+str(run)+"/ompl_stats"+str(yamlnum)+'.yaml') as stats_file:
-                    stats_ = yaml.load(stats_file, Loader=yaml.FullLoader)
-                if stats_['stats'] != None:
-                    statsdict[file][yamlnum][run].update({'stats' : stats_['stats']})
-                    successRuns+=1
-                    initcosts.append(statsdict[file][yamlnum][run]['stats'][0]['cost'])
-                    inittimes.append(statsdict[file][yamlnum][run]['stats'][0]['t'])
-            if successRuns > 0:
-                statsdict[file][yamlnum].update({'initcosts' : initcosts})
-                statsdict[file][yamlnum].update({'inittimes' : inittimes})
-                statsdict[file][yamlnum].update({'successRuns' : successRuns})
-        problem_num+=1
-
-        statdictFile=open("statdict.yaml","w")
-        yaml.dump(statsdict,statdictFile)
-        statdictFile.close()
-        print("YAML file saved.")
+            statdictFile=open("statdict.yaml","w")
+            yaml.dump(statsdict,statdictFile)
+            statdictFile.close()
+            print("YAML file saved.")
 
 if __name__ == "__main__": 
     main()

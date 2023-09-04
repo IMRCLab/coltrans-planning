@@ -1,10 +1,10 @@
 forest:
-  enable: False
+  enable: true
   path: 'forest.sh'
   yamldir: 'forest/stats'
   runs: 10
   rangeofRobots: [3, 4, 5, 6, 7, 8]
-  timelimits: [850, 850, 850, 850, 850, 850, 850]
+  timelimits: [30, 30, 30, 30, 30, 30, 30]
   environment:
     min: [-0.6, -1.0, -0.1]
     max: [4, 1.0, 1]
@@ -12,32 +12,30 @@ forest:
   goal: [3.5, 0, 0] 
 
 maze: 
-  enable: False
+  enable: true
   path: 'maze.sh'
   yamldir: 'maze/stats'
   runs: 10
   rangeofRobots: [3, 4, 5, 6, 7, 8]
-  timelimits: [850, 850, 850, 850, 850, 850, 850]
+  timelimits: [30, 30, 30, 30, 30, 30, 30]
   environment:
     min: [-0.6, -0.5, -0.1]
     max: [4, 0.5, 1]
     obstacles:
-    - type: cylinder
+    - type: box
       center: [0.5, 0.5, 0.0]
-      radius: 0.2
-      height: 3.0
-    - type: cylinder
+      size:   [0.2, 0.2, 3.]
+    - type: box
       center: [0.5, -0.5, 0.0]
-      radius: 0.2
-      height: 3.0
+      size:   [0.2, 0.2, 3.]
 
 empty:
-  enable: True
+  enable: true
   path: 'empty.sh'
   yamldir: 'empty/stats'
   runs: 10
   rangeofRobots: [3,4, 5, 6, 7, 8]
-  timelimits: [600, 600, 600, 600, 600, 600, 600]
+  timelimits: [30, 30, 30, 30, 30, 30, 30]
   environment:
     min: [-0.6, -1.0, -0.1]
     max: [4, 1.0, 1]
