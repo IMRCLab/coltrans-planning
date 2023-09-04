@@ -15,6 +15,8 @@ class ExecutionTask:
 	# cfg: Path
 	# result_folder: Path
 	instance: str
+	env: str
+	num_robot: int
 	alg: str
 	trial: int
 	timelimit: float
@@ -50,13 +52,14 @@ def gen_ref_init_guess(folder, flag):
 			"--out", folder / traj,
 			"-w"])
 
-def run_controller(folder, reftrajectory, output):
+def run_controller(folder, reftrajectory, output, num_robot):
 	folder = Path(folder)
 	subprocess.run(["python3",
 		 "../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
 			"-cff", "-w",
 			"--inp", folder / reftrajectory,
 			"--out", folder / output,
+			"--num_robots", str(num_robot),
 		 ], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"})
 	
 def run_visualizer(filename_env, reference_traj, filename_result, filename_output):
@@ -101,38 +104,47 @@ def execute_task(task: ExecutionTask):
 		# gen_ref_init_guess -> inp: output.yaml + "-r" , output: reference trajectory geom_ref_traj.yaml
 		gen_ref_init_guess(str(result_folder), "")
 		#run_controller -> input: reference trajecetory to be tracked (geom_init_guess.yaml), output: controller output (trajectory_geom.yaml)
-		run_controller(result_folder, "init_guess.yaml", "trajectory_geom.yaml")
+		run_controller(result_folder, "init_guess.yaml", "trajectory_geom.yaml", task.num_robot)
 		# visualize: reference trajectory from the geometric planner, output of controller tracking the ref traj
-		run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/quad3d_payload_one_obs/quad3d_payload_one_obs_0_2_pm_hard.yaml",result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
+		run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env ,result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
 	
 	if task.alg == "opt":
 		run_geom(str(env), str(result_folder), task.timelimit)
 		# gen_ref_init_guess -> inp: output.yaml, output: initial guess for optimizer
 		gen_ref_init_guess(str(result_folder), "")
 		# filename_init, filename_env, folder, timelimit
-		run_opt(result_folder / "init_guess.yaml", "../deps/dynoplan/dynobench/envs/quad3d_payload/quad3d_payload_one_obs/quad3d_payload_one_obs_0_2_pm_hard.yaml", str(result_folder), task.timelimit)
+		run_opt(result_folder / "init_guess.yaml", "../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, str(result_folder), task.timelimit)
 		# run_controller -> input: reference trajecetory to be tracked (output.trajopt.yaml), output: controller output (trajectory_opt.yaml)
-		run_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml")
+		run_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml", task.num_robot)
 		# filename_env, reference_traj, filename_result, filename_output
-		run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/quad3d_payload_one_obs/quad3d_payload_one_obs_0_2_pm_hard.yaml", result_folder / "output.trajopt.yaml", result_folder / "trajectory_opt.yaml", result_folder / "trajectory_opt.html")
+		run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, result_folder / "output.trajopt.yaml", result_folder / "trajectory_opt.yaml", result_folder / "trajectory_opt.html")
 
 def main():
 	parallel = True
 	instances = [
 		"2cfs_pointmass",
+		"3cfs_pointmass"
+	]
+	envs = [
+		"2robots.yaml",
+		"3robots.yaml"
+	]
+	num_robots = [
+		2,
+		3
 	]
 	algs = [
 		"geom",
 		"opt",
 	]
 	trials = 1
-	timelimit = 5*60
+	timelimit = 5*100
 
 	tasks = []
-	for instance in instances:
+	for instance, env, num_robot in zip(instances, envs, num_robots):
 		for alg in algs:
 			for trial in range(trials):
-				tasks.append(ExecutionTask(instance, alg, trial, timelimit))
+				tasks.append(ExecutionTask(instance, env, num_robot, alg, trial, timelimit))
 
 	if parallel and len(tasks) > 1:
 		use_cpus = psutil.cpu_count(logical=False)-1
@@ -143,6 +155,6 @@ def main():
 	else:
 		for task in tasks:
 			execute_task(task)
-
+	compute_errors(instances, algs, trials)
 if __name__ == '__main__':
 	main()
