@@ -1,8 +1,8 @@
 #include "optimObj.h"
-#include "robots.h"
 
-minCableObjective::minCableObjective(const ob::SpaceInformationPtr &si) :
+minCableObjective::minCableObjective(const ob::SpaceInformationPtr &si, const plannerSettings& cfg) :
     ob::OptimizationObjective(si)
+    , cfg_(cfg)
     {}
 
 float minCableObjective::requiredForceMagnitude(const ob::State* s) const
@@ -26,11 +26,28 @@ ob::Cost minCableObjective::motionCost(const ob::State *s1, const ob::State *s2)
 
     auto st1 = s1->as<StateSpace::StateType>();
     auto st2 = s2->as<StateSpace::StateType>();
-    Eigen::Vector3f pos1 = st1->getPayloadPos();
-    Eigen::Vector3f pos2 = st2->getPayloadPos();
-    float distance = (pos1 - pos2).norm();
 
-    float c = (E1+E2)/2 * distance;
+    // compute 
+    Eigen::Vector3f pos1(0,0,0);
+    Eigen::Vector3f pos2(0,0,0);
+    size_t num_cables = si_->getStateSpace()->as<StateSpace>()->getNumCables();
+    for(size_t i = 0; i<num_cables; ++i) {
+        double length = cfg_.cablelengthVec[i];
+        Eigen::Vector3f attachmentPoint(cfg_.attachmentpoints(0+3*i), cfg_.attachmentpoints(1+3*i), cfg_.attachmentpoints(2+3*i));
+        pos1 += st1->getuavPos(i, attachmentPoint, length);
+        pos2 += st2->getuavPos(i, attachmentPoint, length);
+    }
+    pos1 /= num_cables;
+    pos2 /= num_cables;
+    float distance_uavs = (pos1 - pos2).norm();
+
+    pos1 = st1->getPayloadPos();
+    pos2 = st2->getPayloadPos();
+    float distance_payload = (pos1 - pos2).norm();
+
+    const float alpha = 0.5;
+
+    float c = (E1+E2)/2 * (alpha * distance_payload + (1-alpha) * distance_uavs);
     return ob::Cost(c);
 }
 
