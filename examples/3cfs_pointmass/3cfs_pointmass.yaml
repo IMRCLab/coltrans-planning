@@ -1,10 +1,10 @@
 plannerType: 'rrtstar'
-timelimit: 300.0
+timelimit: 10.0
 numofcables: 3
 interpolate: 1000
 environment:
-  min: [-1, -1.2, -0.1]
-  max: [2,   1.2,  2]
+  min: [-0.8, -0.8,  0.0]
+  max: [ 2.5,  2.5,  1.0]
   obstacles:
     - type: box
       center: [0.5, 0., 0.0]
