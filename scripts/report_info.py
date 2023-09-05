@@ -79,13 +79,13 @@ class Report:
 
             out = r"\begin{tabular}{l||" # instances
             for _ in algs:
-                out += r"c|" # algorithms
+                out += r"cc|" # algorithms
             out += "}\n"
             f.write(out)
 
             out = r" "
             for alg in algs:
-                out += r"&{}".format(alg)
+                out += r"&{} tracking &{} energy".format(alg, alg)
             out += r"\\ \hline"
             f.write(out)
             f.write("\n")
@@ -99,6 +99,7 @@ class Report:
 
                 for alg in algs:
                     ep_trials = []
+                    energy_trials = []
                     for trial in trials:
                         filepath = self.result_path / instance / alg / trial / "info.yaml"
                         if filepath.exists():
@@ -106,14 +107,18 @@ class Report:
                                 info = yaml.safe_load(file)
                             ep_norm = np.linalg.norm(info["result"]["error_pos"], axis=1)
                             ep_trials.extend(ep_norm.tolist())
+
+                            energy = np.sum(info["result"]["actions_act"], axis=1)
+                            energy_trials.extend(energy.tolist())
                         else: 
                             ep_trials = [np.nan for i in range(1000)]
                     ep_trials = np.array(ep_trials)
+                    energy_trials = np.array(energy_trials)
 
                     ep_mean = np.nanmean(ep_trials, axis=0)
                     ep_std = np.nanstd(ep_trials, axis=0)
 
-                    out += r"&{:.2f} \color{{gray}} \tiny {:.2f} ".format(ep_mean, ep_std)     
+                    out += r"&{:.2f} \color{{gray}} \tiny {:.2f} & {:.2f}".format(ep_mean, ep_std, np.sum(energy_trials))     
             
                 out += r"\\" + "\n"
                 out += r"\hline"
