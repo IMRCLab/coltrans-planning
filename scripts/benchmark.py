@@ -33,35 +33,44 @@ def run_geom(filename_env, folder, timelimit):
 	except Exception as e:
 		print(e)
 
-def gen_ref_init_guess(folder, flag):
+def gen_ref_init_guess(folder, flag, envName=None):
 	folder = Path(folder)
-	if flag == "-r":
-		traj = "geom_ref_traj.yaml"
+	traj = "init_guess.yaml"
+	if envName is not None:
 		out = subprocess.run(["python3",
-			"../scripts/init_guess.py",
-			"--inp", folder / "output.yaml",
-			"--out", folder / traj,
-			"-w",
-			flag])
-
+				"../scripts/init_guess.py",
+				"--inp", folder / "output.yaml",
+				"--out", folder / traj,
+				"--envName", envName,
+				"-w"])
 	else: 
-		traj = "init_guess.yaml"
-	out = subprocess.run(["python3",
-			"../scripts/init_guess.py",
-			"--inp", folder / "output.yaml",
-			"--out", folder / traj,
-			"-w"])
+		out = subprocess.run(["python3",
+		"../scripts/init_guess.py",
+		"--inp", folder / "output.yaml",
+		"--out", folder / traj,
+		"-w"])
 
-def run_controller(folder, reftrajectory, output, num_robot):
+def run_controller(folder, reftrajectory, output, num_robot, computeAcc=False):
 	folder = Path(folder)
-	subprocess.run(["python3",
-		 "../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
-			"-cff", "-w",
-			"--inp", folder / reftrajectory,
-			"--out", folder / output,
-			"--num_robots", str(num_robot),
-		 ], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"})
+	print("ACC: ", computeAcc)
+	if computeAcc:
+		subprocess.run(["python3",
+			"../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
+				"-cff", "-w", "-a",
+				"--inp", folder / reftrajectory,
+				"--out", folder / output,
+				"--num_robots", str(num_robot),
+			], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"})
+	else: 
+		subprocess.run(["python3",
+			"../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
+				"-cff", "-w",
+				"--inp", folder / reftrajectory,
+				"--out", folder / output,
+				"--num_robots", str(num_robot),
+			], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"})
 	
+
 def run_visualizer(filename_env, reference_traj, filename_result, filename_output):
 	subprocess.run(["python3",
 		 "../deps/dynoplan/dynobench/utils/viewer/viewer_cli.py",
@@ -88,8 +97,8 @@ def run_opt(filename_init, filename_env, folder, timelimit):
 def execute_task(task: ExecutionTask):
 	results_path = Path("../results")
 	# tuning_path = Path("../tuning")
-	env_path = Path().resolve() / "../examples"
-	env = (env_path / task.instance / task.instance).with_suffix(".yaml")
+	env_path = Path().resolve() / "../examples/benchmark"
+	env = (env_path / task.instance).with_suffix(".yaml")
 	assert(env.is_file())
 
 	result_folder = results_path / task.instance / task.alg / "{:03d}".format(task.trial)
@@ -111,34 +120,75 @@ def execute_task(task: ExecutionTask):
 	if task.alg == "opt":
 		run_geom(str(env), str(result_folder), task.timelimit)
 		# gen_ref_init_guess -> inp: output.yaml, output: initial guess for optimizer
-		gen_ref_init_guess(str(result_folder), "")
+		gen_ref_init_guess(str(result_folder), "", envName="../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env)
 		# filename_init, filename_env, folder, timelimit
 		run_opt(result_folder / "init_guess.yaml", "../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, str(result_folder), task.timelimit)
 		# run_controller -> input: reference trajecetory to be tracked (output.trajopt.yaml), output: controller output (trajectory_opt.yaml)
-		run_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml", task.num_robot)
+		run_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml", task.num_robot, computeAcc=True)
 		# filename_env, reference_traj, filename_result, filename_output
 		run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, result_folder / "output.trajopt.yaml", result_folder / "trajectory_opt.yaml", result_folder / "trajectory_opt.html")
 
 def main():
 	parallel = True
 	instances = [
-		"2cfs_pointmass",
-		"3cfs_pointmass"
+	
+	"empty_2robots",
+    "empty_3robots",
+    "empty_4robots",
+    "empty_5robots",
+    "empty_6robots",
+    "forest_2robots",
+    "forest_3robots",
+    "forest_4robots",
+    "forest_5robots",
+    "forest_6robots",
+    "maze_2robots",
+    "maze_3robots",
+    "maze_4robots",
+    "maze_5robots",
+    "maze_6robots",	
+	
 	]
 	envs = [
-		"2robots.yaml",
-		"3robots.yaml"
+	"empty_2robots.yaml",
+    "empty_3robots.yaml",
+    "empty_4robots.yaml",
+    "empty_5robots.yaml",
+    "empty_6robots.yaml",
+    "forest_2robots.yaml",
+    "forest_3robots.yaml",
+    "forest_4robots.yaml",
+    "forest_5robots.yaml",
+    "forest_6robots.yaml",
+    "maze_2robots.yaml",
+    "maze_3robots.yaml",
+    "maze_4robots.yaml",
+    "maze_5robots.yaml",
+    "maze_6robots.yaml",
 	]
 	num_robots = [
 		2,
-		3
+		3,
+		4,
+		5,
+		6,
+		2,
+		3,
+		4,
+		5,
+		6,
+		2,
+		3,
+		4,
+		5,
+		6
 	]
 	algs = [
 		"geom",
 		"opt",
 	]
 	trials = 1
-	timelimit = 5*100
+	timelimit = 5*150
 
 	tasks = []
 	for instance, env, num_robot in zip(instances, envs, num_robots):
