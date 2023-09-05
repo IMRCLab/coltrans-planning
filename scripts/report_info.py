@@ -69,7 +69,7 @@ class Report:
 
     def genandwriteTable(self, instances, algs, trials):
 
-        with open(self.result_path /self.tableName, "w") as f:
+        with open(self.result_path / self.tableName, "w") as f:
             f.write(r"\documentclass{standalone}")
             f.write("\n")
             f.write(r"\usepackage{xcolor}")
@@ -120,7 +120,7 @@ class Report:
             out += r"\end{tabular}" + "\n"
             out += r"\end{document}" 
             f.write(out)
-            subprocess.run(["pdflatex", self.tableName], check=True, cwd=self.result_path)
+        subprocess.run(["pdflatex", self.tableName], check=True, cwd=self.result_path)
 
     def plot_info(self, info):
         pass
