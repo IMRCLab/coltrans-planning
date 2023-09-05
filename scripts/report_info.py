@@ -95,7 +95,7 @@ class Report:
                     instance_ = instance.replace("_", " ")
                 else: 
                     instance_ = instance
-                out += r"{}".format(instance_)
+                out += r" {}".format(instance_)
 
                 for alg in algs:
                     ep_trials = []

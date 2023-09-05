@@ -132,8 +132,8 @@ def polartovector(cablestate):
     el = cablestate[1]
     # azimuth and elevation --> unit vec
     # source https://math.stackexchange.com/questions/1150232/finding-the-unit-direction-vector-given-azimuth-and-elevation
-    unitvec = [mt.cos(az)*mt.cos(el),
-                mt.sin(az)*mt.cos(el),
+    unitvec = [-mt.cos(az)*mt.cos(el),
+                -mt.sin(az)*mt.cos(el),
                 -mt.sin(el)]
     return unitvec
 
@@ -142,7 +142,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--inp", type=str, help="yaml file for the table")
     parser.add_argument("--out", default=None,  type=str, help="yaml file for the table")
+    parser.add_argument("--envName", default=None,  type=str, help="yaml file for the table")
     parser.add_argument("-w", "--write", action="store_true")  # on/off flag: write yaml file
+    # parser.add_argument("-e", "--writeEnv", action="store_true")  # on/off flag: write yaml file
     # on/off flag: if it's a reference trajecotry then it should be activated
     # if it's an initial guess to the optimizer then it should be deactivated
     parser.add_argument("-r", "--ref", action="store_true")  
@@ -220,6 +222,21 @@ def main():
     if write:
         with open(args.out, 'w') as file:
             yaml.safe_dump(output, file, default_flow_style=None)
+
+    print("ENVNAME: ", args.envName)
+    if args.envName is not None:
+        
+        opt_env_path = "../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/"
+        start = finalStates[0]
+        goal = finalStates[-1]
+
+        with open(args.envName, "r") as env_file:
+            env_ = yaml.safe_load(env_file)
+        env_["robots"][0]["start"] = start
+        env_["robots"][0]["goal"] = goal
+        with open(args.envName, "w") as env_file:
+            yaml.safe_dump(env_, env_file, default_flow_style=None)
+    
 
 if __name__ == "__main__":
     main()
