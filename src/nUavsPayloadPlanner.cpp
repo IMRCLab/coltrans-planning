@@ -204,6 +204,7 @@ int main(int argc, char* argv[])
     
     // Declare the supported options.
     po::options_description desc("Allowed options");
+    float timelimit;
     std::string inputFile;
     std::string outputFile;
     std::string statsFile;
@@ -212,6 +213,7 @@ int main(int argc, char* argv[])
         ("help", "produce help message")
         ("input,i", po::value<std::string>(&inputFile)->required(), "input file (yaml)")
         ("output,o", po::value<std::string>(&outputFile)->required(), "output file (yaml)")
+        ("timelimit", po::value<float>(&timelimit)->default_value(300), "input file (yaml)")
         ("stats", po::value<std::string>(&statsFile)->default_value("ompl_stats.yaml"), "output file (yaml)");
 
     try {
@@ -234,7 +236,7 @@ int main(int argc, char* argv[])
     // planner type
     cfg.plannerType = configFile["plannerType"].as<std::string>();
     // timelimit to find a solution
-    cfg.timelimit = configFile["timelimit"].as<float>();
+    cfg.timelimit = timelimit;
 
     // payload shape
     cfg.payloadShape = configFile["payload"]["shape"]["type"].as<std::string>();

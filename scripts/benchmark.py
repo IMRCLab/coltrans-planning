@@ -26,11 +26,12 @@ def run_geom(filename_env, folder, timelimit):
 	folder = Path(folder)
 	try:
 		with open(folder / "log.txt", 'w') as f:
-			out = subprocess.run(["./nUavsPayloadPlanner",
+			subprocess.run(["./nUavsPayloadPlanner",
 						"--input", filename_env,
 						"--output", folder / "output.yaml",
-						"--stats" , folder / "stats.yaml"],
-						stdout=f, stderr=f, timeout=timelimit)
+						"--stats" , folder / "stats.yaml",
+						"--timelimit", str(timelimit)],
+						stdout=f, stderr=f)
 	except Exception as e:
 		print(e)
 
@@ -38,22 +39,21 @@ def gen_ref_init_guess(folder, flag, envName=None):
 	folder = Path(folder)
 	traj = "init_guess.yaml"
 	if envName is not None:
-		out = subprocess.run(["python3",
-				"../scripts/init_guess.py",
-				"--inp", folder / "output.yaml",
-				"--out", folder / traj,
-				"--envName", envName,
-				"-w"])
+		subprocess.run(["python3",
+			"../scripts/init_guess.py",
+			"--inp", folder / "output.yaml",
+			"--out", folder / traj,
+			"--envName", envName,
+			"-w"])
 	else: 
-		out = subprocess.run(["python3",
-		"../scripts/init_guess.py",
-		"--inp", folder / "output.yaml",
-		"--out", folder / traj,
-		"-w"])
+		subprocess.run(["python3",
+			"../scripts/init_guess.py",
+			"--inp", folder / "output.yaml",
+			"--out", folder / traj,
+			"-w"])
 
 def run_controller(folder, reftrajectory, output, num_robot, computeAcc=False):
 	folder = Path(folder)
-	print("ACC: ", computeAcc)
 	if computeAcc:
 		subprocess.run(["python3",
 			"../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
@@ -86,12 +86,12 @@ def run_opt(filename_init, filename_env, folder, timelimit):
 	folder = Path(folder)
 	try:
 		with open(folder / "log.txt", 'w') as f:
-			out = subprocess.run(["./deps/dynoplan/main_optimization",
-						"--init_file", filename_init,
-						"--env_file", filename_env,
-						"--models_base_path", "../deps/dynoplan/dynobench/models/",
-						"--results_file", folder / "output"],
-						stdout=f, stderr=f, timeout=timelimit)
+			subprocess.run(["./deps/dynoplan/main_optimization",
+				"--init_file", filename_init,
+				"--env_file", filename_env,
+				"--models_base_path", "../deps/dynoplan/dynobench/models/",
+				"--results_file", folder / "output"],
+				stdout=f, stderr=f, timeout=timelimit)
 	except Exception as e:
 		print(e)
 
@@ -189,7 +189,7 @@ def main():
 		"opt",
 	]
 	trials = 1
-	timelimit_geom = 300 # TODO, this is also hardcoded in the C++ code
+	timelimit_geom = 300
 	timelimit_opt = 15*60
 	max_cpus = 8 # limit the number of CPUs due to high memory usage
 
