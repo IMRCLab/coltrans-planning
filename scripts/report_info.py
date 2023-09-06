@@ -99,7 +99,7 @@ class Report:
 
                 for alg in algs:
                     ep_trials = []
-                    energy_trials = []
+                    power_trials = []
                     for trial in trials:
                         filepath = self.result_path / instance / alg / trial / "info.yaml"
                         if filepath.exists():
@@ -108,17 +108,23 @@ class Report:
                             ep_norm = np.linalg.norm(info["result"]["error_pos"], axis=1)
                             ep_trials.extend(ep_norm.tolist())
 
-                            energy = np.sum(info["result"]["actions_act"], axis=1)
-                            energy_trials.extend(energy.tolist())
+                            normalized_force = np.sum(info["result"]["actions_act"], axis=1)
+                            force = normalized_force * 34 / 4 # in grams
+                            # see https://wiki.bitcraze.io/misc:investigations:thrust
+                            # and https://github.com/IMRCLab/crazyflie-system-id
+                            power = force / 4 # watts
+                            power_trials.extend(power.tolist())
                         else: 
                             ep_trials = [np.nan for i in range(1000)]
                     ep_trials = np.array(ep_trials)
-                    energy_trials = np.array(energy_trials)
+                    power_trials = np.array(power_trials)
 
                     ep_mean = np.nanmean(ep_trials, axis=0)
                     ep_std = np.nanstd(ep_trials, axis=0)
 
-                    out += r"&{:.2f} \color{{gray}} \tiny {:.2f} & {:.2f}".format(ep_mean, ep_std, np.sum(energy_trials))     
+                    energy = np.sum(power_trials)*0.01/60/60 # Wh
+
+                    out += r"&{:.2f} \color{{gray}} \tiny {:.2f} & {:.2f}".format(ep_mean, ep_std, energy)
             
                 out += r"\\" + "\n"
                 out += r"\hline"
