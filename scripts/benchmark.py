@@ -31,7 +31,7 @@ def run_geom(filename_env, folder, timelimit):
 						"--output", folder / "output.yaml",
 						"--stats" , folder / "stats.yaml",
 						"--timelimit", str(timelimit)],
-						stdout=f, stderr=f)
+						stdout=f, stderr=f, check=True)
 	except Exception as e:
 		print(e)
 
@@ -44,13 +44,13 @@ def gen_ref_init_guess(folder, flag, envName=None):
 			"--inp", folder / "output.yaml",
 			"--out", folder / traj,
 			"--envName", envName,
-			"-w"])
+			"-w"], check=True)
 	else: 
 		subprocess.run(["python3",
 			"../scripts/init_guess.py",
 			"--inp", folder / "output.yaml",
 			"--out", folder / traj,
-			"-w"])
+			"-w"], check=True)
 
 def run_controller(folder, reftrajectory, output, num_robot, computeAcc=False):
 	folder = Path(folder)
@@ -61,7 +61,7 @@ def run_controller(folder, reftrajectory, output, num_robot, computeAcc=False):
 				"--inp", folder / reftrajectory,
 				"--out", folder / output,
 				"--num_robots", str(num_robot),
-			], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"})
+			], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"}, check=True)
 	else: 
 		subprocess.run(["python3",
 			"../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
@@ -69,7 +69,7 @@ def run_controller(folder, reftrajectory, output, num_robot, computeAcc=False):
 				"--inp", folder / reftrajectory,
 				"--out", folder / output,
 				"--num_robots", str(num_robot),
-			], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"})
+			], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"}, check=True)
 	
 
 def run_visualizer(filename_env, reference_traj, filename_result, filename_output):
@@ -80,7 +80,7 @@ def run_visualizer(filename_env, reference_traj, filename_result, filename_outpu
 			"--env", str(filename_env),
 			"--result", str(filename_result),
 			"--output", str(filename_output)
-		 ])
+		 ], check=True)
 
 def run_opt(filename_init, filename_env, folder, timelimit):
 	folder = Path(folder)
@@ -91,7 +91,7 @@ def run_opt(filename_init, filename_env, folder, timelimit):
 				"--env_file", filename_env,
 				"--models_base_path", "../deps/dynoplan/dynobench/models/",
 				"--results_file", folder / "output"],
-				stdout=f, stderr=f, timeout=timelimit)
+				stdout=f, stderr=f, timeout=timelimit, check=True)
 	except Exception as e:
 		print(e)
 
@@ -200,7 +200,7 @@ def main():
 				tasks.append(ExecutionTask(instance, env, num_robot, alg, trial, timelimit_geom, timelimit_opt))
 
 	if parallel and len(tasks) > 1:
-		use_cpus = max(max_cpus, psutil.cpu_count(logical=False)-1)
+		use_cpus = min(max_cpus, psutil.cpu_count(logical=False)-1)
 		print("Using {} CPUs".format(use_cpus))
 		with mp.Pool(use_cpus) as p:
 			for _ in tqdm.tqdm(p.imap_unordered(execute_task, tasks)):
