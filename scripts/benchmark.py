@@ -19,7 +19,8 @@ class ExecutionTask:
 	num_robot: int
 	alg: str
 	trial: int
-	timelimit: float
+	timelimit_geom: float
+	timelimit_opt: float
 
 def run_geom(filename_env, folder, timelimit):
 	folder = Path(folder)
@@ -109,7 +110,7 @@ def execute_task(task: ExecutionTask):
 
 	if task.alg == "geom":
 		# run_geom -> input:env output: output.yaml
-		run_geom(str(env), str(result_folder), task.timelimit)
+		run_geom(str(env), str(result_folder), task.timelimit_geom)
 		# gen_ref_init_guess -> inp: output.yaml + "-r" , output: reference trajectory geom_ref_traj.yaml
 		gen_ref_init_guess(str(result_folder), "")
 		#run_controller -> input: reference trajecetory to be tracked (geom_init_guess.yaml), output: controller output (trajectory_geom.yaml)
@@ -118,11 +119,11 @@ def execute_task(task: ExecutionTask):
 		run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env ,result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
 	
 	if task.alg == "opt":
-		run_geom(str(env), str(result_folder), task.timelimit)
+		run_geom(str(env), str(result_folder), task.timelimit_geom)
 		# gen_ref_init_guess -> inp: output.yaml, output: initial guess for optimizer
 		gen_ref_init_guess(str(result_folder), "", envName="../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env)
 		# filename_init, filename_env, folder, timelimit
-		run_opt(result_folder / "init_guess.yaml", "../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, str(result_folder), task.timelimit)
+		run_opt(result_folder / "init_guess.yaml", "../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, str(result_folder), task.timelimit_opt)
 		# run_controller -> input: reference trajecetory to be tracked (output.trajopt.yaml), output: controller output (trajectory_opt.yaml)
 		run_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml", task.num_robot, computeAcc=True)
 		# filename_env, reference_traj, filename_result, filename_output
@@ -188,16 +189,18 @@ def main():
 		"opt",
 	]
 	trials = 1
-	timelimit = 5*150
+	timelimit_geom = 300 # TODO, this is also hardcoded in the C++ code
+	timelimit_opt = 15*60
+	max_cpus = 8 # limit the number of CPUs due to high memory usage
 
 	tasks = []
 	for instance, env, num_robot in zip(instances, envs, num_robots):
 		for alg in algs:
 			for trial in range(trials):
-				tasks.append(ExecutionTask(instance, env, num_robot, alg, trial, timelimit))
+				tasks.append(ExecutionTask(instance, env, num_robot, alg, trial, timelimit_geom, timelimit_opt))
 
 	if parallel and len(tasks) > 1:
-		use_cpus = psutil.cpu_count(logical=False)-1
+		use_cpus = max(max_cpus, psutil.cpu_count(logical=False)-1)
 		print("Using {} CPUs".format(use_cpus))
 		with mp.Pool(use_cpus) as p:
 			for _ in tqdm.tqdm(p.imap_unordered(execute_task, tasks)):
