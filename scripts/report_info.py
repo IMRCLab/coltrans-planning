@@ -28,7 +28,7 @@ class Report:
                 ref_traj_path = result_folder / "output.trajopt.yaml"
                 act_traj_path = result_folder/ "trajectory_opt.yaml"
             
-            if ref_traj_path.exists():
+            if ref_traj_path.exists() and act_traj_path.exists():
                 with open(ref_traj_path, "r") as ref_file:
                     _ref = yaml.safe_load(ref_file)
                 if "states" in _ref:
