@@ -18,9 +18,17 @@
 #include "robots.h"
 #include "fclStateValidityChecker.h"
 #include "goal.h"
+#include "sampler.h"
 
 namespace ob = ompl::base;
 namespace og = ompl::geometric;
+
+ob::StateSamplerPtr allocMyStateSampler(const ob::StateSpace *statespace, ob::SpaceInformationPtr si, std::shared_ptr<RobotsWithPayload> robots,
+        const plannerSettings& cfg)
+{
+    return std::make_shared<RobotsWithPayloadStateSampler>(si, statespace, robots, cfg);
+}
+
 
 void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile, std::string &statsFile)
 {
@@ -33,6 +41,9 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile, s
     // set state validity checking for this space
     auto stateValidityChecker(std::make_shared<fclStateValidityChecker>(si, nCablesPayload, Obstacles, cfg));
     si->setStateValidityChecker(stateValidityChecker);
+
+    // set valid state sampler
+    si->getStateSpace()->setStateSamplerAllocator(std::bind(&allocMyStateSampler, std::placeholders::_1, si, nCablesPayload, cfg));
 
      // create a problem instance
     auto pdef(std::make_shared<ob::ProblemDefinition>(si));
