@@ -36,7 +36,7 @@ RobotsWithPayloadStateSampler::RobotsWithPayloadStateSampler(
     for (size_t i = 0; i < 100; ++i) {
         auto state = ss->allocState();
         // sampleValidCables(state);
-        std::cout << i << std::endl;
+        // std::cout << i << std::endl;
         do {
             ob::State **comps = state->as<ob::CompoundState>()->components;
             sampler_pos_->sampleUniform(comps[0]);
