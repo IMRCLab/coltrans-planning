@@ -3,6 +3,7 @@
 
 #include "sampler.h"
 #include "fclStateValidityChecker.h"
+#include "helper.h"
 
 namespace ob = ompl::base;
 
@@ -27,6 +28,10 @@ RobotsWithPayloadStateSampler::RobotsWithPayloadStateSampler(
 
     fclStateValidityChecker checker(si, robots, std::make_shared<Obstacles>(), cfg);
 
+    auto startState = si->allocState();
+    si->getStateSpace()->copyFromReals(startState, eigentoStd(cfg.start));
+    valid_cable_states_.push_back(startState);
+
 
     for (size_t i = 0; i < 100; ++i) {
         auto state = ss->allocState();
@@ -36,10 +41,15 @@ RobotsWithPayloadStateSampler::RobotsWithPayloadStateSampler(
             ob::State **comps = state->as<ob::CompoundState>()->components;
             sampler_pos_->sampleUniform(comps[0]);
             sampler_orientation_->sampleUniform(comps[1]);
-            sampler_cables_->sampleUniform(comps[2]);
+
+            // sampler_cables_->sampleUniform(comps[2]);
+            int idx = rng_.uniformInt(0, valid_cable_states_.size() - 1);
+            sampler_cables_->sampleGaussian(comps[2], valid_cable_states_[idx]->as<ob::CompoundState>()->components[2], 0.2);
+
         } while (!checker.isValid(state));
 
         valid_cable_states_.push_back(state);
+        // si->printState(state);
     }
     std::cout << "Done" << std::endl;
 
@@ -114,10 +124,18 @@ void RobotsWithPayloadStateSampler::sampleUniform(ompl::base::State *state)
     sampleValidCables(state);
     #endif
 
+    #if 0
     int idx = rng_.uniformInt(0, valid_cable_states_.size() - 1);
     space_->copyState(state, valid_cable_states_[idx]);
     sampler_pos_->sampleUniform(comps[0]);
     sampler_orientation_->sampleUniform(comps[1]);
+    #endif
+
+    sampler_pos_->sampleUniform(comps[0]);
+    sampler_orientation_->sampleUniform(comps[1]);
+
+    int idx = rng_.uniformInt(0, valid_cable_states_.size() - 1);
+    sampler_cables_->sampleGaussian(comps[2], valid_cable_states_[idx]->as<ob::CompoundState>()->components[2], 0.2);
 
 
 #if 0

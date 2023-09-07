@@ -13,7 +13,7 @@
 
 #include <boost/program_options.hpp>
 
-#include <helper.hpp>
+#include "helper.h"
 #include "optimObj.h"
 #include "robots.h"
 #include "fclStateValidityChecker.h"
@@ -128,7 +128,7 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile, s
 
     ob::PlannerStatus solved = planner->ob::Planner::solve(cfg.timelimit);
 
-    if (solved) 
+    if (solved == ob::PlannerStatus::EXACT_SOLUTION) 
     {
         std::cout << "found solution!" << std::endl;
         auto path = pdef->getSolutionPath()->as<og::PathGeometric>();

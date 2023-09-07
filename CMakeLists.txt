@@ -36,6 +36,7 @@ add_executable(nUavsPayloadPlanner
   src/optimObj.cpp
   src/goal.cpp
   src/sampler.cpp
+  src/helper.cpp
 )
 target_include_directories(nUavsPayloadPlanner
   PRIVATE ${CMAKE_BINARY_DIR}/deps/fcl/include
