@@ -16,7 +16,9 @@ namespace ob = ompl::base;
 class Obstacles
 {
 public:
+    Obstacles();
     Obstacles(const YAML::Node &env);
+    ~Obstacles();
     std::vector<fcl::CollisionObjectf *> obstacles;
     fcl::BroadPhaseCollisionManagerf* obsmanager;
 };

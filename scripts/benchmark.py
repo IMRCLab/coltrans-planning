@@ -191,7 +191,7 @@ def main():
 	trials = 1
 	timelimit_geom = 300
 	timelimit_opt = 15*60
-	max_cpus = 8 # limit the number of CPUs due to high memory usage
+	max_cpus = 32 # limit the number of CPUs due to high memory usage
 
 	tasks = []
 	for instance, env, num_robot in zip(instances, envs, num_robots):

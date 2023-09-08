@@ -1,5 +1,6 @@
 
 #include "robots.h" 
+#include "fclStateValidityChecker.h"
 namespace ob = ompl::base;
 
 RobotsWithPayload::RobotsWithPayload(const plannerSettings& cfg)
@@ -146,6 +147,12 @@ void RobotsWithPayload::setUAVTransformation(const ob::State* state, const size_
     uavObj[uavNum]->computeAABB();
 }
 
+Obstacles::Obstacles()
+{
+    obsmanager = new fcl::DynamicAABBTreeCollisionManagerf();
+    obsmanager->setup();
+}
+
 Obstacles::Obstacles(const YAML::Node &env)
 {
     for (const auto &obs : env)
@@ -186,6 +193,12 @@ Obstacles::Obstacles(const YAML::Node &env)
   obsmanager->registerObjects(obstacles);
   obsmanager->setup();
 }
+
+Obstacles::~Obstacles()
+{
+    delete obsmanager;
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 
 const Eigen::Vector3f StateSpace::StateType::getPayloadPos() const

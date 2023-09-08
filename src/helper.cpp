@@ -1,5 +1,4 @@
-#pragma once
-#include <yaml-cpp/yaml.h>
+#include "helper.h"
 
 
 std::vector<double> yamltovec(const YAML::Node &yamlvec) 
