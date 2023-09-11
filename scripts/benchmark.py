@@ -16,7 +16,7 @@ class ExecutionTask:
 	# result_folder: Path
 	instance: str
 	env: str
-	num_robot: int
+	model: str
 	alg: str
 	trial: int
 	timelimit_geom: float
@@ -35,10 +35,12 @@ def run_geom(filename_env, folder, timelimit):
 	except Exception as e:
 		print(e)
 
-def gen_ref_init_guess(folder, flag, envName=None):
+def gen_ref_init_guess(folder, envName=None):
 	folder = Path(folder)
 	traj = "init_guess.yaml"
 	if envName is not None:
+		# here we generate the initial guess for the optimizer, 
+		# we only compute the geometric components and update the envs start and goal of dynobench
 		subprocess.run(["python3",
 			"../scripts/init_guess.py",
 			"--inp", folder / "output.yaml",
@@ -46,21 +48,26 @@ def gen_ref_init_guess(folder, flag, envName=None):
 			"--envName", envName,
 			"-w"], check=True)
 	else: 
+		# -r: compute the velocity components for the geometric planner reference trajectory, 
+		# otherwise the controller will not be able to track the traj 
 		subprocess.run(["python3",
 			"../scripts/init_guess.py",
 			"--inp", folder / "output.yaml",
 			"--out", folder / traj,
-			"-w"], check=True)
+			"-w", 
+			"-r"], check=True)
 
-def run_controller(folder, reftrajectory, output, num_robot, computeAcc=False):
+def run_controller(folder, reftrajectory, output, model_path, computeAcc=False):
 	folder = Path(folder)
 	if computeAcc:
+		# this flag activates -a: it computes the mu_planned based on the reference actions
 		subprocess.run(["python3",
 			"../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
 				"-cff", "-w", "-a",
 				"--inp", folder / reftrajectory,
 				"--out", folder / output,
-				"--num_robots", str(num_robot),
+				"--model_path", model_path,
+				"-a",
 			], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"}, check=True)
 	else: 
 		subprocess.run(["python3",
@@ -68,7 +75,7 @@ def run_controller(folder, reftrajectory, output, num_robot, computeAcc=False):
 				"-cff", "-w",
 				"--inp", folder / reftrajectory,
 				"--out", folder / output,
-				"--num_robots", str(num_robot),
+				"--model_path", model_path,
 			], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"}, check=True)
 	
 
@@ -112,92 +119,92 @@ def execute_task(task: ExecutionTask):
 		# run_geom -> input:env output: output.yaml
 		run_geom(str(env), str(result_folder), task.timelimit_geom)
 		# gen_ref_init_guess -> inp: output.yaml + "-r" , output: reference trajectory geom_ref_traj.yaml
-		gen_ref_init_guess(str(result_folder), "")
+		gen_ref_init_guess(str(result_folder)) # dont forget to add -r here for the geom planner reference 
 		#run_controller -> input: reference trajecetory to be tracked (geom_init_guess.yaml), output: controller output (trajectory_geom.yaml)
-		run_controller(result_folder, "init_guess.yaml", "trajectory_geom.yaml", task.num_robot)
+		run_controller(result_folder, "init_guess.yaml", "trajectory_geom.yaml", "../deps/dynoplan/dynobench/models/" + task.model)
 		# visualize: reference trajectory from the geometric planner, output of controller tracking the ref traj
 		run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env ,result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
 	
 	if task.alg == "opt":
 		run_geom(str(env), str(result_folder), task.timelimit_geom)
 		# gen_ref_init_guess -> inp: output.yaml, output: initial guess for optimizer
-		gen_ref_init_guess(str(result_folder), "", envName="../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env)
+		gen_ref_init_guess(str(result_folder), envName="../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env)
 		# filename_init, filename_env, folder, timelimit
 		run_opt(result_folder / "init_guess.yaml", "../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, str(result_folder), task.timelimit_opt)
 		# run_controller -> input: reference trajecetory to be tracked (output.trajopt.yaml), output: controller output (trajectory_opt.yaml)
-		run_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml", task.num_robot, computeAcc=True)
+		# TODO: do not forget to pass the model path
+		run_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml", "../deps/dynoplan/dynobench/models/" + task.model, computeAcc=True)
 		# filename_env, reference_traj, filename_result, filename_output
 		run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, result_folder / "output.trajopt.yaml", result_folder / "trajectory_opt.yaml", result_folder / "trajectory_opt.html")
 
 def main():
 	parallel = True
 	instances = [
-	
 	"empty_2robots",
     "empty_3robots",
-    "empty_4robots",
-    "empty_5robots",
-    "empty_6robots",
-    "forest_2robots",
-    "forest_3robots",
-    "forest_4robots",
-    "forest_5robots",
-    "forest_6robots",
-    "maze_2robots",
-    "maze_3robots",
-    "maze_4robots",
-    "maze_5robots",
-    "maze_6robots",	
+    # "empty_4robots",
+    # "empty_5robots",
+    # "empty_6robots",
+    # "forest_2robots",
+    # "forest_3robots",
+    # "forest_4robots",
+    # "forest_5robots",
+    # "forest_6robots",
+    # "maze_2robots",
+    # "maze_3robots",
+    # "maze_4robots",
+    # "maze_5robots",
+    # "maze_6robots",	
 	
 	]
 	envs = [
 	"empty_2robots.yaml",
     "empty_3robots.yaml",
-    "empty_4robots.yaml",
-    "empty_5robots.yaml",
-    "empty_6robots.yaml",
-    "forest_2robots.yaml",
-    "forest_3robots.yaml",
-    "forest_4robots.yaml",
-    "forest_5robots.yaml",
-    "forest_6robots.yaml",
-    "maze_2robots.yaml",
-    "maze_3robots.yaml",
-    "maze_4robots.yaml",
-    "maze_5robots.yaml",
-    "maze_6robots.yaml",
+    # "empty_4robots.yaml",
+    # "empty_5robots.yaml",
+    # "empty_6robots.yaml",
+    # "forest_2robots.yaml",
+    # "forest_3robots.yaml",
+    # "forest_4robots.yaml",
+    # "forest_5robots.yaml",
+    # "forest_6robots.yaml",
+    # "maze_2robots.yaml",
+    # "maze_3robots.yaml",
+    # "maze_4robots.yaml",
+    # "maze_5robots.yaml",
+    # "maze_6robots.yaml",
 	]
-	num_robots = [
-		2,
-		3,
-		4,
-		5,
-		6,
-		2,
-		3,
-		4,
-		5,
-		6,
-		2,
-		3,
-		4,
-		5,
-		6
+	models_path = [
+		"point_2.yaml",
+		"point_3.yaml",
+		"point_4.yaml",
+		"point_5.yaml",
+		"point_6.yaml",
+		"point_2.yaml",
+		"point_3.yaml",
+		"point_4.yaml",
+		"point_5.yaml",
+		"point_6.yaml",
+		"point_2.yaml",
+		"point_3.yaml",
+		"point_4.yaml",
+		"point_5.yaml",
+		"point_6.yaml"
 	]
 	algs = [
 		"geom",
 		"opt",
 	]
 	trials = 1
-	timelimit_geom = 300
+	timelimit_geom = 30
 	timelimit_opt = 15*60
 	max_cpus = 32 # limit the number of CPUs due to high memory usage
 
 	tasks = []
-	for instance, env, num_robot in zip(instances, envs, num_robots):
+	for instance, env, model in zip(instances, envs, models_path):
 		for alg in algs:
 			for trial in range(trials):
-				tasks.append(ExecutionTask(instance, env, num_robot, alg, trial, timelimit_geom, timelimit_opt))
+				tasks.append(ExecutionTask(instance, env, model, alg, trial, timelimit_geom, timelimit_opt))
 
 	if parallel and len(tasks) > 1:
 		use_cpus = min(max_cpus, psutil.cpu_count(logical=False)-1)
