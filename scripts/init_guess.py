@@ -147,7 +147,7 @@ def main():
     # parser.add_argument("-e", "--writeEnv", action="store_true")  # on/off flag: write yaml file
     # on/off flag: if it's a reference trajecotry then it should be activated
     # if it's an initial guess to the optimizer then it should be deactivated
-    parser.add_argument("-r", "--ref", action="store_true")  
+    parser.add_argument("-r", "--ref", action="store_true")  # we use this to set the reference trajectory for the geom case
 
     args = parser.parse_args()
     write = args.write
@@ -185,35 +185,29 @@ def main():
    
     finalStates = []
     actions = []
-    oldStateRep = False
     for i, (pos, vel,  quat_loadi, acc, qc, wc) in enumerate(zip(p_load, v_load, quat_load, a_load, qcs, cable_omegas)):
         if i < len(v_load)-1:
             actions.append(np.ones(4*num_of_cables,).tolist())
         quat = [0,0,0,1]
         w = [0,0,0]
-        if oldStateRep: 
-            finalState = [*pos.tolist(), *qc[0], *vel.tolist(), *wc[0], *quat, 0,0,0]
-            finalStates.append(finalState)
-        else:
-            tmp = []
-            for qc_, wc_ in zip(qc, wc): 
-                tmp.extend(qc_)
-                wc_ = [0,0,0]
-                tmp.extend(wc_)
-            for i in range(num_of_cables):
-                tmp.extend(quat)
-                tmp.extend(w)
-            if args.ref:
-                finalState = [*pos.tolist(), *vel.tolist(), *acc.tolist(), *tmp]
-            else:
-                vel = [0,0,0]
-                if payloadType == "sphere":
-                    finalState = [*pos.tolist(), *vel, *tmp]
-                elif payloadType == "rod" or payloadType == "triangle":
-                    wl = [0,0,0]
-                    finalState = [*pos.tolist(), *quat_loadi.tolist(), *vel, *wl, *tmp]
-                    
-            finalStates.append(finalState)
+        tmp = []
+        for qc_, wc_ in zip(qc, wc): 
+            tmp.extend(qc_)
+            wc_ = [0,0,0]
+            tmp.extend(wc_)
+        for i in range(num_of_cables):
+            tmp.extend(quat)
+            tmp.extend(w)
+        if not args.ref:
+            vel = np.array([0,0,0])
+
+        if payloadType == "sphere":
+            finalState = [*pos.tolist(), *vel.tolist(), *tmp]
+        elif payloadType == "rod" or payloadType == "triangle":
+            wl = [0,0,0]
+            finalState = [*pos.tolist(), *quat_loadi.tolist(), *vel.tolist(), *wl, *tmp]
+                
+        finalStates.append(finalState)
     output = {}
     output["feasible"] = 0
     output["cost"] = 10
@@ -221,7 +215,12 @@ def main():
     output["result"]["states"] = finalStates
     output["result"]["actions"] = actions 
     output["result"]["dt"] = dt
-
+    if payloadType == "sphere":
+        output["result"]["payload"] = "point"
+    elif payloadType == "rod" or payloadType == "triangle":
+        output["result"]["payload"] = "rigid"
+        
+    
     if write:
         with open(args.out, 'w') as file:
             yaml.safe_dump(output, file, default_flow_style=None)
