@@ -14,6 +14,6 @@ then
 fi
 
 cd ../../../build
-./nUavsPayloadPlanner --input ../examples/3cfs_pointmass/3cfs_pointmass.yaml --output ../examples/3cfs_pointmass/output.yaml --stats ../examples/3cfs_pointmass/stats/$FILE
+./nUavsPayloadPlanner --input ../examples/3cfs_pointmass/3cfs_pointmass.yaml --output ../examples/3cfs_pointmass/output.yaml --stats ../examples/3cfs_pointmass/stats/$FILE --timelimit 30
 cd ../scripts
 python3 visualize.py ../examples/3cfs_pointmass/output.yaml pointmass
