@@ -9,6 +9,9 @@ float minCableObjective::requiredForceMagnitude(const ob::State* s) const
 {
     auto st = s->as<StateSpace::StateType>();
     size_t num_cables = si_->getStateSpace()->as<StateSpace>()->getNumCables();
+    if (num_cables == 0) {
+        return 1;
+    }
     Eigen::Vector3f basevec(0,0,1);
     float cost = 0;        
     for(size_t i = 0; i < num_cables; ++i) {
@@ -28,18 +31,21 @@ ob::Cost minCableObjective::motionCost(const ob::State *s1, const ob::State *s2)
     auto st2 = s2->as<StateSpace::StateType>();
 
     // compute 
+    float distance_uavs = 0;
     Eigen::Vector3f pos1(0,0,0);
     Eigen::Vector3f pos2(0,0,0);
     size_t num_cables = si_->getStateSpace()->as<StateSpace>()->getNumCables();
-    for(size_t i = 0; i<num_cables; ++i) {
-        double length = cfg_.cablelengthVec[i];
-        Eigen::Vector3f attachmentPoint(cfg_.attachmentpoints(0+3*i), cfg_.attachmentpoints(1+3*i), cfg_.attachmentpoints(2+3*i));
-        pos1 += st1->getuavPos(i, attachmentPoint, length);
-        pos2 += st2->getuavPos(i, attachmentPoint, length);
+    if (num_cables > 0) {
+        for(size_t i = 0; i<num_cables; ++i) {
+            double length = cfg_.cablelengthVec[i];
+            Eigen::Vector3f attachmentPoint(cfg_.attachmentpoints(0+3*i), cfg_.attachmentpoints(1+3*i), cfg_.attachmentpoints(2+3*i));
+            pos1 += st1->getuavPos(i, attachmentPoint, length);
+            pos2 += st2->getuavPos(i, attachmentPoint, length);
+        }
+        pos1 /= num_cables;
+        pos2 /= num_cables;
+        distance_uavs = (pos1 - pos2).norm();
     }
-    pos1 /= num_cables;
-    pos2 /= num_cables;
-    float distance_uavs = (pos1 - pos2).norm();
 
     pos1 = st1->getPayloadPos();
     pos2 = st2->getPayloadPos();

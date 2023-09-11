@@ -7,11 +7,11 @@ RobotsWithPayloadGoal::RobotsWithPayloadGoal(const ob::SpaceInformationPtr &si, 
     : ob::GoalSampleableRegion(si)
 {
     goalState_ = si_->cloneState(goalState);
-    auto si_typed = si_->getStateSpace()->as<StateSpace>();
+    auto ss_typed = si_->getStateSpace()->as<StateSpace>();
     // set the values of cable part to be zero
     auto goalState_typed = goalState_->as<StateSpace::StateType>();
     auto cables_typed = goalState_typed->as<ob::RealVectorStateSpace::StateType>(2);
-    for (size_t i = 0; i < si_typed->as<ob::RealVectorStateSpace>(2)->getDimension(); ++i) {
+    for (size_t i = 0; i < ss_typed->getNumCables(); ++i) {
         cables_typed->values[i] = 0.0;
     }
 
@@ -37,8 +37,8 @@ double RobotsWithPayloadGoal::distanceGoal(const ompl::base::State *st) const
     // set the values of cable part to be zero
     auto tmpState_typed = tmpState_->as<StateSpace::StateType>();
     auto cables_typed = tmpState_typed->as<ob::RealVectorStateSpace::StateType>(2);
-    auto si_typed = si_->getStateSpace()->as<StateSpace>();
-    for (size_t i = 0; i < si_typed->as<ob::RealVectorStateSpace>(2)->getDimension(); ++i) {
+    auto ss_typed = si_->getStateSpace()->as<StateSpace>();
+    for (size_t i = 0; i < ss_typed->getNumCables(); ++i) {
         cables_typed->values[i] = 0.0;
     }
 

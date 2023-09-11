@@ -16,14 +16,16 @@ RobotsWithPayload::RobotsWithPayload(const plannerSettings& cfg)
     }
     space->setPositionBounds(payloadbounds);
 
-    ob::RealVectorBounds cablebounds(2*cfg.numofcables);
-    // prepare the cable elevation bounds
-    for (size_t i=0; i < cfg.cablemin.size(); ++i) 
-    {
-        cablebounds.setLow(i, cfg.cablemin[i]);
-        cablebounds.setHigh(i, cfg.cablemax[i]);
+    if (cfg.numofcables > 0) {
+        ob::RealVectorBounds cablebounds(2*cfg.numofcables);
+        // prepare the cable elevation bounds
+        for (size_t i=0; i < cfg.cablemin.size(); ++i) 
+        {
+            cablebounds.setLow(i, cfg.cablemin[i]);
+            cablebounds.setHigh(i, cfg.cablemax[i]);
+        }
+        space->setCableBounds(cablebounds);
     }
-    space->setCableBounds(cablebounds);
 
     // construct an instance of space information from this state
     si = std::make_shared<ob::SpaceInformation>(space);
@@ -279,15 +281,18 @@ StateSpace::StateSpace(size_t numCables, double cable_weight)
 {
     setName("Quadrotor" + getName());
     type_ = ob::STATE_SPACE_TYPE_COUNT + 0;
+    num_cables_ = numCables;
     addSubspace(std::make_shared<ob::RealVectorStateSpace>(3), 1.0);      // position
     addSubspace(std::make_shared<ob::SO3StateSpace>(), 1.0);              // orientation
-    addSubspace(std::make_shared<ob::RealVectorStateSpace>(2*numCables), cable_weight); // cable az and el
+    if (numCables > 0) {
+        addSubspace(std::make_shared<ob::RealVectorStateSpace>(2*numCables), cable_weight); // cable az and el
+    }
     lock();
 }
 
 size_t StateSpace::getNumCables() const
 {
-    return as<ob::RealVectorStateSpace>(2)->getDimension() / 2;
+    return num_cables_;
 }
 
 void StateSpace::setPositionBounds(const ob::RealVectorBounds &bounds)

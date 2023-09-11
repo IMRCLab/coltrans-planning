@@ -105,4 +105,8 @@ public:
     ob::State *allocState() const override;
     void freeState(ob::State *state) const override;
     void registerProjections();
+
+protected:
+    size_t num_cables_;
+
 };

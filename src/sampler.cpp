@@ -20,7 +20,9 @@ RobotsWithPayloadStateSampler::RobotsWithPayloadStateSampler(
 
     sampler_pos_ = ss_typed->getSubspace(0)->allocStateSampler();
     sampler_orientation_ = ss_typed->getSubspace(1)->allocStateSampler();
-    sampler_cables_ = ss_typed->getSubspace(2)->allocStateSampler();
+    if (ss_typed->getNumCables() > 0) {
+        sampler_cables_ = ss_typed->getSubspace(2)->allocStateSampler();
+    }
 
 
     // sample a number of valid cable states
@@ -43,9 +45,10 @@ RobotsWithPayloadStateSampler::RobotsWithPayloadStateSampler(
             sampler_orientation_->sampleUniform(comps[1]);
 
             // sampler_cables_->sampleUniform(comps[2]);
-            int idx = rng_.uniformInt(0, valid_cable_states_.size() - 1);
-            sampler_cables_->sampleGaussian(comps[2], valid_cable_states_[idx]->as<ob::CompoundState>()->components[2], 0.2);
-
+            if (ss_typed->getNumCables() > 0) {
+                int idx = rng_.uniformInt(0, valid_cable_states_.size() - 1);
+                sampler_cables_->sampleGaussian(comps[2], valid_cable_states_[idx]->as<ob::CompoundState>()->components[2], 0.2);
+            }
         } while (!checker.isValid(state));
 
         valid_cable_states_.push_back(state);
@@ -134,9 +137,11 @@ void RobotsWithPayloadStateSampler::sampleUniform(ompl::base::State *state)
     sampler_pos_->sampleUniform(comps[0]);
     sampler_orientation_->sampleUniform(comps[1]);
 
-    int idx = rng_.uniformInt(0, valid_cable_states_.size() - 1);
-    sampler_cables_->sampleGaussian(comps[2], valid_cable_states_[idx]->as<ob::CompoundState>()->components[2], 0.2);
-
+    auto ss_typed = space_->as<StateSpace>();
+    if (ss_typed->getNumCables() > 0) {
+        int idx = rng_.uniformInt(0, valid_cable_states_.size() - 1);
+        sampler_cables_->sampleGaussian(comps[2], valid_cable_states_[idx]->as<ob::CompoundState>()->components[2], 0.2);
+    }
 
 #if 0
     auto space_typed = space_->as<StateSpace>();
