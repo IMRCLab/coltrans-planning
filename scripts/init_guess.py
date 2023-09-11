@@ -169,15 +169,11 @@ def main():
     # payload velocity 
     v_load = derivative(p_load, dt)
     a_load = derivative(v_load, dt)
+    # load attitude: ignored if it is a point mass
+    quat_load = np.asarray([state[3:7] for state in states])
     # cables states
     cableSt = np.empty(3,)
-    if payloadType == "sphere":
-        cableSt  = np.asarray([state[7::] for state in states])
-    elif payloadType == "rigid":
-        cableSt  = np.asarray([state[13::] for state in states])
-    else:
-        print("payload type is wrong please check it: sphere or rigid")
-        exit()
+    cableSt  = np.asarray([state[7::] for state in states])
     
     num_of_cables = int(len(cableSt[0])/2)
 
@@ -190,7 +186,7 @@ def main():
     finalStates = []
     actions = []
     oldStateRep = False
-    for i, (pos, vel, acc, qc, wc) in enumerate(zip(p_load, v_load, a_load, qcs, cable_omegas)):
+    for i, (pos, vel,  quat_loadi, acc, qc, wc) in enumerate(zip(p_load, v_load, quat_load, a_load, qcs, cable_omegas)):
         if i < len(v_load)-1:
             actions.append(np.ones(4*num_of_cables,).tolist())
         quat = [0,0,0,1]
@@ -202,6 +198,7 @@ def main():
             tmp = []
             for qc_, wc_ in zip(qc, wc): 
                 tmp.extend(qc_)
+                wc_ = [0,0,0]
                 tmp.extend(wc_)
             for i in range(num_of_cables):
                 tmp.extend(quat)
@@ -209,7 +206,13 @@ def main():
             if args.ref:
                 finalState = [*pos.tolist(), *vel.tolist(), *acc.tolist(), *tmp]
             else:
-                finalState = [*pos.tolist(), *vel.tolist(), *tmp]
+                vel = [0,0,0]
+                if payloadType == "sphere":
+                    finalState = [*pos.tolist(), *vel, *tmp]
+                elif payloadType == "rod" or payloadType == "triangle":
+                    wl = [0,0,0]
+                    finalState = [*pos.tolist(), *quat_loadi.tolist(), *vel, *wl, *tmp]
+                    
             finalStates.append(finalState)
     output = {}
     output["feasible"] = 0
