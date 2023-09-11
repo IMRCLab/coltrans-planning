@@ -66,8 +66,7 @@ def main():
         vis["payload"].set_object(g.StlMeshGeometry.from_file(ploadConfig['path']), 
                                             g.MeshLambertMaterial(color=ploadConfig['color']))
     elif payloadType == 'rod':
-        vis["payload"].set_object(g.Mesh(g.Cylinder(ploadConfig['height'], 
-                                        radius=ploadConfig['radius']),
+        vis["payload"].set_object(g.Mesh(g.Box(ploadConfig['size']),
                                         g.MeshLambertMaterial(color=ploadConfig['color'])))
     elif payloadType == 'cuboid':
             vis["payload"].set_object(g.Mesh(g.Box(ploadConfig['size']),

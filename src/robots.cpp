@@ -50,7 +50,7 @@ void RobotsWithPayload::addRobotParts(const plannerSettings& cfg)
       std::shared_ptr<fcl::CollisionGeometryf> geom;
     if (cfg.payloadShape == "rod")
     {
-        geom.reset(new fcl::Cylinderf(0.025, 0.2));
+        geom.reset(new fcl::Boxf(0.025, 0.6, 0.025));
     } else if (cfg.payloadShape == " Triangle")
     {
         geom.reset(new fcl::Boxf(0.08, 0.08, 0.005));
@@ -89,13 +89,13 @@ fcl::Transform3f RobotsWithPayload::getPayloadTransform(const ob::State *state, 
     Eigen::Vector3f pos(st->getPayloadPos());
     transform = Eigen::Translation<float, 3>(fcl::Vector3f(pos(0), pos(1), pos(2)));
     Eigen::Quaternionf payload_quat(st->getPayloadquat());
-    if (payloadShape == "rod") {
-        const Eigen::Quaternionf fclInmeshcat(0.7071068, -0.7071068, 0, 0);
-        Eigen::Matrix3f payload_rotmat = fclInmeshcat.normalized().toRotationMatrix() * payload_quat.normalized().toRotationMatrix();
-        Eigen::Quaternionf payload_quat_in_fcl(payload_rotmat);
-        transform.rotate(payload_quat_in_fcl);
-        return transform;
-    }
+    // if (payloadShape == "rod") {
+    //     const Eigen::Quaternionf fclInmeshcat(0.7071068, -0.7071068, 0, 0);
+    //     Eigen::Matrix3f payload_rotmat = fclInmeshcat.normalized().toRotationMatrix() * payload_quat.normalized().toRotationMatrix();
+    //     Eigen::Quaternionf payload_quat_in_fcl(payload_rotmat);
+    //     transform.rotate(payload_quat_in_fcl);
+    //     return transform;
+    // }
     transform.rotate(payload_quat);
     return transform;
 }

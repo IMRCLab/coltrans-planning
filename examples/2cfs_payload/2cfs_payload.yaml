@@ -1,29 +1,24 @@
 plannerType: 'rrtstar'
-timelimit: 120.0
+timelimit: 30.0
 numofcables: 2
 interpolate: 1000
 environment:
   min: [-1, -1, -0.1]
   max: [2,   1,  2]
   obstacles:
-    - type: cylinder
-      center: [0.25, 0.6, 0.0]
-      radius: 0.3
-      height: 10.0
-    - type: cylinder
-      center: [0.25, -0.6, 0.0]
-      radius: 0.3
-      height: 10.0
+    - type: box
+      center: [0.25, 0.0, 0.0]
+      size: [0.5, 0.5, 10]
 payload:
-  start: [-0.5,  0, 0.5,  0, 0, 0, 1, 1.57,  1.2,  4.71, 1.2] # [xi, yi, zi, qxi,qyi,qzi,qwi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
-  goal : [1.0,   0, 0.4,  0, 0, 0, 1, 1.57,  1.2,  4.71, 1.2] # [xi, yi, zi, qxi,qyi,qzi,qwi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
+  start: [-0.5,  0, 0.0,  0, 0, 0, 1, 1.57,  1.57,  4.71, 1.57] # [xi, yi, zi, qxi,qyi,qzi,qwi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
+  goal : [1.0,   0, 0.0,  0, 0, 0, 1, 1.57,  1.57,  4.71, 1.57] # [xi, yi, zi, qxi,qyi,qzi,qwi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
   shape: 
     type: rod
-    size: [0.025, 0.2] # radius, height
+    size: [0.025, 0.6] # radius, height
   angle_min: -0.1 # (rad)
   angle_max: 0.1 # (rad)
 cables: 
   lengths: [0.5, 0.5]
-  attachmentpoints: [0, 0.1, 0, 0, -0.1, 0]
+  attachmentpoints: [0, 0.3, 0, 0, -0.3, 0]
   min: [0, 0, 0, 0] # minimum az_i, elv_i for each ith cable 
   max: [6.28, 1.57, 6.28, 1.57] # maximum az_i, elv_i for each ith cable  

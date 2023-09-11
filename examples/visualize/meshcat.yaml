@@ -1,7 +1,7 @@
 meshcat: 
   openWindow: true
-  timestep: 0.01 # timestep in secs
-  finalstep: 2  # sleep at final step
+  timestep: 0.001 # timestep in secs
+  finalstep: 1  # sleep at final step
 
 uav: 
   path: ../examples/visualize/cf2_assembly.stl
@@ -24,8 +24,7 @@ payload:
     color: 0x808080
   
   rod:
-    radius: 0.025
-    height: 0.2
+    size: [0.025, 0.6, 0.025]
     opacity: 1.0
     color: 0xff11dd
 
