@@ -77,26 +77,28 @@ class Report:
             f.write(r"\begin{document}")
             f.write("\n")
 
-            out = r"\begin{tabular}{l||" # instances
-            for _ in algs:
-                out += r"cc|" # algorithms
-            out += "}\n"
-            f.write(out)
+            f.write(r"\begin{tabular}{l||cc|cc}")
+            f.write("\n")
+            f.write(r"& \multicolumn{2}{c|}{Tracking Error [m]} & \multicolumn{2}{c}{Energy [Wh]}\\")
+            f.write("\n")
 
             out = r" "
-            for alg in algs:
-                out += r"&{} tracking &{} energy".format(alg, alg)
+            for _ in range(2):
+                for alg in algs:
+                    out += r"&{}".format(alg)
             out += r"\\ \hline"
             f.write(out)
             f.write("\n")
             out = r" "
-            for instance in instances:    
-                if "_" in instance: 
+
+            for instance in instances:
+                if "_" in instance:
                     instance_ = instance.replace("_", " ")
                 else: 
                     instance_ = instance
                 out += r" {}".format(instance_)
 
+                results = dict()
                 for alg in algs:
                     ep_trials = []
                     power_trials = []
@@ -124,7 +126,16 @@ class Report:
 
                     energy = np.sum(power_trials)*0.01/60/60 # Wh
 
-                    out += r"&{:.2f} \color{{gray}} \tiny {:.2f} & {:.2f}".format(ep_mean, ep_std, energy)
+                    results[alg] = {
+                        "ep_mean": ep_mean,
+                        "ep_std": ep_std,
+                        "energy": energy,
+                    }
+
+                for alg in algs:
+                    out += r"&{:.2f} \color{{gray}} \tiny {:.2f} ".format(results[alg]["ep_mean"], results[alg]["ep_std"])
+                for alg in algs:
+                    out += r"& {:.2f}".format(results[alg]["energy"])
             
                 out += r"\\" + "\n"
                 out += r"\hline"

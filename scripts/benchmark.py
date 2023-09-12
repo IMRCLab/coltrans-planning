@@ -8,6 +8,7 @@ import tqdm
 import psutil
 from compute_errors import compute_errors
 import traceback
+import shutil
 
 @dataclass
 class ExecutionTask:
@@ -117,18 +118,44 @@ def execute_task(task: ExecutionTask):
 	result_folder.mkdir(parents=True, exist_ok=False)
 
 	try:
-		if task.alg == "geom":
+		# if task.alg == "geom":
+		# 	# run_geom -> input:env output: output.yaml
+		# 	run_geom(str(env), str(result_folder), task.timelimit_geom)
+		# 	# gen_ref_init_guess -> inp: output.yaml + "-r" , output: reference trajectory geom_ref_traj.yaml
+		# 	gen_ref_init_guess(str(result_folder)) # dont forget to add -r here for the geom planner reference 
+		# 	#run_controller -> input: reference trajecetory to be tracked (geom_init_guess.yaml), output: controller output (trajectory_geom.yaml)
+		# 	run_controller(result_folder, "init_guess.yaml", "trajectory_geom.yaml", task.num_robots)
+		# 	# visualize: reference trajectory from the geometric planner, output of controller tracking the ref traj
+		# 	run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env ,result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
+		
+		if task.alg == "opt":
 			# run_geom -> input:env output: output.yaml
 			run_geom(str(env), str(result_folder), task.timelimit_geom)
+
+			# geometric baseline
+
 			# gen_ref_init_guess -> inp: output.yaml + "-r" , output: reference trajectory geom_ref_traj.yaml
 			gen_ref_init_guess(str(result_folder)) # dont forget to add -r here for the geom planner reference 
 			#run_controller -> input: reference trajecetory to be tracked (geom_init_guess.yaml), output: controller output (trajectory_geom.yaml)
 			run_controller(result_folder, "init_guess.yaml", "trajectory_geom.yaml", task.num_robots)
 			# visualize: reference trajectory from the geometric planner, output of controller tracking the ref traj
 			run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env ,result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
-		
-		if task.alg == "opt":
-			run_geom(str(env), str(result_folder), task.timelimit_geom)
+
+			# now copy/move the resulting files
+			result_folder2 = results_path / task.instance / "geom" / "{:03d}".format(task.trial)
+			if result_folder2.exists():
+					print("Warning! {} exists already. Deleting...".format(result_folder2))
+					shutil.rmtree(result_folder2)
+			result_folder2.mkdir(parents=True, exist_ok=False)
+			shutil.move(result_folder / "init_guess.yaml", result_folder2)
+			shutil.move(result_folder / "log.txt", result_folder2)
+			shutil.copy(result_folder / "output.yaml", result_folder2)
+			shutil.move(result_folder / "stats.yaml", result_folder2)
+			shutil.move(result_folder / "trajectory_geom.html", result_folder2)
+			shutil.move(result_folder / "trajectory_geom.yaml", result_folder2)
+
+			# optimization-based solution
+
 			# gen_ref_init_guess -> inp: output.yaml, output: initial guess for optimizer
 			gen_ref_init_guess(str(result_folder), envName="../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env)
 			# filename_init, filename_env, folder, timelimit
@@ -175,6 +202,9 @@ def main():
 	for instance in instances:
 		env = instance["name"] + ".yaml"
 		for alg in algs:
+			# "geom" is implicitly executed with "opt", so don't execute here
+			if alg == "geom":
+				continue
 			for trial in range(trials):
 				tasks.append(ExecutionTask(instance["name"], env, instance["num_robots"], alg, trial, timelimit_geom, timelimit_opt))
 
