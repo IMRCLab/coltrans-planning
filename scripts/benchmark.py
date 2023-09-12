@@ -104,6 +104,18 @@ def run_opt(filename_init, filename_env, folder, timelimit):
 	except Exception as e:
 		print(e)
 
+def run_checker(filename_env, filename_result, filename_log):
+	with open(filename_log, 'w') as f:
+		cmd = ["./deps/dynoplan/dynobench/check_trajectory",
+					"--result_file", filename_result,
+					"--env_file", filename_env,
+					"--models_base_path" , "../deps/dynoplan/dynobench/models/",
+					"--goal_tol" , "2"]
+		print(subprocess.list2cmdline(cmd))
+		out = subprocess.run(cmd,
+					stdout=f, stderr=f)
+	return out.returncode == 0
+
 def execute_task(task: ExecutionTask):
 	results_path = Path("../results")
 	# tuning_path = Path("../tuning")
@@ -141,6 +153,9 @@ def execute_task(task: ExecutionTask):
 			# visualize: reference trajectory from the geometric planner, output of controller tracking the ref traj
 			run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env ,result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
 
+			run_checker("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env,
+						result_folder / "trajectory_geom.yaml", (result_folder / "trajectory_geom.yaml").with_suffix(".check.txt")):
+
 			# now copy/move the resulting files
 			result_folder2 = results_path / task.instance / "geom" / "{:03d}".format(task.trial)
 			if result_folder2.exists():
@@ -150,9 +165,11 @@ def execute_task(task: ExecutionTask):
 			shutil.move(result_folder / "init_guess.yaml", result_folder2)
 			shutil.move(result_folder / "log.txt", result_folder2)
 			shutil.copy(result_folder / "output.yaml", result_folder2)
-			shutil.move(result_folder / "stats.yaml", result_folder2)
+			if (result_folder / "stats.yaml").exists():
+				shutil.move(result_folder / "stats.yaml", result_folder2)
 			shutil.move(result_folder / "trajectory_geom.html", result_folder2)
 			shutil.move(result_folder / "trajectory_geom.yaml", result_folder2)
+			shutil.move(result_folder / "trajectory_geom.check.txt", result_folder2)
 
 			# optimization-based solution
 
@@ -165,6 +182,9 @@ def execute_task(task: ExecutionTask):
 			run_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml", "../deps/dynoplan/dynobench/models/" + task.model_path, computeAcc=True)
 			# filename_env, reference_traj, filename_result, filename_output
 			run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, result_folder / "output.trajopt.yaml", result_folder / "trajectory_opt.yaml", result_folder / "trajectory_opt.html")
+
+			run_checker("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env,
+						result_folder / "trajectory_opt.yaml", (result_folder / "trajectory_opt.yaml").with_suffix(".check.txt")):
 
 		if task.alg == "payload":
 			# run_geom -> input:env output: output.yaml
