@@ -96,7 +96,7 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile, s
         exit(3);
     }
     auto objectCable(std::make_shared<minCableObjective>(si, cfg));
-    objectCable->setCostThreshold(ob::Cost(1.0));
+    objectCable->setCostThreshold(ob::Cost(0.0));
     pdef->setOptimizationObjective(objectCable);
 
     // empty stats file
