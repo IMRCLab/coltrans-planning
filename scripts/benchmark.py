@@ -154,7 +154,7 @@ def execute_task(task: ExecutionTask):
 			run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env ,result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
 
 			run_checker("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env,
-						result_folder / "trajectory_geom.yaml", (result_folder / "trajectory_geom.yaml").with_suffix(".check.txt")):
+						result_folder / "trajectory_geom.yaml", (result_folder / "trajectory_geom.yaml").with_suffix(".check.txt"))
 
 			# now copy/move the resulting files
 			result_folder2 = results_path / task.instance / "geom" / "{:03d}".format(task.trial)
@@ -184,7 +184,7 @@ def execute_task(task: ExecutionTask):
 			run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, result_folder / "output.trajopt.yaml", result_folder / "trajectory_opt.yaml", result_folder / "trajectory_opt.html")
 
 			run_checker("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env,
-						result_folder / "trajectory_opt.yaml", (result_folder / "trajectory_opt.yaml").with_suffix(".check.txt")):
+						result_folder / "trajectory_opt.yaml", (result_folder / "trajectory_opt.yaml").with_suffix(".check.txt"))
 
 		if task.alg == "payload":
 			# run_geom -> input:env output: output.yaml
