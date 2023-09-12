@@ -9,6 +9,7 @@ import psutil
 from compute_errors import compute_errors
 import traceback
 import shutil
+import paper_tables
 
 @dataclass
 class ExecutionTask:
@@ -251,5 +252,8 @@ def main():
 			execute_task(task)
 	trials_ = ["00"+str(i) for i in range(trials)]
 	compute_errors([instance["name"] for instance in instances], algs, trials_)
+
+	paper_tables.write_table1(Path("../results"), trials_)
+
 if __name__ == '__main__':
 	main()
