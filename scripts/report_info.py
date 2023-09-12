@@ -30,8 +30,10 @@ class Report:
                 act_traj_path = result_folder/ "trajectory_opt.yaml"
                 check_traj_path = result_folder/ "trajectory_opt.check.txt"
 
-            with open(check_traj_path, "r") as f:
-                solution_valid = (f.readlines()[-1][0:2] == "OK")
+            solution_valid = False
+            if check_traj_path.exists():
+                with open(check_traj_path, "r") as f:
+                    solution_valid = (f.readlines()[-1][0:2] == "OK")
             
             if ref_traj_path.exists() and act_traj_path.exists() and solution_valid:
                 with open(ref_traj_path, "r") as ref_file:
