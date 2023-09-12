@@ -165,6 +165,16 @@ def execute_task(task: ExecutionTask):
 			run_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml", task.num_robots, computeAcc=True)
 			# filename_env, reference_traj, filename_result, filename_output
 			run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, result_folder / "output.trajopt.yaml", result_folder / "trajectory_opt.yaml", result_folder / "trajectory_opt.html")
+
+		if task.alg == "payload":
+			# run_geom -> input:env output: output.yaml
+			run_geom(str(env.with_name(env.name.replace("_{}robots.yaml".format(task.num_robots), "_0robots.yaml"))), str(result_folder), task.timelimit_geom)
+			# gen_ref_init_guess -> inp: output.yaml + "-r" , output: reference trajectory geom_ref_traj.yaml
+			gen_ref_init_guess(str(result_folder)) # dont forget to add -r here for the geom planner reference 
+			#run_controller -> input: reference trajecetory to be tracked (geom_init_guess.yaml), output: controller output (trajectory_geom.yaml)
+			run_controller(result_folder, "init_guess.yaml", "trajectory_geom.yaml", task.num_robots)
+			# visualize: reference trajectory from the geometric planner, output of controller tracking the ref traj
+			run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env ,result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
 	except:
 		traceback.print_exc()
 
@@ -192,6 +202,7 @@ def main():
 	algs = [
 		"geom",
 		"opt",
+		# "payload",
 	]
 	trials = 1
 	timelimit_geom = 30
