@@ -84,9 +84,9 @@ class Report:
             f.write(r"\begin{document}")
             f.write("\n")
 
-            f.write(r"\begin{tabular}{l||cc|cc}")
+            f.write(r"\begin{tabular}{l||ccc|ccc}")
             f.write("\n")
-            f.write(r"& \multicolumn{2}{c|}{Tracking Error [m]} & \multicolumn{2}{c}{Energy [Wh]}\\")
+            f.write(r"& \multicolumn{3}{c|}{Tracking Error [m]} & \multicolumn{3}{c}{Energy [Wh]}\\")
             f.write("\n")
 
             out = r" "

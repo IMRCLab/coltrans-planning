@@ -38,7 +38,7 @@ def compute_result(result_path, instances, algs, trials):
 			results[instance][alg] = {
 				"ep_mean": ep_mean if not np.isnan(ep_mean) else None,
 				"ep_std": ep_std if not np.isnan(ep_std) else None,
-				"energy": energy,
+				"energy": energy if not np.isnan(ep_mean) else None,
 			}
 	return results
 
@@ -54,7 +54,7 @@ def print_and_highlight_best_min(key, result, alg, algs, digits=1):
 	is_best = False
 	if result[alg][key] is not None and result[alg][key] != "*":
 		# we only look at one digit
-		is_best = np.array([round(result[alg][key],1) <= round(result[other][key],1) for other in algs if result[other][key] is not None and result[other][key] != "*"]).all()
+		is_best = np.array([round(result[alg][key],digits) <= round(result[other][key],digits) for other in algs if result[other][key] is not None and result[other][key] != "*"]).all()
 	if is_best:
 		out += r"\bfseries "
 	if result[alg][key] == "*":
@@ -70,7 +70,7 @@ def print_and_highlight_best_max(key, result, alg, algs, digits=1):
 	is_best = False
 	if result[alg][key] is not None and result[alg][key] != "*":
 		# we only look at one digit
-		is_best = np.array([round(result[alg][key],1) >= round(result[other][key],1) for other in algs if result[other][key] is not None and result[other][key] != "*"]).all()
+		is_best = np.array([round(result[alg][key],digits) >= round(result[other][key],digits) for other in algs if result[other][key] is not None and result[other][key] != "*"]).all()
 	if is_best:
 		out += r"\bfseries "
 	if result[alg][key] == "*":
