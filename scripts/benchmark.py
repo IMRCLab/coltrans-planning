@@ -73,10 +73,9 @@ def gen_ref_init_guess(folder, envName=None):
 def run_controller(folder, reftrajectory, output, model_path, computeAcc=False, nocableTrack=False):
 	folder = Path(folder)
 	if nocableTrack:
-		print("I AM RUNNING HERE")
 		subprocess.run(["python3",
 			"../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
-			"-cff", "-w", "-noC"
+			"-cff", "-w", "-noC",
 			"--inp", folder / reftrajectory,
 			"--out", folder / output,
 			"--model_path", model_path,
@@ -242,7 +241,7 @@ def execute_task(task: ExecutionTask):
 			add_init_cable_states(str(result_folder), envName=env)
 			
 			#run_controller -> input: reference trajecetory to be tracked (geom_init_guess.yaml), output: controller output (trajectory_geom.yaml)
-			run_controller(result_folder, "init_guess.yaml", "trajectory_geom.yaml", "../deps/dynoplan/dynobench/models/" + task.model_path)
+			run_controller(result_folder, "init_guess.yaml", "trajectory_geom.yaml", "../deps/dynoplan/dynobench/models/" + task.model_path, nocableTrack=True)
 			# # visualize: reference trajectory from the geometric planner, output of controller tracking the ref traj
 			run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env ,result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
 	except:
@@ -252,22 +251,22 @@ def main():
 	parallel = True
 	instances = [
 		{ "name": "empty_2robots", "models_path": "point_2.yaml"},
-		{ "name": "empty_3robots", "models_path": "point_3.yaml"},
-		{ "name": "empty_4robots", "models_path": "point_4.yaml"},
-		{ "name": "empty_5robots", "models_path": "point_5.yaml"},
-		{ "name": "empty_6robots", "models_path": "point_6.yaml"},
+		# { "name": "empty_3robots", "models_path": "point_3.yaml"},
+		# { "name": "empty_4robots", "models_path": "point_4.yaml"},
+		# { "name": "empty_5robots", "models_path": "point_5.yaml"},
+		# { "name": "empty_6robots", "models_path": "point_6.yaml"},
 
-		{ "name": "forest_2robots", "models_path": "point_2.yaml"},
-		{ "name": "forest_3robots", "models_path": "point_3.yaml"},
-		{ "name": "forest_4robots", "models_path": "point_4.yaml"},
-		{ "name": "forest_5robots", "models_path": "point_5.yaml"},
-		{ "name": "forest_6robots", "models_path": "point_6.yaml"},
+		# { "name": "forest_2robots", "models_path": "point_2.yaml"},
+		# { "name": "forest_3robots", "models_path": "point_3.yaml"},
+		# { "name": "forest_4robots", "models_path": "point_4.yaml"},
+		# { "name": "forest_5robots", "models_path": "point_5.yaml"},
+		# { "name": "forest_6robots", "models_path": "point_6.yaml"},
 
-		{ "name": "maze_2robots", "models_path": "point_2.yaml"},
-		{ "name": "maze_3robots", "models_path": "point_3.yaml"},
-		{ "name": "maze_4robots", "models_path": "point_4.yaml"},
-		{ "name": "maze_5robots", "models_path": "point_5.yaml"},
-		{ "name": "maze_6robots", "models_path": "point_6.yaml"},
+		# { "name": "maze_2robots", "models_path": "point_2.yaml"},
+		# { "name": "maze_3robots", "models_path": "point_3.yaml"},
+		# { "name": "maze_4robots", "models_path": "point_4.yaml"},
+		# { "name": "maze_5robots", "models_path": "point_5.yaml"},
+		# { "name": "maze_6robots", "models_path": "point_6.yaml"},
 	]
 	algs = [
 		# "geom",
