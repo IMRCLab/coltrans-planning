@@ -117,6 +117,17 @@ def run_checker(filename_env, filename_result, filename_log):
 					stdout=f, stderr=f)
 	return out.returncode == 0
 
+def inflate_obstacles(filename_env_in, filename_env_out, inflation=0.05):
+	with open(filename_env_in, "r") as env_file:
+		env = yaml.safe_load(env_file)
+
+	for o in env["environment"]["obstacles"]:
+		for i in range(len(o["size"])):
+			o["size"][i] += inflation
+
+	with open(filename_env_out, "w") as env_file:
+		yaml.safe_dump(env, env_file, default_flow_style=None)
+
 def execute_task(task: ExecutionTask):
 	results_path = Path("../results")
 	# tuning_path = Path("../tuning")
@@ -142,8 +153,11 @@ def execute_task(task: ExecutionTask):
 		# 	run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env ,result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
 		
 		if task.alg == "opt":
+			# inflate obstacles
+			inflate_obstacles(env, result_folder / "env_inflated.yaml")
+
 			# run_geom -> input:env output: output.yaml
-			run_geom(str(env), str(result_folder), task.timelimit_geom)
+			run_geom(str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_geom)
 
 			# geometric baseline
 
@@ -174,10 +188,13 @@ def execute_task(task: ExecutionTask):
 
 			# optimization-based solution
 
+			# inflate obstacles
+			inflate_obstacles("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, result_folder / "env_inflated.yaml")
+
 			# gen_ref_init_guess -> inp: output.yaml, output: initial guess for optimizer
-			gen_ref_init_guess(str(result_folder), envName="../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env)
+			gen_ref_init_guess(str(result_folder), envName=str(result_folder / "env_inflated.yaml"))
 			# filename_init, filename_env, folder, timelimit
-			run_opt(result_folder / "init_guess.yaml", "../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, str(result_folder), task.timelimit_opt)
+			run_opt(result_folder / "init_guess.yaml", str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_opt)
 			# run_controller -> input: reference trajecetory to be tracked (output.trajopt.yaml), output: controller output (trajectory_opt.yaml)
 			# TODO: do not forget to pass the model path
 			run_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml", "../deps/dynoplan/dynobench/models/" + task.model_path, computeAcc=True)
