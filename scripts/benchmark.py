@@ -38,6 +38,16 @@ def run_geom(filename_env, folder, timelimit):
 	except Exception as e:
 		print(e)
 
+def add_init_cable_states(folder, envName=None):
+	folder = Path(folder)
+	traj = "init_guess.yaml"
+	subprocess.run(["python3",
+			"../scripts/init_cables.py",
+			"--inp", folder / traj,
+			"--out", folder / traj,
+			"--envName", envName], check=True)
+
+
 def gen_ref_init_guess(folder, envName=None):
 	folder = Path(folder)
 	traj = "init_guess.yaml"
@@ -60,27 +70,46 @@ def gen_ref_init_guess(folder, envName=None):
 			"-w", 
 			"-r"], check=True)
 
-def run_controller(folder, reftrajectory, output, model_path, computeAcc=False):
+def run_controller(folder, reftrajectory, output, model_path, computeAcc=False, nocableTrack=False):
 	folder = Path(folder)
-	if computeAcc:
-		# this flag activates -a: it computes the mu_planned based on the reference actions
+	if nocableTrack:
+		print("I AM RUNNING HERE")
 		subprocess.run(["python3",
 			"../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
-				"-cff", "-w", "-a",
-				"--inp", folder / reftrajectory,
-				"--out", folder / output,
-				"--model_path", model_path,
-				"-a",
+			"-cff", "-w", "-noC"
+			"--inp", folder / reftrajectory,
+			"--out", folder / output,
+			"--model_path", model_path,
 			], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"}, check=True)
-	else: 
+
+	else:
 		subprocess.run(["python3",
-			"../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
-				"-cff", "-w",
-				"--inp", folder / reftrajectory,
-				"--out", folder / output,
-				"--model_path", model_path,
-			], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"}, check=True)
-	
+		"../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
+			"-cff", "-w",
+			"--inp", folder / reftrajectory,
+			"--out", folder / output,
+			"--model_path", model_path,
+		], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"}, check=True)
+
+		if computeAcc:
+			# this flag activates -a: it computes the mu_planned based on the reference actions
+			subprocess.run(["python3",
+				"../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
+					"-cff", "-w", "-a",
+					"--inp", folder / reftrajectory,
+					"--out", folder / output,
+					"--model_path", model_path,
+					"-a",
+				], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"}, check=True)
+		else: 
+			subprocess.run(["python3",
+				"../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
+					"-cff", "-w",
+					"--inp", folder / reftrajectory,
+					"--out", folder / output,
+					"--model_path", model_path,
+				], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"}, check=True)
+		
 
 def run_visualizer(filename_env, reference_traj, filename_result, filename_output):
 	subprocess.run(["python3",
@@ -210,9 +239,11 @@ def execute_task(task: ExecutionTask):
 			run_geom(str(env.with_name(env.name.replace("_{}robots.yaml".format(num_robots), "_0robots.yaml"))), str(result_folder), task.timelimit_geom)
 			# gen_ref_init_guess -> inp: output.yaml + "-r" , output: reference trajectory geom_ref_traj.yaml
 			gen_ref_init_guess(str(result_folder)) # dont forget to add -r here for the geom planner reference 
+			add_init_cable_states(str(result_folder), envName=env)
+			
 			#run_controller -> input: reference trajecetory to be tracked (geom_init_guess.yaml), output: controller output (trajectory_geom.yaml)
 			run_controller(result_folder, "init_guess.yaml", "trajectory_geom.yaml", "../deps/dynoplan/dynobench/models/" + task.model_path)
-			# visualize: reference trajectory from the geometric planner, output of controller tracking the ref traj
+			# # visualize: reference trajectory from the geometric planner, output of controller tracking the ref traj
 			run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env ,result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
 	except:
 		traceback.print_exc()
@@ -220,31 +251,31 @@ def execute_task(task: ExecutionTask):
 def main():
 	parallel = True
 	instances = [
-		{ "name": "empty_2robots", "models_path": "point_2.yaml"},
-		{ "name": "empty_3robots", "models_path": "point_3.yaml"},
-		{ "name": "empty_4robots", "models_path": "point_4.yaml"},
-		{ "name": "empty_5robots", "models_path": "point_5.yaml"},
-		{ "name": "empty_6robots", "models_path": "point_6.yaml"},
+		# { "name": "empty_2robots", "models_path": "point_2.yaml"},
+		# { "name": "empty_3robots", "models_path": "point_3.yaml"},
+		# { "name": "empty_4robots", "models_path": "point_4.yaml"},
+		# { "name": "empty_5robots", "models_path": "point_5.yaml"},
+		# { "name": "empty_6robots", "models_path": "point_6.yaml"},
 
 		{ "name": "forest_2robots", "models_path": "point_2.yaml"},
 		{ "name": "forest_3robots", "models_path": "point_3.yaml"},
-		{ "name": "forest_4robots", "models_path": "point_4.yaml"},
-		{ "name": "forest_5robots", "models_path": "point_5.yaml"},
-		{ "name": "forest_6robots", "models_path": "point_6.yaml"},
+		# { "name": "forest_4robots", "models_path": "point_4.yaml"},
+		# { "name": "forest_5robots", "models_path": "point_5.yaml"},
+		# { "name": "forest_6robots", "models_path": "point_6.yaml"},
 
-		{ "name": "maze_2robots", "models_path": "point_2.yaml"},
-		{ "name": "maze_3robots", "models_path": "point_3.yaml"},
-		{ "name": "maze_4robots", "models_path": "point_4.yaml"},
-		{ "name": "maze_5robots", "models_path": "point_5.yaml"},
-		{ "name": "maze_6robots", "models_path": "point_6.yaml"},
+		# { "name": "maze_2robots", "models_path": "point_2.yaml"},
+		# { "name": "maze_3robots", "models_path": "point_3.yaml"},
+		# { "name": "maze_4robots", "models_path": "point_4.yaml"},
+		# { "name": "maze_5robots", "models_path": "point_5.yaml"},
+		# { "name": "maze_6robots", "models_path": "point_6.yaml"},
 	]
 	algs = [
-		"geom",
-		"opt",
-		# "payload",
+		# "geom",
+		# "opt",
+		"payload",
 	]
 	trials = 1
-	timelimit_geom = 30
+	timelimit_geom = 3
 	timelimit_opt = 15*60
 	max_cpus = 32 # limit the number of CPUs due to high memory usage
 
