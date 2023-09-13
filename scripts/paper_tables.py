@@ -36,8 +36,8 @@ def compute_result(result_path, instances, algs, trials):
 			energy = np.sum(power_trials)*0.01/60/60 # Wh
 
 			results[instance][alg] = {
-				"ep_mean": ep_mean,
-				"ep_std": ep_std,
+				"ep_mean": ep_mean if not np.isnan(ep_mean) else None,
+				"ep_std": ep_std if not np.isnan(ep_std) else None,
 				"energy": energy,
 			}
 	return results
