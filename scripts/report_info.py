@@ -21,7 +21,7 @@ class Report:
     def write_info(self, instance, alg, trial):
         result_folder = self.result_path / instance / alg / Path(trial)
         if result_folder.exists():
-            if alg == "geom":
+            if alg == "geom" or alg == "payload":
                 ref_traj_path = result_folder / "init_guess.yaml"
                 act_traj_path = result_folder/ "trajectory_geom.yaml"
                 check_traj_path = result_folder/ "trajectory_geom.check.txt"

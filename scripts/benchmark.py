@@ -233,9 +233,15 @@ def execute_task(task: ExecutionTask):
 						result_folder / "trajectory_opt.yaml", (result_folder / "trajectory_opt.yaml").with_suffix(".check.txt"))
 
 		if task.alg == "payload":
-			# run_geom -> input:env output: output.yaml
+
 			num_robots = int(task.model_path[6])
-			run_geom(str(env.with_name(env.name.replace("_{}robots.yaml".format(num_robots), "_0robots.yaml"))), str(result_folder), task.timelimit_geom)
+			env_0robots = env.with_name(env.name.replace("_{}robots.yaml".format(num_robots), "_0robots.yaml"))
+			# inflate obstacles
+			inflate_obstacles(env_0robots, result_folder / "env_inflated.yaml")
+
+			# run_geom -> input:env output: output.yaml
+			run_geom(str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_geom)
+
 			# gen_ref_init_guess -> inp: output.yaml + "-r" , output: reference trajectory geom_ref_traj.yaml
 			gen_ref_init_guess(str(result_folder)) # dont forget to add -r here for the geom planner reference 
 			add_init_cable_states(str(result_folder), envName=env)
@@ -244,6 +250,10 @@ def execute_task(task: ExecutionTask):
 			run_controller(result_folder, "init_guess.yaml", "trajectory_geom.yaml", "../deps/dynoplan/dynobench/models/" + task.model_path, nocableTrack=True)
 			# # visualize: reference trajectory from the geometric planner, output of controller tracking the ref traj
 			run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env ,result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
+
+			run_checker("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env,
+				result_folder / "trajectory_geom.yaml", (result_folder / "trajectory_geom.yaml").with_suffix(".check.txt"))
+
 	except:
 		traceback.print_exc()
 
@@ -251,27 +261,27 @@ def main():
 	parallel = True
 	instances = [
 		{ "name": "empty_2robots", "models_path": "point_2.yaml"},
-		# { "name": "empty_3robots", "models_path": "point_3.yaml"},
-		# { "name": "empty_4robots", "models_path": "point_4.yaml"},
-		# { "name": "empty_5robots", "models_path": "point_5.yaml"},
-		# { "name": "empty_6robots", "models_path": "point_6.yaml"},
+		{ "name": "empty_3robots", "models_path": "point_3.yaml"},
+		{ "name": "empty_4robots", "models_path": "point_4.yaml"},
+		{ "name": "empty_5robots", "models_path": "point_5.yaml"},
+		{ "name": "empty_6robots", "models_path": "point_6.yaml"},
 
-		# { "name": "forest_2robots", "models_path": "point_2.yaml"},
-		# { "name": "forest_3robots", "models_path": "point_3.yaml"},
-		# { "name": "forest_4robots", "models_path": "point_4.yaml"},
-		# { "name": "forest_5robots", "models_path": "point_5.yaml"},
-		# { "name": "forest_6robots", "models_path": "point_6.yaml"},
+		{ "name": "forest_2robots", "models_path": "point_2.yaml"},
+		{ "name": "forest_3robots", "models_path": "point_3.yaml"},
+		{ "name": "forest_4robots", "models_path": "point_4.yaml"},
+		{ "name": "forest_5robots", "models_path": "point_5.yaml"},
+		{ "name": "forest_6robots", "models_path": "point_6.yaml"},
 
-		# { "name": "maze_2robots", "models_path": "point_2.yaml"},
-		# { "name": "maze_3robots", "models_path": "point_3.yaml"},
-		# { "name": "maze_4robots", "models_path": "point_4.yaml"},
-		# { "name": "maze_5robots", "models_path": "point_5.yaml"},
-		# { "name": "maze_6robots", "models_path": "point_6.yaml"},
+		{ "name": "maze_2robots", "models_path": "point_2.yaml"},
+		{ "name": "maze_3robots", "models_path": "point_3.yaml"},
+		{ "name": "maze_4robots", "models_path": "point_4.yaml"},
+		{ "name": "maze_5robots", "models_path": "point_5.yaml"},
+		{ "name": "maze_6robots", "models_path": "point_6.yaml"},
 	]
 	algs = [
-		# "geom",
-		# "opt",
 		"payload",
+		"geom",
+		"opt",
 	]
 	trials = 1
 	timelimit_geom = 3

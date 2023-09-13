@@ -49,8 +49,42 @@ def gen_pdf(output_path):
 	output_path.with_suffix(".aux").unlink()
 	output_path.with_suffix(".log").unlink()
 
+def print_and_highlight_best_min(key, result, alg, algs, digits=1):
+	out = ""
+	is_best = False
+	if result[alg][key] is not None and result[alg][key] != "*":
+		# we only look at one digit
+		is_best = np.array([round(result[alg][key],1) <= round(result[other][key],1) for other in algs if result[other][key] is not None and result[other][key] != "*"]).all()
+	if is_best:
+		out += r"\bfseries "
+	if result[alg][key] == "*":
+		out += r"$\star$"
+	elif result[alg][key] is not None:
+		out += ("{:."+str(digits)+"f}").format(result[alg][key])
+	else:
+		out += r"\textemdash"
+	return out
+
+def print_and_highlight_best_max(key, result, alg, algs, digits=1):
+	out = ""
+	is_best = False
+	if result[alg][key] is not None and result[alg][key] != "*":
+		# we only look at one digit
+		is_best = np.array([round(result[alg][key],1) >= round(result[other][key],1) for other in algs if result[other][key] is not None and result[other][key] != "*"]).all()
+	if is_best:
+		out += r"\bfseries "
+	if result[alg][key] == "*":
+		out += r"$\star$"
+	elif result[alg][key] is not None:
+		out += ("{:."+str(digits)+"f}").format(result[alg][key])
+	else:
+		out += r"\textemdash"
+	return out
+
+
 def write_table1(result_path, trials):
 	algs = [
+		"payload",
 		"geom",
 		"opt",
 	]
@@ -67,26 +101,40 @@ def write_table1(result_path, trials):
 		f.write(r"\documentclass{standalone}")
 		f.write("\n")
 		f.write(r"\usepackage{xcolor}")
+		f.write(r"\usepackage{multirow}")
 		f.write("\n")
 		f.write(r"\begin{document}")
 		f.write("\n")
 		f.write(r"% GENERATED - DO NOT EDIT - " + output_path.name + "\n")
-		f.write(r"\begin{tabular}{l||l||l||l||l||l||l||l||c}" + "\n")
-		f.write("Environment & Metrics &"+ r" & ".join([str(n)  + " robots" for n in robots]) + r" & \\" + "\n")
+		f.write(r"\begin{tabular}{l|l||l|l|l|l|l}" + "\n")
+		f.write("Environment & Metrics &"+ r" & ".join([str(n)  + " robots" for n in robots]) + r" \\" + "\n")
 
 		for env in envs:
 			f.write(r"\hline" + "\n")
-			f.write(env + " & Error Geom [m] & "+ " & ".join(["{:.2f} {{\\color{{gray}}\\tiny {:.2f} }}".format(r["{}_{}robots".format(env, n)]["geom"]["ep_mean"], r["{}_{}robots".format(env, n)]["geom"]["ep_std"]) 
-					if r["{}_{}robots".format(env, n)]["geom"].get('ep_mean') else "\\hspace{0.4cm}- " for n in robots])  + r" & \\")
-			
-			f.write(env + " & Error Opt [m] & "+ " & ".join(["{:.2f} {{\\color{{gray}}\\tiny {:.2f} }}".format(r["{}_{}robots".format(env, n)]["opt"]["ep_mean"], r["{}_{}robots".format(env, n)]["opt"]["ep_std"]) 
-					if r["{}_{}robots".format(env, n)]["opt"].get('ep_mean') else "\\hspace{0.4cm}- " for n in robots])  + r" & \\")
-			
-			f.write(env + " & Energy Geom [Wh] & "+ " & ".join(["{:.2f}".format(r["{}_{}robots".format(env, n)]["geom"]["energy"]) 
-					if r["{}_{}robots".format(env, n)]["geom"].get('energy') else "\\hspace{0.4cm}- " for n in robots])  + r" & \\")
-			
-			f.write(env + " & Energy Opt [Wh] & "+ " & ".join(["{:.2f}".format(r["{}_{}robots".format(env, n)]["opt"]["energy"]) 
-					if r["{}_{}robots".format(env, n)]["opt"].get('energy') else "\\hspace{0.4cm}- " for n in robots])  + r" & \\")
+			f.write(r"\multirow{6}{*}{" + env + r"}")
+
+			# tracking error
+			for k, alg in enumerate(algs):
+				out = " & Error " + alg + " [m] "
+				for n in robots:
+					inst = "{}_{}robots".format(env, n)
+					out += " & " + print_and_highlight_best_min("ep_mean", r[inst], alg, algs, digits=2)
+					if r[inst][alg]["ep_std"] is not None:
+						out += " {{\\color{{gray}}\\tiny {:.2f} }} ".format(r[inst][alg]["ep_std"])
+				out += r"\\"
+				f.write(out)
+
+			f.write(r"\cline{2-7}" + "\n")
+
+			# energy
+			for alg in algs:
+				out = " & Energy " + alg + " [Wh] "
+				for n in robots:
+					inst = "{}_{}robots".format(env, n)
+					out += " & " + print_and_highlight_best_min("energy", r[inst], alg, algs, digits=2)
+				out += r"\\"
+				f.write(out)
+
 
 		f.write("\n")
 		f.write(r"\end{tabular}")
