@@ -249,6 +249,8 @@ int main(int argc, char* argv[])
     // timelimit to find a solution
     cfg.timelimit = timelimit;
 
+    cfg.sampler = configFile["sampler"].as<std::string>("custom");
+
     // payload shape
     cfg.payloadShape = configFile["payload"]["shape"]["type"].as<std::string>();
 

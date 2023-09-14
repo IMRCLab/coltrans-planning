@@ -43,6 +43,7 @@ public:
     float angle_min;
     float angle_max;
     float interpolate;
+    std::string sampler;
 };
 
 class RobotsWithPayload

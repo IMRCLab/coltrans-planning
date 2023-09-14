@@ -3,6 +3,13 @@ import numpy as np
 import yaml
 import subprocess
 
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+import yaml
+np.set_printoptions(linewidth=np.inf)
+np.set_printoptions(suppress=True)
+from matplotlib.backends.backend_pdf import PdfPages
+
 def compute_result(result_path, instances, algs, trials):
 
 	results = dict()
@@ -143,10 +150,67 @@ def write_table1(result_path, trials):
 
 	gen_pdf(output_path)
 
+def write_plot1(result_path, trials, T):
+	envs = ['forest_3robots', 'forest_3robots_uniform']
+	labels = [ 'forest:3 robots (new sampler)', 'forest:3 robots (uniform)']
+	meancolors = ['r', 'g']
+	stdcolors = ['r','g']
+	with PdfPages(result_path / 'plot1.pdf') as pdf:
+		fig, ax = plt.subplots()
+		ax.grid('True', which='both', axis='x', linestyle='dashed')
+		ax.grid(which='major', axis='y', linestyle='dashed')
+		for env, label, color, stdcolor in zip(envs, labels, meancolors, stdcolors):
+
+			dt = 0.1
+			costs = []
+
+			for trial in trials:
+				filepath = result_path / env / "geom" / trial / "stats.yaml"
+				with open(filepath, "r") as file:
+					stats = yaml.safe_load(file)
+
+				costsperrun = np.zeros(int(T / dt)) * np.nan
+				if stats.get('stats') !=  None:    # ## Maze for 3 robots
+					for d in stats['stats']:
+						idx =  int(d["t"] / dt)
+						costsperrun[idx:] = d["cost"]
+					costs.append(costsperrun)
+			times = np.arange(0, T, dt)
+			
+			costs = np.array(costs)
+			rs = costs.shape[0]
+			cs = costs.shape[1]
+			indices = []
+			for c in range(cs):
+				nanNums = 0
+				for r in range(rs):
+					if np.isnan(costs[r, c]): 
+						nanNums += 1
+				if nanNums > 5:
+					indices.append(c)
+
+			costs = np.delete(costs, indices, axis=1)
+			times = np.delete(times, indices, axis=0)
+			
+			mean = np.nanmean(costs, axis=0)
+			std = np.nanstd(costs, axis=0)
+
+			ax.plot(times, mean, label=label, color=color, lw=2.5)
+			ax.set_xscale('log')
+			ax.fill_between(times, mean+std, mean-std, color=stdcolor, alpha=0.1)
+			ax.legend()
+			ax.set_xlabel("Time [s]")
+			ax.set_ylabel("Cost [s]")
+		# plt.show()
+		pdf.savefig(fig)
+		plt.close()
+
 
 if __name__ == '__main__':
-	trials = ["000"]
-	r = write_table1(Path("../results"), trials)
+	trials = ["000", "001", "002"]
+	# r = write_table1(Path("../results"), trials)
+	T = 300
+	write_plot1(Path("../results"), trials, T)
 
 
 
