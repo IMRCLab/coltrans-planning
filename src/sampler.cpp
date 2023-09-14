@@ -54,56 +54,56 @@ RobotsWithPayloadStateSampler::RobotsWithPayloadStateSampler(
                 //     int idx = rng_.uniformInt(0, valid_cable_states_.size() - 1);
                 //     sampler_cables_->sampleGaussian(comps[2], valid_cable_states_[idx]->as<ob::CompoundState>()->components[2], 0.5);
                 // }
-            } while (!checker.isValid(state));
 
-            // re-arrange to avoid factorial permutation
-            // a) pick a random existing state
-            int idx = rng_.uniformInt(0, valid_cable_states_.size() - 1);
-            auto baseState = valid_cable_states_[idx];
-            // b) compute cost between UAVs
+                // re-arrange to avoid factorial permutation
+                // a) pick a random existing state
+                int idx = rng_.uniformInt(0, valid_cable_states_.size() - 1);
+                auto baseState = valid_cable_states_[idx];
+                // b) compute cost between UAVs
 
-            auto st1 = baseState->as<StateSpace::StateType>();
-            auto st2 = state->as<StateSpace::StateType>();
+                auto st1 = baseState->as<StateSpace::StateType>();
+                auto st2 = state->as<StateSpace::StateType>();
 
-            libMultiRobotPlanning::Assignment<size_t, size_t> assignment;
-            for (size_t i = 0; i < ss_typed->getNumCables(); ++i) {
+                libMultiRobotPlanning::Assignment<size_t, size_t> assignment;
+                for (size_t i = 0; i < ss_typed->getNumCables(); ++i) {
 
-                double length1 = cfg_.cablelengthVec[i];
-                Eigen::Vector3f attachmentPoint1(cfg_.attachmentpoints(0+3*i), cfg_.attachmentpoints(1+3*i), cfg_.attachmentpoints(2+3*i));
-                Eigen::Vector3f pos1 = st1->getuavPos(i, attachmentPoint1, length1);
+                    double length1 = cfg_.cablelengthVec[i];
+                    Eigen::Vector3f attachmentPoint1(cfg_.attachmentpoints(0+3*i), cfg_.attachmentpoints(1+3*i), cfg_.attachmentpoints(2+3*i));
+                    Eigen::Vector3f pos1 = st1->getuavPos(i, attachmentPoint1, length1);
 
-                for (size_t j = 0; j < ss_typed->getNumCables(); ++j) {
+                    for (size_t j = 0; j < ss_typed->getNumCables(); ++j) {
 
-                    double length2 = cfg_.cablelengthVec[j];
-                    Eigen::Vector3f attachmentPoint2(cfg_.attachmentpoints(0+3*j), cfg_.attachmentpoints(1+3*j), cfg_.attachmentpoints(2+3*j));
-                    Eigen::Vector3f pos2 = st2->getuavPos(j, attachmentPoint2, length2);
+                        double length2 = cfg_.cablelengthVec[j];
+                        Eigen::Vector3f attachmentPoint2(cfg_.attachmentpoints(0+3*j), cfg_.attachmentpoints(1+3*j), cfg_.attachmentpoints(2+3*j));
+                        Eigen::Vector3f pos2 = st2->getuavPos(j, attachmentPoint2, length2);
 
-                    double dist = (pos1 - pos2).norm();
-                    int dist_in_mm = dist * 1000;
-                    assignment.setCost(i, j, dist_in_mm);
-                    // std::cout << i << " " << j << " " << dist << " " << pos1 << " " << pos2 << std::endl;
+                        double dist = (pos1 - pos2).norm();
+                        int dist_in_mm = dist * 1000;
+                        assignment.setCost(i, j, dist_in_mm);
+                        // std::cout << i << " " << j << " " << dist << " " << pos1 << " " << pos2 << std::endl;
+                    }
                 }
-            }
 
-            std::map<size_t, size_t> solution;
-            int64_t c = assignment.solve(solution);
+                std::map<size_t, size_t> solution;
+                int64_t c = assignment.solve(solution);
 
-            // std::cout << "solution with cost: " << c << std::endl;
-            // for (const auto& s : solution) {
-            //     std::cout << s.first << ": " << s.second << std::endl;
-            // }
+                // std::cout << "solution with cost: " << c << std::endl;
+                // for (const auto& s : solution) {
+                //     std::cout << s.first << ": " << s.second << std::endl;
+                // }
 
-            // re-arrange
-            auto cablestate = state->as<ob::CompoundState>()->components[2]->as<ob::RealVectorStateSpace::StateType>();
-            std::vector<float> vec;
-            for (int i = 0; i < 2*ss_typed->getNumCables(); ++i) {
-                vec.push_back(cablestate->values[i]);
-            }
+                // re-arrange
+                auto cablestate = state->as<ob::CompoundState>()->components[2]->as<ob::RealVectorStateSpace::StateType>();
+                std::vector<float> vec;
+                for (int i = 0; i < 2*ss_typed->getNumCables(); ++i) {
+                    vec.push_back(cablestate->values[i]);
+                }
 
-            for (const auto& s : solution) {
-                cablestate->values[2*s.first+0] = vec[2*s.second+0];
-                cablestate->values[2*s.first+1] = vec[2*s.second+1]; 
-            }
+                for (const auto& s : solution) {
+                    cablestate->values[2*s.first+0] = vec[2*s.second+0];
+                    cablestate->values[2*s.first+1] = vec[2*s.second+1]; 
+                }
+            } while (!checker.isValid(state));
 
             valid_cable_states_.push_back(state);
             // si->printState(state);
