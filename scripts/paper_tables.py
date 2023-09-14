@@ -248,6 +248,12 @@ def runtime_results(result_path, trials):
 		data.append(trial_runtime)
 	print(data)
 	create_whisker_plot(data, pdfname=result_path /"whiskers_forest.pdf", title="", ylabel="Runtime [s]", xlabel=robots)
+
+
+def plot_iter_vs_error(result_path):
+	
+	pass
+
 if __name__ == '__main__':
 	trials = ["000"]
 	# r = write_table1(Path("../results"), trials)
