@@ -284,7 +284,7 @@ def main():
 		"opt",
 	]
 	trials = 1
-	timelimit_geom = 3
+	timelimit_geom = 60
 	timelimit_opt = 15*60
 	max_cpus = 32 # limit the number of CPUs due to high memory usage
 
