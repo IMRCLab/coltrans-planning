@@ -31,7 +31,7 @@ protected:
     ompl::base::StateSamplerPtr sampler_orientation_;
     ompl::base::StateSamplerPtr sampler_cables_;
 
-    std::vector<ompl::base::State *> valid_cable_states_;
+    static std::vector<ompl::base::State *> valid_cable_states_;
 
     bool uniform_;
 

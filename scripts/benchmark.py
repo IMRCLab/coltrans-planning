@@ -335,15 +335,21 @@ def main():
 		{ "name": "forest_5robots", "models_path": "point_5.yaml"},
 		{ "name": "forest_6robots", "models_path": "point_6.yaml"},
 
-		{ "name": "maze_2robots", "models_path": "point_2.yaml"},
-		{ "name": "maze_3robots", "models_path": "point_3.yaml"},
-		{ "name": "maze_4robots", "models_path": "point_4.yaml"},
-		{ "name": "maze_5robots", "models_path": "point_5.yaml"},
-		{ "name": "maze_6robots", "models_path": "point_6.yaml"},
+		# { "name": "maze_2robots", "models_path": "point_2.yaml"},
+		# { "name": "maze_3robots", "models_path": "point_3.yaml"},
+		# { "name": "maze_4robots", "models_path": "point_4.yaml"},
+		# { "name": "maze_5robots", "models_path": "point_5.yaml"},
+		# { "name": "maze_6robots", "models_path": "point_6.yaml"},
 
-		{ "name": "forest_3robots_uniform", "models_path": "point_3.yaml"},
-		{ "name": "maze_3robots_uniform", "models_path": "point_3.yaml"},
-		{ "name": "maze_4robots_uniform", "models_path": "point_4.yaml"},
+		{ "name": "window_2robots", "models_path": "point_2.yaml"},
+		{ "name": "window_3robots", "models_path": "point_3.yaml"},
+		{ "name": "window_4robots", "models_path": "point_4.yaml"},
+		{ "name": "window_5robots", "models_path": "point_5.yaml"},
+		{ "name": "window_6robots", "models_path": "point_6.yaml"},
+
+		{ "name": "empty_5robots_uniform", "models_path": "point_5.yaml"},
+		{ "name": "forest_4robots_uniform", "models_path": "point_4.yaml"},
+		{ "name": "window_3robots_uniform", "models_path": "point_3.yaml"},
 
 	]
 	algs = [

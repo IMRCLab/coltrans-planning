@@ -151,16 +151,20 @@ def write_table1(result_path, trials):
 	gen_pdf(output_path)
 
 def write_plot1(result_path, trials, T):
-	envs = ['forest_3robots', 'forest_3robots_uniform']
-	labels = [ 'forest:3 robots (new sampler)', 'forest:3 robots (uniform)']
-	meancolors = ['r', 'g']
-	stdcolors = ['r','g']
+	envs = ['empty_5robots', 'empty_5robots_uniform',
+		 'forest_4robots', 'forest_4robots_uniform',
+		 'window_3robots', 'window_3robots_uniform']
+	labels = [ 'empty:5 robots (new sampler)', 'empty:5 robots (uniform)',
+		   'forest:4 robots (new sampler)', 'forest:4 robots (uniform)', 
+		   'window:3 robots (new sampler)', 'window:3 robots (uniform)']
+	meancolors = ['r', 'r', 'g', 'g', 'b', 'b']
+	stdcolors = ['r', 'r', 'g', 'g', 'b', 'b']
+	linestyles = ['solid', 'dashed', 'solid', 'dashed', 'solid', 'dashed']
 	with PdfPages(result_path / 'plot1.pdf') as pdf:
 		fig, ax = plt.subplots()
 		ax.grid('True', which='both', axis='x', linestyle='dashed')
 		ax.grid(which='major', axis='y', linestyle='dashed')
-		for env, label, color, stdcolor in zip(envs, labels, meancolors, stdcolors):
-
+		for env, label, color, stdcolor, linestyle in zip(envs, labels, meancolors, stdcolors, linestyles):
 			dt = 0.1
 			costs = []
 
@@ -195,7 +199,7 @@ def write_plot1(result_path, trials, T):
 			mean = np.nanmean(costs, axis=0)
 			std = np.nanstd(costs, axis=0)
 
-			ax.plot(times, mean, label=label, color=color, lw=2.5)
+			ax.plot(times, mean, label=label, color=color, linestyle=linestyle, lw=2.5)
 			ax.set_xscale('log')
 			ax.fill_between(times, mean+std, mean-std, color=stdcolor, alpha=0.1)
 			ax.legend()
@@ -257,7 +261,7 @@ def plot_iter_vs_error(result_path):
 if __name__ == '__main__':
 	trials = ["000"]
 	# r = write_table1(Path("../results"), trials)
-	T = 300
+	T = 60
 	write_plot1(Path("../results"), trials, T)
 	runtime_results(Path("../results"), trials)
 

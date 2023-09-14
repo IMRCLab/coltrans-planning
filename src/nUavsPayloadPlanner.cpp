@@ -126,6 +126,8 @@ void cablesPayloadPlanner(const plannerSettings& cfg, std::string &outputFile, s
     // print the problem settings
     pdef->print(std::cout);
 
+    std::cout << "Start solve!" << std::endl;
+    start = std::chrono::steady_clock::now();
     ob::PlannerStatus solved = planner->ob::Planner::solve(cfg.timelimit);
 
     if (solved == ob::PlannerStatus::EXACT_SOLUTION) 

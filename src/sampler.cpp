@@ -9,6 +9,9 @@
 
 namespace ob = ompl::base;
 
+// static, so we don't have to recompute multiple times
+std::vector<ompl::base::State *> RobotsWithPayloadStateSampler::valid_cable_states_;
+
 RobotsWithPayloadStateSampler::RobotsWithPayloadStateSampler(
     ompl::base::SpaceInformationPtr si,
     const ob::StateSpace *ss,
@@ -17,6 +20,7 @@ RobotsWithPayloadStateSampler::RobotsWithPayloadStateSampler(
     : StateSampler(ss)
     , robots_(robots)
     , cfg_(cfg)
+    , uniform_(false)
 {
     auto ss_typed = ss->as<StateSpace>();
 
@@ -28,7 +32,8 @@ RobotsWithPayloadStateSampler::RobotsWithPayloadStateSampler(
 
     if (cfg_.sampler == "uniform") {
         uniform_ = true;
-    } else {
+    } else if (valid_cable_states_.size() == 0) {
+
         // sample a number of valid cable states
         std::cout << "Generating valid cable states..." << std::endl;
 
@@ -117,6 +122,8 @@ RobotsWithPayloadStateSampler::RobotsWithPayloadStateSampler(
         std::cout << "Done" << std::endl;
         uniform_ = false;
     }
+
+    std::cout << "uniform sampling: " << uniform_ << std::endl;
 }
 
 #if 0
