@@ -322,6 +322,6 @@ def main():
 
 	paper_tables.write_table1(Path("../results"), trials_)
 	paper_tables.write_plot1(Path("../results"), trials_, timelimit_geom)
-
+	paper_tables.runtime_results(Path("../results"), trials_)
 if __name__ == '__main__':
 	main()

@@ -206,11 +206,53 @@ def write_plot1(result_path, trials, T):
 		plt.close()
 
 
+def create_whisker_plot(data, pdfname="result.pdf", title='Whisker Plot', ylabel='Values', xlabel=[2]):
+    mv = []
+    for d in data:
+        mean = np.mean(d)
+        std = np.std(d)
+        mv.append((mean, std))
+    print(pdfname, '\n', mv)
+    plt.figure()
+    plt.boxplot(data, labels=xlabel, patch_artist=True, boxprops=dict(facecolor='lightblue'), showfliers=True)
+    plt.title(title)
+    plt.xlabel("Number of robots")
+    plt.ylabel(ylabel)
+    # plt.yscale("log")
+    plt.grid()
+    plt.savefig(pdfname)  # Save
+
+
+def runtime_results(result_path, trials):
+	algs = [
+		"opt",
+	]
+	robots = [2, 3, 4, 5, 6]
+	envs = ["forest"]
+
+	instances = ["{}_{}robots".format(env, n) for env in envs for n in robots]
+	runtimes  = dict()
+	data = []
+	for instance in instances:
+		for trial in trials:	
+			trial_runtime = []
+			for alg in algs:
+				trajopt_path = result_path / instance / alg / trial / "output"
+				if trajopt_path.exists():	
+					with open(trajopt_path, "r") as f:
+						trajopt = yaml.safe_load(f)
+					runtimes[instance] = trajopt["info"]["time_ddp_total"] * 1e-3
+				else: 
+					runtimes[instance] = np.nan
+				trial_runtime.append(runtimes[instance])
+		data.append(trial_runtime)
+	print(data)
+	create_whisker_plot(data, pdfname=result_path /"whiskers_forest.pdf", title="", ylabel="Runtime [s]", xlabel=robots)
 if __name__ == '__main__':
-	trials = ["000", "001", "002"]
+	trials = ["000"]
 	# r = write_table1(Path("../results"), trials)
 	T = 300
 	write_plot1(Path("../results"), trials, T)
-
+	runtime_results(Path("../results"), trials)
 
 
