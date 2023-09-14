@@ -140,7 +140,7 @@ def run_opt(filename_init, filename_env, folder, timelimit, t_weight=None, t_ref
 					"--env_file", filename_env,
 					"--models_base_path", "../deps/dynoplan/dynobench/models/",
 					"--results_file", folder / "output",
-					"--t_ref", t_ref],
+					"--time_ref", t_ref],
 					stdout=f, stderr=f, timeout=timelimit, check=True)
 
 		elif t_weight is not None and t_ref is None: 
@@ -151,7 +151,7 @@ def run_opt(filename_init, filename_env, folder, timelimit, t_weight=None, t_ref
 					"--env_file", filename_env,
 					"--models_base_path", "../deps/dynoplan/dynobench/models/",
 					"--results_file", folder / "output",
-					"--t_weight", t_weight],
+					"--time_weight", t_weight],
 					stdout=f, stderr=f, timeout=timelimit, check=True)
 
 		elif t_weight is not None and t_ref is not None: 
@@ -162,8 +162,8 @@ def run_opt(filename_init, filename_env, folder, timelimit, t_weight=None, t_ref
 					"--env_file", filename_env,
 					"--models_base_path", "../deps/dynoplan/dynobench/models/",
 					"--results_file", folder / "output",
-					"--t_weight", t_weight,
-					"--t_ref", t_ref],
+					"--time_weight", t_weight,
+					"--time_ref", t_ref],
 					stdout=f, stderr=f, timeout=timelimit, check=True)
 
 	except Exception as e:
@@ -271,10 +271,10 @@ def execute_task(task: ExecutionTask):
 							result_folder / "trajectory_opt.yaml", (result_folder / "trajectory_opt.yaml").with_suffix(".check.txt"))
 
 				previous_result = result_folder / "output.trajopt.yaml"
-				for i in range(1, 5):
+				for i in range(1, 1):
 					result_folder_i = result_folder / "iter{:02d}".format(i)
 					result_folder_i.mkdir(parents=True, exist_ok=False)
-					run_opt(previous_result, str(result_folder / "env_inflated.yaml"), str(result_folder_i), task.timelimit_opt, t_weight="0.9", t_ref="0.2")
+					run_opt(previous_result, str(result_folder / "env_inflated.yaml"), str(result_folder_i), task.timelimit_opt, t_weight="3.0", t_ref="0.8")
 					previous_result = result_folder_i / "output.trajopt.yaml"
 
 				# only run visualizer and checker on last iteration
@@ -324,35 +324,35 @@ def main():
 	parallel = True
 	instances = [
 		{ "name": "empty_2robots", "models_path": "point_2.yaml"},
-		# { "name": "empty_3robots", "models_path": "point_3.yaml"},
-		# { "name": "empty_4robots", "models_path": "point_4.yaml"},
-		# { "name": "empty_5robots", "models_path": "point_5.yaml"},
-		# { "name": "empty_6robots", "models_path": "point_6.yaml"},
+		{ "name": "empty_3robots", "models_path": "point_3.yaml"},
+		{ "name": "empty_4robots", "models_path": "point_4.yaml"},
+		{ "name": "empty_5robots", "models_path": "point_5.yaml"},
+		{ "name": "empty_6robots", "models_path": "point_6.yaml"},
 
-		# { "name": "forest_2robots", "models_path": "point_2.yaml"},
-		# { "name": "forest_3robots", "models_path": "point_3.yaml"},
-		# { "name": "forest_4robots", "models_path": "point_4.yaml"},
-		# { "name": "forest_5robots", "models_path": "point_5.yaml"},
-		# { "name": "forest_6robots", "models_path": "point_6.yaml"},
+		{ "name": "forest_2robots", "models_path": "point_2.yaml"},
+		{ "name": "forest_3robots", "models_path": "point_3.yaml"},
+		{ "name": "forest_4robots", "models_path": "point_4.yaml"},
+		{ "name": "forest_5robots", "models_path": "point_5.yaml"},
+		{ "name": "forest_6robots", "models_path": "point_6.yaml"},
 
-		# { "name": "maze_2robots", "models_path": "point_2.yaml"},
-		# { "name": "maze_3robots", "models_path": "point_3.yaml"},
-		# { "name": "maze_4robots", "models_path": "point_4.yaml"},
-		# { "name": "maze_5robots", "models_path": "point_5.yaml"},
-		# { "name": "maze_6robots", "models_path": "point_6.yaml"},
+		{ "name": "maze_2robots", "models_path": "point_2.yaml"},
+		{ "name": "maze_3robots", "models_path": "point_3.yaml"},
+		{ "name": "maze_4robots", "models_path": "point_4.yaml"},
+		{ "name": "maze_5robots", "models_path": "point_5.yaml"},
+		{ "name": "maze_6robots", "models_path": "point_6.yaml"},
 
 		{ "name": "forest_3robots_uniform", "models_path": "point_3.yaml"},
-		# { "name": "maze_3robots_uniform", "models_path": "point_3.yaml"},
-		# { "name": "maze_4robots_uniform", "models_path": "point_4.yaml"},
+		{ "name": "maze_3robots_uniform", "models_path": "point_3.yaml"},
+		{ "name": "maze_4robots_uniform", "models_path": "point_4.yaml"},
 
 	]
 	algs = [
-		# "payload",
-		# "geom",
+		"payload",
+		"geom",
 		"opt",
 	]
 	trials = 1
-	timelimit_geom = 60
+	timelimit_geom = 10
 	timelimit_opt = 15*60
 	max_cpus = 32 # limit the number of CPUs due to high memory usage
 
