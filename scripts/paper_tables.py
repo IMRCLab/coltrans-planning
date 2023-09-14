@@ -96,7 +96,7 @@ def write_table1(result_path, trials):
 		"opt",
 	]
 	robots = [2,3,4,5,6]
-	envs = ["empty", "forest", "maze"]
+	envs = ["empty", "forest", "window"]
 
 	instances = ["{}_{}robots".format(env, n) for env in envs for n in robots]
 
