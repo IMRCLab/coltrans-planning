@@ -230,7 +230,7 @@ def execute_task(task: ExecutionTask):
 			# geometric baseline
 
 			# gen_ref_init_guess -> inp: output.yaml + "-r" , output: reference trajectory geom_ref_traj.yaml
-			gen_ref_init_guess(str(result_folder), "../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env) 
+			gen_ref_init_guess(str(result_folder)) 
 			#run_controller -> input: reference trajecetory to be tracked (geom_init_guess.yaml), output: controller output (trajectory_geom.yaml)
 			run_controller(result_folder, "init_guess.yaml", "trajectory_geom.yaml", "../deps/dynoplan/dynobench/models/" + task.model_path)
 
@@ -257,7 +257,7 @@ def execute_task(task: ExecutionTask):
 				inflate_obstacles("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, result_folder / "env_inflated.yaml")
 
 				# gen_ref_init_guess -> inp: output.yaml, output: initial guess for optimizer
-				gen_ref_init_guess(str(result_folder), envName="../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env)
+				gen_ref_init_guess(str(result_folder), envName=result_folder / "env_inflated.yaml")
 
 				# filename_init, filename_env, folder, timelimit
 				run_opt(result_folder / "init_guess.yaml", str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_opt)
@@ -310,7 +310,7 @@ def execute_task(task: ExecutionTask):
 			run_geom(str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_geom)
 
 			# gen_ref_init_guess -> inp: output.yaml + "-r" , output: reference trajectory geom_ref_traj.yaml
-			gen_ref_init_guess(str(result_folder), envName="../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env) # dont forget to add -r here for the geom planner reference 
+			gen_ref_init_guess(str(result_folder)) # dont forget to add -r here for the geom planner reference 
 			add_init_cable_states(str(result_folder), envName=env)
 			
 			#run_controller -> input: reference trajecetory to be tracked (geom_init_guess.yaml), output: controller output (trajectory_geom.yaml)
@@ -364,7 +364,7 @@ def main():
 		"opt",
 	]
 	trials = 1
-	timelimit_geom = 10
+	timelimit_geom = 300
 	timelimit_opt = 15*60
 	max_cpus = 32 # limit the number of CPUs due to high memory usage
 
