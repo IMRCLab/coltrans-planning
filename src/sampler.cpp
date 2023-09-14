@@ -32,21 +32,23 @@ RobotsWithPayloadStateSampler::RobotsWithPayloadStateSampler(
         // sample a number of valid cable states
         std::cout << "Generating valid cable states..." << std::endl;
 
-        fclStateValidityChecker checker(si, robots, std::make_shared<Obstacles>(), cfg);
+        // fclStateValidityChecker checker(si, robots, std::make_shared<Obstacles>(), cfg);
 
         auto startState = si->allocState();
         si->getStateSpace()->copyFromReals(startState, eigentoStd(cfg.start));
         valid_cable_states_.push_back(startState);
 
 
-        for (size_t i = 0; i < 1000; ++i) {
-            auto state = ss->allocState();
+        for (size_t i = 0; i < 100; ++i) {
+            // take the position/orientation from the start to guarantee collision-free operation
+            auto state = ss->cloneState(startState);
             // sampleValidCables(state);
             // std::cout << i << std::endl;
+            bool motionValid;
             do {
                 ob::State **comps = state->as<ob::CompoundState>()->components;
-                sampler_pos_->sampleUniform(comps[0]);
-                sampler_orientation_->sampleUniform(comps[1]);
+                // sampler_pos_->sampleUniform(comps[0]);
+                // sampler_orientation_->sampleUniform(comps[1]);
                 if (ss_typed->getNumCables() > 0) {
                     sampler_cables_->sampleUniform(comps[2]);
                 }
@@ -103,7 +105,11 @@ RobotsWithPayloadStateSampler::RobotsWithPayloadStateSampler(
                     cablestate->values[2*s.first+0] = vec[2*s.second+0];
                     cablestate->values[2*s.first+1] = vec[2*s.second+1]; 
                 }
-            } while (!checker.isValid(state));
+
+                motionValid = si->checkMotion(baseState, state);
+                // std::cout << m << std::endl;
+
+            } while (!si->isValid(state) || !motionValid);
 
             valid_cable_states_.push_back(state);
             // si->printState(state);
@@ -189,7 +195,7 @@ void RobotsWithPayloadStateSampler::sampleUniform(ompl::base::State *state)
         auto ss_typed = space_->as<StateSpace>();
         if (ss_typed->getNumCables() > 0) {
             int idx = rng_.uniformInt(0, valid_cable_states_.size() - 1);
-            sampler_cables_->sampleGaussian(comps[2], valid_cable_states_[idx]->as<ob::CompoundState>()->components[2], 0.2);
+            sampler_cables_->sampleGaussian(comps[2], valid_cable_states_[idx]->as<ob::CompoundState>()->components[2], 0.05);
         }
     }
 
