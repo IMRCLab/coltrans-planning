@@ -163,12 +163,6 @@ def execute_task(task: ExecutionTask):
 	env = (env_path / task.instance).with_suffix(".yaml")
 	assert(env.is_file())
 
-	result_folder = results_path / task.instance / task.alg / "{:03d}".format(task.trial)
-	if result_folder.exists():
-			print("Warning! {} exists already. Deleting...".format(result_folder))
-			shutil.rmtree(result_folder)
-	result_folder.mkdir(parents=True, exist_ok=False)
-
 	try:
 		# if task.alg == "geom":
 		# 	# run_geom -> input:env output: output.yaml
@@ -180,7 +174,15 @@ def execute_task(task: ExecutionTask):
 		# 	# visualize: reference trajectory from the geometric planner, output of controller tracking the ref traj
 		# 	run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env ,result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
 		
-		if task.alg == "opt":
+		if task.alg == "opt" or task.alg == "geom":
+
+			result_folder = results_path / task.instance / "geom" / "{:03d}".format(task.trial)
+			if result_folder.exists():
+					print("Warning! {} exists already. Deleting...".format(result_folder))
+					shutil.rmtree(result_folder)
+			result_folder.mkdir(parents=True, exist_ok=False)
+
+
 			# inflate obstacles
 			inflate_obstacles(env, result_folder / "env_inflated.yaml")
 
@@ -199,40 +201,43 @@ def execute_task(task: ExecutionTask):
 			run_checker("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env,
 						result_folder / "trajectory_geom.yaml", (result_folder / "trajectory_geom.yaml").with_suffix(".check.txt"))
 
-			# now copy/move the resulting files
-			result_folder2 = results_path / task.instance / "geom" / "{:03d}".format(task.trial)
-			if result_folder2.exists():
-					print("Warning! {} exists already. Deleting...".format(result_folder2))
-					shutil.rmtree(result_folder2)
-			result_folder2.mkdir(parents=True, exist_ok=False)
-			shutil.move(result_folder / "init_guess.yaml", result_folder2)
-			shutil.move(result_folder / "log.txt", result_folder2)
-			shutil.copy(result_folder / "output.yaml", result_folder2)
-			if (result_folder / "stats.yaml").exists():
-				shutil.move(result_folder / "stats.yaml", result_folder2)
-			shutil.move(result_folder / "trajectory_geom.html", result_folder2)
-			shutil.move(result_folder / "trajectory_geom.yaml", result_folder2)
-			shutil.move(result_folder / "trajectory_geom.check.txt", result_folder2)
 
 			# optimization-based solution
+			if task.alg == "opt":
 
-			# inflate obstacles
-			inflate_obstacles("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, result_folder / "env_inflated.yaml")
+				result_folder_geom = result_folder
+				result_folder = results_path / task.instance / "opt" / "{:03d}".format(task.trial)
+				if result_folder.exists():
+						print("Warning! {} exists already. Deleting...".format(result_folder))
+						shutil.rmtree(result_folder)
+				result_folder.mkdir(parents=True, exist_ok=False)
 
-			# gen_ref_init_guess -> inp: output.yaml, output: initial guess for optimizer
-			gen_ref_init_guess(str(result_folder), envName=str(result_folder / "env_inflated.yaml"))
-			# filename_init, filename_env, folder, timelimit
-			run_opt(result_folder / "init_guess.yaml", str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_opt)
-			# run_controller -> input: reference trajecetory to be tracked (output.trajopt.yaml), output: controller output (trajectory_opt.yaml)
-			# TODO: do not forget to pass the model path
-			run_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml", "../deps/dynoplan/dynobench/models/" + task.model_path, computeAcc=True)
-			# filename_env, reference_traj, filename_result, filename_output
-			run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, result_folder / "output.trajopt.yaml", result_folder / "trajectory_opt.yaml", result_folder / "trajectory_opt.html")
+				# copy output.yaml file
+				shutil.copy(result_folder_geom / "output.yaml", result_folder)
 
-			run_checker("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env,
-						result_folder / "trajectory_opt.yaml", (result_folder / "trajectory_opt.yaml").with_suffix(".check.txt"))
+				# inflate obstacles
+				inflate_obstacles("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, result_folder / "env_inflated.yaml")
+
+				# gen_ref_init_guess -> inp: output.yaml, output: initial guess for optimizer
+				gen_ref_init_guess(str(result_folder), envName=str(result_folder / "env_inflated.yaml"))
+				# filename_init, filename_env, folder, timelimit
+				run_opt(result_folder / "init_guess.yaml", str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_opt)
+				# run_controller -> input: reference trajecetory to be tracked (output.trajopt.yaml), output: controller output (trajectory_opt.yaml)
+				# TODO: do not forget to pass the model path
+				run_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml", "../deps/dynoplan/dynobench/models/" + task.model_path, computeAcc=True)
+				# filename_env, reference_traj, filename_result, filename_output
+				run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, result_folder / "output.trajopt.yaml", result_folder / "trajectory_opt.yaml", result_folder / "trajectory_opt.html")
+
+				run_checker("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env,
+							result_folder / "trajectory_opt.yaml", (result_folder / "trajectory_opt.yaml").with_suffix(".check.txt"))
 
 		if task.alg == "payload":
+
+			result_folder = results_path / task.instance / task.alg / "{:03d}".format(task.trial)
+			if result_folder.exists():
+					print("Warning! {} exists already. Deleting...".format(result_folder))
+					shutil.rmtree(result_folder)
+			result_folder.mkdir(parents=True, exist_ok=False)
 
 			num_robots = int(task.model_path[6])
 			env_0robots = env.with_name(env.name.replace("_{}robots.yaml".format(num_robots), "_0robots.yaml"))
@@ -277,6 +282,11 @@ def main():
 		{ "name": "maze_4robots", "models_path": "point_4.yaml"},
 		{ "name": "maze_5robots", "models_path": "point_5.yaml"},
 		{ "name": "maze_6robots", "models_path": "point_6.yaml"},
+
+		{ "name": "forest_3robots_uniform", "models_path": "point_3.yaml"},
+		# { "name": "maze_3robots_uniform", "models_path": "point_3.yaml"},
+		# { "name": "maze_4robots_uniform", "models_path": "point_4.yaml"},
+
 	]
 	algs = [
 		"payload",
@@ -290,10 +300,10 @@ def main():
 
 	tasks = []
 	for instance in instances:
-		env = instance["name"] + ".yaml"
+		env = instance["name"].replace("_uniform", "") + ".yaml"
 		for alg in algs:
 			# "geom" is implicitly executed with "opt", so don't execute here
-			if alg == "geom":
+			if alg == "geom" and "opt" in algs:
 				continue
 			for trial in range(trials):
 				tasks.append(ExecutionTask(instance["name"], env, instance["models_path"], alg, trial, timelimit_geom, timelimit_opt))
@@ -311,6 +321,7 @@ def main():
 	compute_errors([instance["name"] for instance in instances], algs, trials_)
 
 	paper_tables.write_table1(Path("../results"), trials_)
+	paper_tables.write_plot1(Path("../results"), trials_, timelimit_geom)
 
 if __name__ == '__main__':
 	main()
