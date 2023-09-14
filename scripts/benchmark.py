@@ -221,8 +221,31 @@ def execute_task(task: ExecutionTask):
 
 				# gen_ref_init_guess -> inp: output.yaml, output: initial guess for optimizer
 				gen_ref_init_guess(str(result_folder), envName=str(result_folder / "env_inflated.yaml"))
+				
+
+				
 				# filename_init, filename_env, folder, timelimit
 				run_opt(result_folder / "init_guess.yaml", str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_opt)
+
+				# run_controller -> input: reference trajecetory to be tracked (output.trajopt.yaml), output: controller output (trajectory_opt.yaml)
+				# TODO: do not forget to pass the model path
+				run_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml", "../deps/dynoplan/dynobench/models/" + task.model_path, computeAcc=True)
+				# filename_env, reference_traj, filename_result, filename_output
+				run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, result_folder / "output.trajopt.yaml", result_folder / "trajectory_opt.yaml", result_folder / "trajectory_opt.html")
+
+				run_checker("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env,
+							result_folder / "trajectory_opt.yaml", (result_folder / "trajectory_opt.yaml").with_suffix(".check.txt"))
+
+				previous_result = result_folder / "output.trajopt.yaml"
+				for i in range(1, 1):
+					result_folder_i = result_folder / "iter{:02d}".format(i)
+					result_folder_i.mkdir(parents=True, exist_ok=False)
+					run_opt(previous_result, str(result_folder / "env_inflated.yaml"), str(result_folder_i), task.timelimit_opt)
+					previous_result = result_folder_i / "output.trajopt.yaml"
+
+				# only run visualizer and checker on last iteration
+				result_folder = previous_result.parent
+
 				# run_controller -> input: reference trajecetory to be tracked (output.trajopt.yaml), output: controller output (trajectory_opt.yaml)
 				# TODO: do not forget to pass the model path
 				run_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml", "../deps/dynoplan/dynobench/models/" + task.model_path, computeAcc=True)
