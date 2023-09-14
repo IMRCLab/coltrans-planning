@@ -220,7 +220,8 @@ def execute_task(task: ExecutionTask):
 				inflate_obstacles("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, result_folder / "env_inflated.yaml")
 
 				# gen_ref_init_guess -> inp: output.yaml, output: initial guess for optimizer
-				gen_ref_init_guess(str(result_folder), envName=str(result_folder / "env_inflated.yaml"))
+				gen_ref_init_guess(str(result_folder), envName="../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env)
+
 				# filename_init, filename_env, folder, timelimit
 				run_opt(result_folder / "init_guess.yaml", str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_opt)
 				# run_controller -> input: reference trajecetory to be tracked (output.trajopt.yaml), output: controller output (trajectory_opt.yaml)
