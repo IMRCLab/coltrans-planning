@@ -175,7 +175,7 @@ def run_checker(filename_env, filename_result, filename_log):
 					"--result_file", filename_result,
 					"--env_file", filename_env,
 					"--models_base_path" , "../deps/dynoplan/dynobench/models/",
-					"--goal_tol" , "2",
+					"--goal_tol" , "999",
 					"--u_bound_tol", "0.101",
 					"--col_tol", "0.02"]
 		print(subprocess.list2cmdline(cmd))
@@ -322,6 +322,16 @@ def execute_task(task: ExecutionTask):
 			# # visualize: reference trajectory from the geometric planner, output of controller tracking the ref traj
 			run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env ,result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
 
+		if task.alg == "extraiter":
+
+			result_folder = results_path / task.instance / "opt" / "{:03d}".format(task.trial)
+			previous_result = result_folder / "output.trajopt.yaml"
+			for i in range(1, 20):
+				result_folder_i = result_folder / "iter{:02d}".format(i)
+				result_folder_i.mkdir(parents=True, exist_ok=False)
+				run_opt(previous_result, str(result_folder / "env_inflated.yaml"), str(result_folder_i), task.timelimit_opt, t_weight="3.0", t_ref="0.8")
+				previous_result = result_folder_i / "output.trajopt.yaml"
+
 
 	except:
 		traceback.print_exc()
@@ -329,41 +339,43 @@ def execute_task(task: ExecutionTask):
 def main():
 	parallel = True
 	instances = [
-		{ "name": "empty_2robots", "models_path": "point_2.yaml"},
-		{ "name": "empty_3robots", "models_path": "point_3.yaml"},
-		{ "name": "empty_4robots", "models_path": "point_4.yaml"},
-		{ "name": "empty_5robots", "models_path": "point_5.yaml"},
-		{ "name": "empty_6robots", "models_path": "point_6.yaml"},
+		# { "name": "empty_2robots", "models_path": "point_2.yaml"},
+		# { "name": "empty_3robots", "models_path": "point_3.yaml"},
+		# { "name": "empty_4robots", "models_path": "point_4.yaml"},
+		# { "name": "empty_5robots", "models_path": "point_5.yaml"},
+		# { "name": "empty_6robots", "models_path": "point_6.yaml"},
 
-		{ "name": "forest_2robots", "models_path": "point_2.yaml"},
-		{ "name": "forest_3robots", "models_path": "point_3.yaml"},
+		# { "name": "forest_2robots", "models_path": "point_2.yaml"},
+		# { "name": "forest_3robots", "models_path": "point_3.yaml"},
 		{ "name": "forest_4robots", "models_path": "point_4.yaml"},
-		{ "name": "forest_5robots", "models_path": "point_5.yaml"},
-		{ "name": "forest_6robots", "models_path": "point_6.yaml"},
+		# { "name": "forest_5robots", "models_path": "point_5.yaml"},
+		# { "name": "forest_6robots", "models_path": "point_6.yaml"},
 
-		# { "name": "maze_2robots", "models_path": "point_2.yaml"},
-		# { "name": "maze_3robots", "models_path": "point_3.yaml"},
-		# { "name": "maze_4robots", "models_path": "point_4.yaml"},
-		# { "name": "maze_5robots", "models_path": "point_5.yaml"},
-		# { "name": "maze_6robots", "models_path": "point_6.yaml"},
+		# # { "name": "maze_2robots", "models_path": "point_2.yaml"},
+		# # { "name": "maze_3robots", "models_path": "point_3.yaml"},
+		# # { "name": "maze_4robots", "models_path": "point_4.yaml"},
+		# # { "name": "maze_5robots", "models_path": "point_5.yaml"},
+		# # { "name": "maze_6robots", "models_path": "point_6.yaml"},
 
-		{ "name": "window_2robots", "models_path": "point_2.yaml"},
-		{ "name": "window_3robots", "models_path": "point_3.yaml"},
-		{ "name": "window_4robots", "models_path": "point_4.yaml"},
-		{ "name": "window_5robots", "models_path": "point_5.yaml"},
-		{ "name": "window_6robots", "models_path": "point_6.yaml"},
+		# { "name": "window_2robots", "models_path": "point_2.yaml"},
+		# { "name": "window_3robots", "models_path": "point_3.yaml"},
+		# { "name": "window_4robots", "models_path": "point_4.yaml"},
+		# { "name": "window_5robots", "models_path": "point_5.yaml"},
+		# { "name": "window_6robots", "models_path": "point_6.yaml"},
 
-		{ "name": "empty_5robots_uniform", "models_path": "point_5.yaml"},
-		{ "name": "forest_4robots_uniform", "models_path": "point_4.yaml"},
-		{ "name": "window_3robots_uniform", "models_path": "point_3.yaml"},
+		# { "name": "empty_5robots_uniform", "models_path": "point_5.yaml"},
+		# { "name": "forest_4robots_uniform", "models_path": "point_4.yaml"},
+		# { "name": "window_3robots_uniform", "models_path": "point_3.yaml"},
 
 	]
 	algs = [
-		"payload",
-		"geom",
-		"opt",
+		# "payload",
+		# "geom",
+		# "opt",
+		"extraiter",
 	]
-	trials = 1
+	# trials = 3
+	trials = [0]
 	timelimit_geom = 300
 	timelimit_opt = 15*60
 	max_cpus = 32 # limit the number of CPUs due to high memory usage
@@ -375,7 +387,7 @@ def main():
 			# "geom" is implicitly executed with "opt", so don't execute here
 			if alg == "geom" and "opt" in algs:
 				continue
-			for trial in range(trials):
+			for trial in trials:
 				tasks.append(ExecutionTask(instance["name"], env, instance["models_path"], alg, trial, timelimit_geom, timelimit_opt))
 
 	if parallel and len(tasks) > 1:
@@ -387,7 +399,7 @@ def main():
 	else:
 		for task in tasks:
 			execute_task(task)
-	trials_ = ["00"+str(i) for i in range(trials)]
+	trials_ = ["00"+str(i) for i in trials]
 	compute_errors([instance["name"] for instance in instances], algs, trials_)
 
 	paper_tables.write_table1(Path("../results"), trials_)

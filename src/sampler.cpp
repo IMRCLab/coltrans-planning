@@ -35,7 +35,8 @@ RobotsWithPayloadStateSampler::RobotsWithPayloadStateSampler(
     } else if (valid_cable_states_.size() == 0) {
 
         // sample a number of valid cable states
-        std::cout << "Generating valid cable states..." << std::endl;
+        const size_t num_cable_states = 1000;
+        std::cout << "Generating " << num_cable_states << " cable states..." << std::endl;
 
         // fclStateValidityChecker checker(si, robots, std::make_shared<Obstacles>(), cfg);
 
@@ -44,7 +45,7 @@ RobotsWithPayloadStateSampler::RobotsWithPayloadStateSampler(
         valid_cable_states_.push_back(startState);
 
 
-        for (size_t i = 0; i < 100; ++i) {
+        for (size_t i = 0; i < num_cable_states; ++i) {
             // take the position/orientation from the start to guarantee collision-free operation
             auto state = ss->cloneState(startState);
             // sampleValidCables(state);
