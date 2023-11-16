@@ -339,40 +339,41 @@ def execute_task(task: ExecutionTask):
 def main():
 	parallel = True
 	instances = [
-		# { "name": "empty_2robots", "models_path": "point_2.yaml"},
-		# { "name": "empty_3robots", "models_path": "point_3.yaml"},
-		# { "name": "empty_4robots", "models_path": "point_4.yaml"},
-		# { "name": "empty_5robots", "models_path": "point_5.yaml"},
-		# { "name": "empty_6robots", "models_path": "point_6.yaml"},
+		{ "name": "empty_2robots", "models_path": "point_2.yaml"},
+		{ "name": "empty_3robots", "models_path": "point_3.yaml"},
+		{ "name": "empty_4robots", "models_path": "point_4.yaml"},
+		{ "name": "empty_5robots", "models_path": "point_5.yaml"},
+		{ "name": "empty_6robots", "models_path": "point_6.yaml"},
 
-		# { "name": "forest_2robots", "models_path": "point_2.yaml"},
-		# { "name": "forest_3robots", "models_path": "point_3.yaml"},
+		{ "name": "forest_2robots", "models_path": "point_2.yaml"},
+		{ "name": "forest_3robots", "models_path": "point_3.yaml"},
 		{ "name": "forest_4robots", "models_path": "point_4.yaml"},
-		# { "name": "forest_5robots", "models_path": "point_5.yaml"},
-		# { "name": "forest_6robots", "models_path": "point_6.yaml"},
+		{ "name": "forest_5robots", "models_path": "point_5.yaml"},
+		{ "name": "forest_6robots", "models_path": "point_6.yaml"},
 
-		# # { "name": "maze_2robots", "models_path": "point_2.yaml"},
-		# # { "name": "maze_3robots", "models_path": "point_3.yaml"},
-		# # { "name": "maze_4robots", "models_path": "point_4.yaml"},
-		# # { "name": "maze_5robots", "models_path": "point_5.yaml"},
-		# # { "name": "maze_6robots", "models_path": "point_6.yaml"},
+		{ "name": "maze_2robots", "models_path": "point_2.yaml"},
+		{ "name": "maze_3robots", "models_path": "point_3.yaml"},
+		{ "name": "maze_4robots", "models_path": "point_4.yaml"},
+		{ "name": "maze_5robots", "models_path": "point_5.yaml"},
+		{ "name": "maze_6robots", "models_path": "point_6.yaml"},
 
-		# { "name": "window_2robots", "models_path": "point_2.yaml"},
-		# { "name": "window_3robots", "models_path": "point_3.yaml"},
-		# { "name": "window_4robots", "models_path": "point_4.yaml"},
-		# { "name": "window_5robots", "models_path": "point_5.yaml"},
-		# { "name": "window_6robots", "models_path": "point_6.yaml"},
+		{ "name": "window_2robots", "models_path": "point_2.yaml"},
+		{ "name": "window_3robots", "models_path": "point_3.yaml"},
+		{ "name": "window_4robots", "models_path": "point_4.yaml"},
+		{ "name": "window_5robots", "models_path": "point_5.yaml"},
+		{ "name": "window_6robots", "models_path": "point_6.yaml"},
 
-		# { "name": "empty_5robots_uniform", "models_path": "point_5.yaml"},
-		# { "name": "forest_4robots_uniform", "models_path": "point_4.yaml"},
-		# { "name": "window_3robots_uniform", "models_path": "point_3.yaml"},
+		{ "name": "empty_5robots_uniform", "models_path": "point_5.yaml"},
+		{ "name": "forest_4robots_uniform", "models_path": "point_4.yaml"},
+		{ "name": "window_3robots_uniform", "models_path": "point_3.yaml"},
+		{ "name": "takeoff_2robots", "models_path": "point_2.yaml"},
 
 	]
 	algs = [
-		# "payload",
-		# "geom",
-		# "opt",
-		"extraiter",
+		"payload",
+		"geom",
+		"opt",
+		# "extraiter",
 	]
 	# trials = 3
 	trials = [0]
