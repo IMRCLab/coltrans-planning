@@ -76,7 +76,7 @@ void RobotsWithPayload::addRobotParts(const plannerSettings& cfg)
         cablesObj.push_back(cableco);
 
         std::shared_ptr<fcl::CollisionGeometryf> uavgeom;
-        uavgeom.reset(new fcl::Spheref(0.1));
+        uavgeom.reset(new fcl::Spheref(0.15));
         auto uavco = new fcl::CollisionObjectf(uavgeom);
         uavco->setTranslation(fcl::Vector3f(0,0,0));
         uavco->computeAABB();
