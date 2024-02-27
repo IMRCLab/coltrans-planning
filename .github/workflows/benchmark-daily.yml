@@ -36,6 +36,7 @@ jobs:
         make bindings_python -j ${{env.JOBS}}
 
     - name: Run Benchmark
+      timeout-minutes: 480 # 8 hours
       run: |
         cd ${{github.workspace}}/build
         python3 ../scripts/benchmark.py
