@@ -40,6 +40,7 @@ public:
     std::string payloadShape;
     size_t numofcables;
     float timelimit;
+    float robot_radius;
     float angle_min;
     float angle_max;
     float interpolate;
