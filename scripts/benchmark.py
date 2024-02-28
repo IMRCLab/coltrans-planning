@@ -376,7 +376,7 @@ def main():
 		# "extraiter",
 	]
 	# trials = 3
-	trials = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+	trials = [0] #[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 	timelimit_geom = 300
 	timelimit_opt = 15*60
 	max_cpus = 32 # limit the number of CPUs due to high memory usage
