@@ -310,6 +310,10 @@ def execute_task(task: ExecutionTask):
 			# inflate obstacles
 			inflate_obstacles(env_0robots, result_folder / "env_inflated.yaml")
 
+			with open("../deps/dynoplan/dynobench/models/" + task.model_path, "r") as f:
+				model_params = yaml.load(f,Loader=yaml.CSafeLoader)
+			robot_radius = model_params["col_size_robot"]
+
 			# run_geom -> input:env output: output.yaml
 			run_geom(str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_geom, robot_radius)
 
