@@ -34,7 +34,7 @@ def run_geom(filename_env, folder, timelimit):
 						"--output", folder / "output.yaml",
 						"--stats" , folder / "stats.yaml",
 						"--timelimit", str(timelimit)],
-						stdout=f, stderr=f, check=True)
+						stdout=f, stderr=f, check=True, timeout=timelimit+60)
 	except Exception as e:
 		print(e)
 
