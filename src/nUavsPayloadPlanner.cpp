@@ -218,6 +218,7 @@ int main(int argc, char* argv[])
     // Declare the supported options.
     po::options_description desc("Allowed options");
     float timelimit;
+    float robot_radius;
     std::string inputFile;
     std::string outputFile;
     std::string statsFile;
@@ -226,7 +227,8 @@ int main(int argc, char* argv[])
         ("help", "produce help message")
         ("input,i", po::value<std::string>(&inputFile)->required(), "input file (yaml)")
         ("output,o", po::value<std::string>(&outputFile)->required(), "output file (yaml)")
-        ("timelimit", po::value<float>(&timelimit)->default_value(300), "input file (yaml)")
+        ("timelimit", po::value<float>(&timelimit)->default_value(300), "timelimit for the planner")
+        ("robot_radius", po::value<float>(&robot_radius)->default_value(0.1), "robot radius")
         ("stats", po::value<std::string>(&statsFile)->default_value("ompl_stats.yaml"), "output file (yaml)");
 
     try {
@@ -245,7 +247,8 @@ int main(int argc, char* argv[])
 
     YAML::Node configFile = YAML::LoadFile(inputFile);
     plannerSettings cfg;
-    
+    // robot radius
+    cfg.robot_radius = robot_radius;
     // planner type
     cfg.plannerType = configFile["plannerType"].as<std::string>();
     // timelimit to find a solution
