@@ -390,7 +390,7 @@ def main():
 		# "extraiter",
 	]
 	# trials = 3
-	trials = [0]#, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+	trials = [i for i in range(30)]
 	timelimit_geom = 300
 	timelimit_opt = 15*60
 	max_cpus = 32 # limit the number of CPUs due to high memory usage
@@ -415,6 +415,7 @@ def main():
 		for task in tasks:
 			execute_task(task)
 	trials_ = ["00"+str(i) for i in trials]
+	print(trials_)
 	compute_errors([instance["name"] for instance in instances], algs, trials_)
 
 	paper_tables.write_table1(Path("../results"), trials_)
