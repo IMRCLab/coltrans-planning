@@ -25,7 +25,7 @@ class ExecutionTask:
 	timelimit_geom: float
 	timelimit_opt: float
 
-def run_geom(filename_env, folder, timelimit):
+def run_geom(filename_env, folder, timelimit, robot_radius):
 	folder = Path(folder)
 	try:
 		with open(folder / "log.txt", 'w') as f:
@@ -33,7 +33,8 @@ def run_geom(filename_env, folder, timelimit):
 						"--input", filename_env,
 						"--output", folder / "output.yaml",
 						"--stats" , folder / "stats.yaml",
-						"--timelimit", str(timelimit)],
+						"--timelimit", str(timelimit),
+						"--robot_radius", str(robot_radius),],
 						stdout=f, stderr=f, check=True)
 	except Exception as e:
 		print(e)
@@ -224,8 +225,11 @@ def execute_task(task: ExecutionTask):
 			# inflate obstacles
 			inflate_obstacles(env, result_folder / "env_inflated.yaml")
 
+			with open("../deps/dynoplan/dynobench/models/" + task.model_path, "r") as f:
+				model_params = yaml.load(f,Loader=yaml.CSafeLoader)
+			robot_radius = model_params["col_size_robot"]
 			# run_geom -> input:env output: output.yaml
-			run_geom(str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_geom)
+			run_geom(str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_geom, robot_radius)
 
 			# geometric baseline
 
@@ -307,7 +311,7 @@ def execute_task(task: ExecutionTask):
 			inflate_obstacles(env_0robots, result_folder / "env_inflated.yaml")
 
 			# run_geom -> input:env output: output.yaml
-			run_geom(str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_geom)
+			run_geom(str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_geom, robot_radius)
 
 			# gen_ref_init_guess -> inp: output.yaml + "-r" , output: reference trajectory geom_ref_traj.yaml
 			gen_ref_init_guess(str(result_folder)) # dont forget to add -r here for the geom planner reference 
@@ -368,6 +372,12 @@ def main():
 		{ "name": "window_3robots_uniform", "models_path": "point_3.yaml"},
 		{ "name": "takeoff_2robots", "models_path": "point_2.yaml"},
 
+		{ "name": "window_2robots_exp", "models_path": "point_2_exp.yaml"},
+		{ "name": "window_3robots_exp", "models_path": "point_3_exp.yaml"},
+		{ "name": "forest_2robots_exp", "models_path": "point_2_exp.yaml"},
+		{ "name": "forest_3robots_exp", "models_path": "point_3_exp.yaml"},
+
+
 	]
 	algs = [
 		"payload",
@@ -376,7 +386,7 @@ def main():
 		# "extraiter",
 	]
 	# trials = 3
-	trials = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+	trials = [0]#, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 	timelimit_geom = 300
 	timelimit_opt = 15*60
 	max_cpus = 32 # limit the number of CPUs due to high memory usage
