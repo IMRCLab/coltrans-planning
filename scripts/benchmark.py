@@ -415,7 +415,7 @@ def main():
 		for task in tasks:
 			execute_task(task)
 	trials_ = ["00"+str(i) for i in trials]
-	print(trials_)
+	# print(trials_)
 	compute_errors([instance["name"] for instance in instances], algs, trials_)
 
 	paper_tables.write_table1(Path("../results"), trials_)

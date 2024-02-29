@@ -54,8 +54,8 @@ class Report:
                     act_states =  np.array(_act["result"]["states"])
                     act_actions = np.array(_act["result"]["actions"])
 
-                refpos = ref_states[:, 0:3]
-                actpos = act_states[:, 0:3]
+                refpos = ref_states[:, 0:3].astype(float)
+                actpos = act_states[:, 0:3].astype(float)
                 
                 error_p = (refpos - actpos).tolist()
                 info = dict()
