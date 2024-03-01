@@ -359,11 +359,11 @@ def main():
 		{ "name": "forest_5robots", "models_path": "point_5.yaml"},
 		{ "name": "forest_6robots", "models_path": "point_6.yaml"},
 
-		{ "name": "maze_2robots", "models_path": "point_2.yaml"},
-		{ "name": "maze_3robots", "models_path": "point_3.yaml"},
-		{ "name": "maze_4robots", "models_path": "point_4.yaml"},
-		{ "name": "maze_5robots", "models_path": "point_5.yaml"},
-		{ "name": "maze_6robots", "models_path": "point_6.yaml"},
+		# { "name": "maze_2robots", "models_path": "point_2.yaml"},
+		# { "name": "maze_3robots", "models_path": "point_3.yaml"},
+		# { "name": "maze_4robots", "models_path": "point_4.yaml"},
+		# { "name": "maze_5robots", "models_path": "point_5.yaml"},
+		# { "name": "maze_6robots", "models_path": "point_6.yaml"},
 
 		{ "name": "window_2robots", "models_path": "point_2.yaml"},
 		{ "name": "window_3robots", "models_path": "point_3.yaml"},
@@ -376,10 +376,10 @@ def main():
 		{ "name": "window_3robots_uniform", "models_path": "point_3.yaml"},
 		{ "name": "takeoff_2robots", "models_path": "point_2.yaml"},
 
-		{ "name": "window_2robots_exp", "models_path": "point_2_exp.yaml"},
-		{ "name": "window_3robots_exp", "models_path": "point_3_exp.yaml"},
-		{ "name": "forest_2robots_exp", "models_path": "point_2_exp.yaml"},
-		{ "name": "forest_3robots_exp", "models_path": "point_3_exp.yaml"},
+		# { "name": "window_2robots_exp", "models_path": "point_2_exp.yaml"},
+		# { "name": "window_3robots_exp", "models_path": "point_3_exp.yaml"},
+		# { "name": "forest_2robots_exp", "models_path": "point_2_exp.yaml"},
+		# { "name": "forest_3robots_exp", "models_path": "point_3_exp.yaml"},
 
 
 	]
@@ -390,7 +390,7 @@ def main():
 		# "extraiter",
 	]
 	# trials = 3
-	trials = [i for i in range(30)]
+	trials = [i for i in range(60)]
 	timelimit_geom = 300
 	timelimit_opt = 15*60
 	max_cpus = 32 # limit the number of CPUs due to high memory usage
@@ -414,8 +414,13 @@ def main():
 	else:
 		for task in tasks:
 			execute_task(task)
-	trials_ = ["00"+str(i) for i in trials]
-	# print(trials_)
+	trials_ = []
+	for i in trials:
+		if i <= 9:
+			trials_.append("00"+str(i))
+		else: 
+			trials_.append("0"+str(i))
+			
 	compute_errors([instance["name"] for instance in instances], algs, trials_)
 
 	paper_tables.write_table1(Path("../results"), trials_)
