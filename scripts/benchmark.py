@@ -178,7 +178,7 @@ def run_checker(filename_env, filename_result, filename_log):
 					"--models_base_path" , "../deps/dynoplan/dynobench/models/",
 					"--goal_tol" , "999",
 					"--u_bound_tol", "0.101",
-					"--col_tol", "0.02"]
+					"--col_tol", "0.01"]
 		print(subprocess.list2cmdline(cmd))
 		out = subprocess.run(cmd,
 					stdout=f, stderr=f)
