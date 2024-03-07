@@ -347,82 +347,6 @@ def execute_task(task: ExecutionTask):
 def main():
 	parallel = True
 	instances = [
-		# { "name": "empty_2robots", "models_path": "point_2.yaml"},
-		# { "name": "empty_3robots", "models_path": "point_3.yaml"},
-		# { "name": "empty_4robots", "models_path": "point_4.yaml"},
-		# { "name": "empty_5robots", "models_path": "point_5.yaml"},
-		# { "name": "empty_6robots", "models_path": "point_6.yaml"},
-
-		# { "name": "forest_2robots", "models_path": "point_2.yaml"},
-		# { "name": "forest_3robots", "models_path": "point_3.yaml"},
-		# { "name": "forest_4robots", "models_path": "point_4.yaml"},
-		# { "name": "forest_5robots", "models_path": "point_5.yaml"},
-		# { "name": "forest_6robots", "models_path": "point_6.yaml"},
-
-		# { "name": "maze_2robots", "models_path": "point_2.yaml"},
-		# { "name": "maze_3robots", "models_path": "point_3.yaml"},
-		# { "name": "maze_4robots", "models_path": "point_4.yaml"},
-		# { "name": "maze_5robots", "models_path": "point_5.yaml"},
-		# { "name": "maze_6robots", "models_path": "point_6.yaml"},
-
-		{ "name": "window_2robots", "models_path": "point_2.yaml"},
-		{ "name": "window_3robots", "models_path": "point_3.yaml"},
-		{ "name": "window_4robots", "models_path": "point_4.yaml"},
-		{ "name": "window_5robots", "models_path": "point_5.yaml"},
-		{ "name": "window_6robots", "models_path": "point_6.yaml"},
-
-		# { "name": "empty_5robots_uniform", "models_path": "point_5.yaml"},
-		# { "name": "forest_4robots_uniform", "models_path": "point_4.yaml"},
-		# { "name": "window_3robots_uniform", "models_path": "point_3.yaml"},
-		# { "name": "takeoff_2robots", "models_path": "point_2.yaml"},
-
-		# { "name": "window_2robots_exp", "models_path": "point_2_exp.yaml"},
-		# { "name": "window_3robots_exp", "models_path": "point_3_exp.yaml"},
-		# { "name": "forest_2robots_exp", "models_path": "point_2_exp.yaml"},
-		# { "name": "forest_3robots_exp", "models_path": "point_3_exp.yaml"},
-
-
-	]
-	algs = [
-		"payload",
-		"geom",
-		"opt",
-		# "extraiter",
-	]
-	# trials = 3
-	trials = [i for i in range(10)]
-	timelimit_geom = 300
-	timelimit_opt = 15*60
-	max_cpus = 32 # limit the number of CPUs due to high memory usage
-
-	tasks = []
-	for instance in instances:
-		env = instance["name"].replace("_uniform", "") + ".yaml"
-		for alg in algs:
-			# "geom" is implicitly executed with "opt", so don't execute here
-			if alg == "geom" and "opt" in algs:
-				continue
-			for trial in trials:
-				tasks.append(ExecutionTask(instance["name"], env, instance["models_path"], alg, trial, timelimit_geom, timelimit_opt))
-
-	if parallel and len(tasks) > 1:
-		use_cpus = min(max_cpus, psutil.cpu_count(logical=False)-1)
-		print("Using {} CPUs".format(use_cpus))
-		with mp.Pool(use_cpus) as p:
-			for _ in tqdm.tqdm(p.imap_unordered(execute_task, tasks)):
-				pass
-	else:
-		for task in tasks:
-			execute_task(task)
-	trials_ = []
-	for i in trials:
-		if i <= 9:
-			trials_.append("00"+str(i))
-		else: 
-			trials_.append("0"+str(i))
-
-
-	instances = [
 		{ "name": "empty_2robots", "models_path": "point_2.yaml"},
 		{ "name": "empty_3robots", "models_path": "point_3.yaml"},
 		{ "name": "empty_4robots", "models_path": "point_4.yaml"},
@@ -459,6 +383,43 @@ def main():
 
 
 	]
+	algs = [
+		"payload",
+		"geom",
+		"opt",
+		# "extraiter",
+	]
+	# trials = 3
+	trials = [i for i in range(20)]
+	timelimit_geom = 300
+	timelimit_opt = 15*60
+	max_cpus = 32 # limit the number of CPUs due to high memory usage
+
+	tasks = []
+	for instance in instances:
+		env = instance["name"].replace("_uniform", "") + ".yaml"
+		for alg in algs:
+			# "geom" is implicitly executed with "opt", so don't execute here
+			if alg == "geom" and "opt" in algs:
+				continue
+			for trial in trials:
+				tasks.append(ExecutionTask(instance["name"], env, instance["models_path"], alg, trial, timelimit_geom, timelimit_opt))
+
+	if parallel and len(tasks) > 1:
+		use_cpus = min(max_cpus, psutil.cpu_count(logical=False)-1)
+		print("Using {} CPUs".format(use_cpus))
+		with mp.Pool(use_cpus) as p:
+			for _ in tqdm.tqdm(p.imap_unordered(execute_task, tasks)):
+				pass
+	else:
+		for task in tasks:
+			execute_task(task)
+	trials_ = []
+	for i in trials:
+		if i <= 9:
+			trials_.append("00"+str(i))
+		else: 
+			trials_.append("0"+str(i))
 
 	compute_errors([instance["name"] for instance in instances], algs, trials_)
 
