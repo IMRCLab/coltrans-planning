@@ -178,7 +178,7 @@ def run_checker(filename_env, filename_result, filename_log):
 					"--models_base_path" , "../deps/dynoplan/dynobench/models/",
 					"--goal_tol" , "999",
 					"--u_bound_tol", "0.101",
-					"--col_tol", "0.02"]
+					"--col_tol", "0.01"]
 		print(subprocess.list2cmdline(cmd))
 		out = subprocess.run(cmd,
 					stdout=f, stderr=f)
@@ -390,7 +390,7 @@ def main():
 		# "extraiter",
 	]
 	# trials = 3
-	trials = [i for i in range(60)]
+	trials = [i for i in range(20)]
 	timelimit_geom = 300
 	timelimit_opt = 15*60
 	max_cpus = 32 # limit the number of CPUs due to high memory usage
@@ -420,7 +420,7 @@ def main():
 			trials_.append("00"+str(i))
 		else: 
 			trials_.append("0"+str(i))
-			
+
 	compute_errors([instance["name"] for instance in instances], algs, trials_)
 
 	paper_tables.write_table1(Path("../results"), trials_)
