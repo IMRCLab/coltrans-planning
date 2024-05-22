@@ -347,12 +347,14 @@ def execute_task(task: ExecutionTask):
 def main():
 	parallel = True
 	instances = [
+		{ "name": "empty_1robots", "models_path": "point_1.yaml"},
 		{ "name": "empty_2robots", "models_path": "point_2.yaml"},
 		{ "name": "empty_3robots", "models_path": "point_3.yaml"},
 		{ "name": "empty_4robots", "models_path": "point_4.yaml"},
 		{ "name": "empty_5robots", "models_path": "point_5.yaml"},
 		{ "name": "empty_6robots", "models_path": "point_6.yaml"},
 
+		{ "name": "forest_1robots", "models_path": "point_1.yaml"},
 		{ "name": "forest_2robots", "models_path": "point_2.yaml"},
 		{ "name": "forest_3robots", "models_path": "point_3.yaml"},
 		{ "name": "forest_4robots", "models_path": "point_4.yaml"},
@@ -365,6 +367,7 @@ def main():
 		# { "name": "maze_5robots", "models_path": "point_5.yaml"},
 		# { "name": "maze_6robots", "models_path": "point_6.yaml"},
 
+		{ "name": "window_1robots", "models_path": "point_1.yaml"},
 		{ "name": "window_2robots", "models_path": "point_2.yaml"},
 		{ "name": "window_3robots", "models_path": "point_3.yaml"},
 		{ "name": "window_4robots", "models_path": "point_4.yaml"},
