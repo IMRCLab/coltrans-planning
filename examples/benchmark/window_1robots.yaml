@@ -3,18 +3,18 @@ timelimit: 300.0
 numofcables: 1
 interpolate: 1000
 environment:
-  max: [4, 0.6, 1]
-  min: [-0.6, -0.6, -0.1]
+  max: [ 1.5,  0.4,  0.2]
+  min: [-1.5, -0.4, -0.1]
   obstacles:
-    - center: [0.5, 0.4, 0.0]
-      size: [0.4, 0.4, 3.0]
+    - center: [0.0, 0.4, 0.0]
+      size: [0.3, 0.3, 3.0]
       type: box
-    - center: [0.5, -0.4, 0.0]
-      size: [0.4, 0.4, 3.0]
+    - center: [0.0, -0.4, 0.0]
+      size: [0.3, 0.3, 3.0]
       type: box
 payload:
-  start: [-0.5, 0,  0, 0, 0, 0, 1, 0.0, 1.57] # [xi, yi, zi, qwi,qxi,qyi,qzi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
-  goal:  [3.5,  0,  0, 0, 0, 0, 1, 0.0, 1.57] # [xi, yi, zi, qwi,qxi,qyi,qzi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
+  start: [-1.0, 0,  0, 0, 0, 0, 1, 0.0, 1.57] # [xi, yi, zi, qwi,qxi,qyi,qzi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
+  goal:  [1.0,  0,  0, 0, 0, 0, 1, 0.0, 1.57] # [xi, yi, zi, qwi,qxi,qyi,qzi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
   shape:
     type: sphere
     size: 0.01 # radius
