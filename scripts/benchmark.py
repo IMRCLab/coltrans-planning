@@ -95,11 +95,11 @@ def run_controller(folder, reftrajectory, output, model_path, computeAcc=False, 
 			# this flag activates -a: it computes the mu_planned based on the reference actions
 			subprocess.run(["python3",
 				"../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
-					"-cff", "-w", "-a",
+					"-cff", "-w", 
 					"--inp", folder / reftrajectory,
 					"--out", folder / output,
 					"--model_path", model_path,
-					"-a",
+				
 				], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"}, check=True)
 		else: 
 			subprocess.run(["python3",
@@ -184,7 +184,7 @@ def run_checker(filename_env, filename_result, filename_log):
 					stdout=f, stderr=f)
 	return out.returncode == 0
 
-def inflate_obstacles(filename_env_in, filename_env_out, inflation=0.05):
+def inflate_obstacles(filename_env_in, filename_env_out, inflation=0.0):
 	with open(filename_env_in, "r") as env_file:
 		env = yaml.safe_load(env_file)
 
@@ -393,8 +393,8 @@ def main():
 		# "extraiter",
 	]
 	# trials = 3
-	trials = [i for i in range(20)]
-	timelimit_geom = 300
+	trials = [i for i in range(25)]
+	timelimit_geom = 350
 	timelimit_opt = 15*60
 	max_cpus = 32 # limit the number of CPUs due to high memory usage
 
