@@ -6,15 +6,15 @@ environment:
   max: [ 1.5,  0.4,  0.2]
   min: [-1.5, -0.4, -0.1]
   obstacles:
-    - center: [0.0, 0.4, 0.0]
-      size: [0.3, 0.3, 3.0]
+    - center: [0.0, 0.35, 0.0]
+      size: [0.3, 0.35, 3.0]
       type: box
     - center: [0.0, -0.4, 0.0]
       size: [0.3, 0.3, 3.0]
       type: box
 payload:
-  start: [-1.0, 0, 0, 0, 0, 0, 1, 1.57, 1.0,  3.14, 1.0,  4.71, 1.0] # [xi, yi, zi, qwi,qxi,qyi,qzi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
-  goal : [1.0,  0, 0, 0, 0, 0, 1, 1.57, 1.0,  3.14, 1.0,  4.71, 1.0] # [xi, yi, zi, qwi,qxi,qyi,qzi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
+  start: [-1.0, 0.0, 0.,   0., 0., 0., 1.,  1.57, 1.0,  0.0, 1.0,  3.92, 1.0] # [xi, yi, zi, qwi,qxi,qyi,qzi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
+  goal: [ 1.0,   0.0, 0.,   0., 0., 0., 1.,  1.57, 1.0,  0.0, 1.0,  3.92, 1.0] # [xi, yi, zi, qwi,qxi,qyi,qzi, az1_i, elv1_i,...azn_i, elvn_i] : initial azimuth(s) and elevation(s)
   shape:
     type: sphere
     size: 0.01 # radius
