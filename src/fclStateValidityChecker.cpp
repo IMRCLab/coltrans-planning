@@ -75,3 +75,61 @@ bool fclStateValidityChecker::isValid(const ompl::base::State* state) const
 
   return true;
 }
+
+
+
+fclUnicyclesStateValidityChecker::fclUnicyclesStateValidityChecker(
+    ompl::base::SpaceInformationPtr si,
+    std::shared_ptr<UnicyclesWithRods> robots,
+    std::shared_ptr<Obstacles> obstacles,
+    const unicycleSettings& cfg)
+    
+    : ompl::base::StateValidityChecker(si)
+    , robots_(robots)
+    , obstacles_(obstacles)
+    , cfg_(cfg)
+{
+
+}
+
+
+bool fclUnicyclesStateValidityChecker::isValid(const ompl::base::State* state) const
+{
+  if (!si_->satisfiesBounds(state)) {
+    return false;
+  }
+
+  auto num_robots = si_->getStateSpace()->as<UnicyclesStateSpace>()->getNumRobots();
+
+  for(size_t i=0; i<num_robots;++i) {
+    robots_->setRobotTransform(state, i);
+  }
+
+  for(size_t i=0; i<num_robots-1; ++i) {
+    robots_->setRodTransform(state, i);
+  } 
+
+  robots_->col_mgr_robots->update();
+  robots_->col_mgr_rods->update();
+
+
+  fcl::DefaultCollisionData<float> collision_data_robot_obs;
+  robots_->col_mgr_robots->collide(obstacles_->obsmanager, &collision_data_robot_obs, fcl::DefaultCollisionFunction<float>);
+
+  fcl::DefaultCollisionData<float> collision_data_robots;
+  robots_->col_mgr_robots->collide(&collision_data_robots, fcl::DefaultCollisionFunction<float>);
+
+  fcl::DefaultCollisionData<float> collision_data_rod_obs;
+  robots_->col_mgr_rods->collide(obstacles_->obsmanager, &collision_data_rod_obs, fcl::DefaultCollisionFunction<float>);
+
+  fcl::DefaultCollisionData<float> collision_data_rod_rod;
+  robots_->col_mgr_rods->collide(&collision_data_rod_rod, fcl::DefaultCollisionFunction<float>);
+
+
+  if (collision_data_robots.result.isCollision() || collision_data_robot_obs.result.isCollision()  || collision_data_rod_obs.result.isCollision() || collision_data_rod_rod.result.isCollision()) {
+    return false;
+  }
+
+
+  return true;
+}
