@@ -23,6 +23,23 @@ public:
     fcl::BroadPhaseCollisionManagerf* obsmanager;
 };
 
+class unicycleSettings 
+{
+public:
+    Eigen::VectorXf start;
+    Eigen::VectorXf goal;
+    YAML::Node env;
+    std::vector<double> envmin;
+    std::vector<double> envmax;
+    size_t num_robots;
+    float timelimit;
+    std::vector<double> robot_size;
+    float angle_min;
+    float angle_max;
+    float interpolate;
+    std::string sampler;
+};
+
 // Class to set the environment and the robot settings 
 class plannerSettings 
 {
@@ -38,6 +55,7 @@ public:
     std::vector<double> cablelengthVec;
     std::string plannerType;
     std::string payloadShape;
+    std::string robot_type;
     size_t numofcables;
     float timelimit;
     float robot_radius;
@@ -110,5 +128,67 @@ public:
 
 protected:
     size_t num_cables_;
+
+};
+
+
+class UnicyclesWithRods
+{
+public:
+    UnicyclesWithRods(const unicycleSettings& cfg);
+
+    fcl::Transform3f getRobotTransform(const ompl::base::State *state, const size_t idx);
+    fcl::Transform3f getRodTransform(const ompl::base::State *state, const size_t idx);
+    
+    void setRobotTransform(const ob::State *state, const size_t idx);
+    void setRodTransform(const ob::State *state, const size_t idx);
+
+    std::shared_ptr<ob::SpaceInformation> si;
+    std::vector<fcl::CollisionObjectf *> robotsObj;
+    std::vector<fcl::CollisionObjectf *> rodsObj;
+    std::shared_ptr<fcl::BroadPhaseCollisionManagerf> col_mgr_robots;
+    std::shared_ptr<fcl::BroadPhaseCollisionManagerf> col_mgr_rods;
+
+protected:
+    void addRobotParts(const unicycleSettings& cfg);
+};
+
+std::shared_ptr<UnicyclesWithRods> create_robots(const unicycleSettings& cfg);
+std::shared_ptr<Obstacles> create_obs(const YAML::Node &env);
+
+class UnicyclesStateSpace : public ob::CompoundStateSpace
+{
+public:
+    class StateType : public ob::CompoundStateSpace::StateType
+    {
+    public:
+        StateType() = default;
+        const Eigen::Vector3f getRobotSt(const size_t idx) const;
+        const Eigen::Vector3f getRodSt(const size_t idx) const;
+    };
+
+    UnicyclesStateSpace(size_t num_robots, std::vector<double> envmin, std::vector<double> envmax);
+    ~UnicyclesStateSpace() override = default;
+
+    size_t getNumRobots() const;
+
+    void setPositionBounds(const ob::RealVectorBounds &bounds);
+    const ob::RealVectorBounds &getPositionBounds() const;
+    
+    void setRotationBounds(const ob::RealVectorBounds &bounds); // alpha bounds
+
+    void setRodBounds(const ob::RealVectorBounds &bounds);
+   
+    const ob::RealVectorBounds &getRodBounds() const;
+
+    bool satisfiesBounds(const ob::State *state) const override;
+
+    ob::State *allocState() const override;
+    void freeState(ob::State *state) const override;
+
+protected:
+    size_t num_robots_;
+    std::vector<double> env_min_;
+    std::vector<double> env_max_;
 
 };
