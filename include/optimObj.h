@@ -19,3 +19,17 @@ protected:
 
     const plannerSettings cfg_;
 };
+
+
+class minAngleObjective : public ob::OptimizationObjective
+{
+public:
+    minAngleObjective(const ob::SpaceInformationPtr &si, const unicycleSettings& cfg);
+
+    ob::Cost motionCost(const ob::State *s1, const ob::State *s2) const override;
+    ob::Cost stateCost(const ob::State*) const override;
+
+protected:
+
+    const unicycleSettings cfg_;
+};

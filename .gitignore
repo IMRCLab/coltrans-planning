@@ -1,11 +1,10 @@
-build/
+build*
 .vscode
 output*
 takeoff_2cfs_payload_output.yaml
 *.pdf
 stats/
 stat*dict*.yaml
-buildDebug/
 build_release
 __pycache__
 results*/

@@ -63,3 +63,82 @@ ob::Cost minCableObjective::stateCost(const ob::State*) const
 }
 
 
+
+
+minAngleObjective::minAngleObjective(const ob::SpaceInformationPtr &si, const unicycleSettings& cfg)
+    : ob::OptimizationObjective(si), cfg_(cfg) {}
+
+
+
+ob::Cost minAngleObjective::motionCost(const ob::State *s1, const ob::State *s2) const {
+   const auto *state1 = s1->as<ob::CompoundState>();
+    const auto *state2 = s2->as<ob::CompoundState>();
+
+    // Extract px, py component
+    const auto *pos1 = state1->as<ob::RealVectorStateSpace::StateType>(0);
+    const auto *pos2 = state2->as<ob::RealVectorStateSpace::StateType>(0);
+
+    // Extract alphas component
+    const auto *alphas1 = state1->as<ob::RealVectorStateSpace::StateType>(1);
+    const auto *alphas2 = state2->as<ob::RealVectorStateSpace::StateType>(1);
+
+    // Extract thetas component
+    const auto *thetas1 = state1->as<ob::RealVectorStateSpace::StateType>(2);
+    const auto *thetas2 = state2->as<ob::RealVectorStateSpace::StateType>(2);
+
+    const size_t num_robots = cfg_.num_robots;
+
+    // Path length (distance cost for robot 1)
+    double distance_cost = std::sqrt(std::pow(pos2->values[0] - pos1->values[0], 2) +
+                                     std::pow(pos2->values[1] - pos1->values[1], 2));
+
+    // Initialize the starting positions
+    double px1 = pos1->values[0];
+    double py1 = pos1->values[1];
+    double px2 = pos2->values[0];
+    double py2 = pos2->values[1];
+    double l = 0.5; // Assume fixed rod length
+    for (size_t i = 0; i < num_robots - 1; ++i) {
+        // Compute next robot positions using theta
+        px1 += l * cos(thetas1->values[i]);
+        py1 += l * sin(thetas1->values[i]);
+        px2 += l * cos(thetas2->values[i]);
+        py2 += l * sin(thetas2->values[i]);
+
+        // Add the path length for robot i
+        distance_cost += std::sqrt(std::pow(px2 - px1, 2) + std::pow(py2 - py1, 2));
+    }
+
+    // Theta-Alpha Alignment 
+    double alignment_cost = 0.0;
+    for (size_t i = 0; i < num_robots - 1; ++i) {
+        double theta1 = thetas1->values[i];
+        double theta2 = thetas2->values[i];
+        double alpha1 = alphas1->values[i];
+        double alpha2 = alphas2->values[i];
+
+    // Compute theta change
+    double delta_theta = theta2 - theta1;
+        double sign_delta_theta = (delta_theta > 0) ? 1.0 : -1.0;
+
+        if (std::abs(delta_theta) > 1e-1) {
+            Eigen::Vector2d desired_dir(-sign_delta_theta * std::sin(theta2), 
+                                        sign_delta_theta * std::cos(theta2));
+            Eigen::Vector2d alpha_dir(std::cos(alpha2), std::sin(alpha2));
+
+            double dot_product = desired_dir.dot(alpha_dir);
+            alignment_cost += std::pow(1.0 - dot_product, 2);
+        } else {
+            alignment_cost += std::pow(alpha2 - theta2, 2);
+        }
+    }
+    // Combine the costs
+    double total_cost =  distance_cost + 0.5*alignment_cost;
+    return ob::Cost(total_cost);
+}
+
+// Cost for a single state (can be used for static penalties or regularization, not used here)
+ob::Cost minAngleObjective::stateCost(const ob::State* state) const {
+    // No additional state cost; return zero
+    return ob::Cost(0.0);
+}

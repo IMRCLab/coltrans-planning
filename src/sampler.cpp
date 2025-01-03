@@ -276,3 +276,131 @@ void RobotsWithPayloadStateSampler::sampleGaussian(ompl::base::State *state, con
 {
     throw ompl::Exception("RobotsWithPayloadStateSampler::sampleGaussian", "not implemented");
 }
+
+
+
+
+std::vector<ompl::base::State *> UnicyclesWithRodsStateSampler::valid_formations_;
+
+UnicyclesWithRodsStateSampler::UnicyclesWithRodsStateSampler(
+    ompl::base::SpaceInformationPtr si,
+    const ob::StateSpace *ss,
+    std::shared_ptr<UnicyclesWithRods> robots,
+    const unicycleSettings& cfg)
+    : StateSampler(ss)
+    , robots_(robots)
+    , cfg_(cfg)
+    , si_(si)
+    , uniform_(false)
+{
+    auto ss_typed = ss->as<UnicyclesStateSpace>();
+    sampler_pos_ = ss_typed->getSubspace(0)->allocStateSampler();
+    sampler_alpha_ = ss_typed->getSubspace(1)->allocStateSampler();
+
+    if (ss_typed->getNumRobots() > 0) {
+        sampler_formations_ = ss_typed->getSubspace(2)->allocStateSampler();
+    }
+    if (cfg_.sampler == "uniform") {
+        uniform_ = true;
+    } else if (valid_formations_.size() == 0) {
+        const size_t num_formations_states = 1000;
+        std::cout << "Generating " << num_formations_states << " formation states..." << std::endl;
+
+        auto startState = si->allocState();
+        si->getStateSpace()->copyFromReals(startState, eigentoStd(cfg.start));
+        valid_formations_.push_back(startState);
+
+        for (size_t i = 0; i < num_formations_states; ++i) {
+            auto state = ss->cloneState(startState);
+            bool motionValid;
+            do {
+                ob::State **comps = state->as<ob::CompoundState>()->components;            
+                // ** Sample px, py, and angles (theta1, theta2, ...) **
+                if (ss_typed->getNumRobots() > 0) {
+                    sampler_formations_->sampleUniform(comps[2]);
+                }                
+                // ** Select Base State **
+                int idx = rng_.uniformInt(0, valid_formations_.size() - 1);
+                auto baseState = valid_formations_[idx];
+
+                auto st1 = baseState->as<UnicyclesStateSpace::StateType>();
+                auto st2 = state->as<UnicyclesStateSpace::StateType>();
+
+                libMultiRobotPlanning::Assignment<size_t, size_t> assignment;
+                for (size_t i = 0; i < ss_typed->getNumRobots(); ++i) {
+                    Eigen::Vector3f state1 = st1->getRobotSt(i);
+                    Eigen::Vector3f pos1(state1(0), state1(1), 0);
+
+                    for (size_t j = 0; j < ss_typed->getNumRobots(); ++j) {
+                        Eigen::Vector3f state2 = st2->getRobotSt(j);
+                        Eigen::Vector3f pos2(state2(0), state2(1), 0);
+                        double dist = (pos1 - pos2).norm();
+                        int dist_in_mm = dist * 1000;
+                        assignment.setCost(i, j, dist_in_mm);
+                        // std::cout << "i: " << i << ", j: " << j << ", dist: " << dist << ", pos1: (" << pos1(0) << ", " << pos1(1) << ")"  << ", pos2: (" << pos2(0) << ", " << pos2(1) << ")"  << std::endl;
+                    }
+                }
+
+                std::map<size_t, size_t> solution;
+                int64_t c = assignment.solve(solution);
+
+                // std::cout << "solution with cost: " << c << std::endl;
+                // for (const auto& s : solution) {
+                //     std::cout << "first, second: " << s.first << ": " << s.second << std::endl;
+                // }
+
+                // re-arrange
+                auto rodstate = state->as<ob::CompoundState>()->components[2]->as<ob::RealVectorStateSpace::StateType>();
+                std::vector<float> vec;
+                for (int i = 0; i < ss_typed->getNumRobots()-1; ++i) {
+                    vec.push_back(rodstate->values[i]);
+                }
+                for (const auto& s : solution) {
+                    // std::cout << "first, second: " << s.first << ": " << s.second << std::endl;
+                    if (s.first != 0 && s.second != 0) {
+                        rodstate->values[s.first - 1] = vec[s.second - 1];
+                    }
+                }
+
+                // ** Check Validity **
+                motionValid = si->checkMotion(baseState, state);
+                
+            } while (!si->isValid(state) || !motionValid);
+
+            valid_formations_.push_back(state);
+        }
+        std::cout << "Done" << std::endl;
+        uniform_ = false;
+    }
+}
+
+void UnicyclesWithRodsStateSampler::sampleUniform(ompl::base::State *state)
+{
+    ob::State **comps = state->as<ob::CompoundState>()->components;
+    auto goalState = si_->allocState();
+    si_->getStateSpace()->copyFromReals(goalState, eigentoStd(cfg_.goal));
+
+    if (uniform_) {
+        sampler_formations_->sampleUniform(state);
+        return;
+    } else {
+
+        auto ss_typed = space_->as<UnicyclesStateSpace>();
+        sampler_pos_->sampleUniform(comps[0]);
+        sampler_alpha_->sampleUniformNear(comps[1], goalState, 0.1);
+        if (ss_typed->getNumRobots() > 0) {
+            int idx = rng_.uniformInt(0, valid_formations_.size() - 1);
+            sampler_formations_->sampleGaussian(comps[2], valid_formations_[idx]->as<ob::CompoundState>()->components[2], 0.05);
+        }
+    }
+}
+
+void UnicyclesWithRodsStateSampler::sampleUniformNear(ompl::base::State *state, const ompl::base::State *near, double distance)
+{
+    throw ompl::Exception("UnicyclesWithRodsStateSampler::sampleUniformNear", "not implemented");
+}
+
+void UnicyclesWithRodsStateSampler::sampleGaussian(ompl::base::State *state, const ompl::base::State *mean, double stdDev)
+{
+    throw ompl::Exception("UnicyclesWithRodsStateSampler::sampleGaussian", "not implemented");
+}
