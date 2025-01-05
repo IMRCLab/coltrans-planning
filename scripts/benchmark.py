@@ -48,6 +48,15 @@ def add_init_cable_states(folder, envName=None):
 			"--out", folder / traj,
 			"--envName", envName], check=True)
 
+def gen_unicycle_init_guess(folder, envName):
+	folder = Path(folder)
+	traj = "init_guess.yaml"
+	subprocess.run(["python3",
+		"../scripts/init_guess_unicycle.py",
+		"--inp", folder / "output.yaml",
+		"--out", folder / traj,
+		"--envName", envName,
+		"-w"], check=True)	
 
 def gen_ref_init_guess(folder, envName=None):
 	folder = Path(folder)
@@ -71,55 +80,47 @@ def gen_ref_init_guess(folder, envName=None):
 			"-w", 
 			"-r"], check=True)
 
-def run_controller(folder, reftrajectory, output, model_path, computeAcc=False, nocableTrack=False):
-	folder = Path(folder)
-	if nocableTrack:
-		subprocess.run(["python3",
-			"../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
-			"-cff", "-w", "-noC",
-			"--inp", folder / reftrajectory,
-			"--out", folder / output,
-			"--model_path", model_path,
-			], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"}, check=True)
+def run_unicycles_controller(folder, reftrajectory, output, model_path):
+	subprocess.run(["python3",
+				"../deps/dynoplan/dynobench/example/unicycle_sim.py",
+				"-w",
+				"--inp", folder / reftrajectory,
+				"--out", folder / output,
+				"--model_path", model_path,
+				], env={"PYTHONPATH": "deps/dynoplan/dynobench"}, check=True)
 
-	else:
-		subprocess.run(["python3",
+def run_unicycles_visualizer(filename_env, reference_traj, filename_result, filename_output):
+	subprocess.run(["python3",
+		"../scripts/visualize_unicycles.py",
+		"--env", str(filename_env),
+		"--robot", "unicycle",
+		"--ref", reference_traj,
+		"--result", str(filename_result),
+		"--output", str(filename_output)],
+		check=True)
+
+def run_controller(folder, reftrajectory, output, model_path):
+	folder = Path(folder)
+	subprocess.run(["python3",
 		"../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
-			"-cff", "-w",
-			"--inp", folder / reftrajectory,
-			"--out", folder / output,
-			"--model_path", model_path,
+		"-cff", "-w",
+		"--inp", folder / reftrajectory,
+		"--out", folder / output,
+		"--model_path", model_path,
 		], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"}, check=True)
 
-		if computeAcc:
-			# this flag activates -a: it computes the mu_planned based on the reference actions
-			subprocess.run(["python3",
-				"../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
-					"-cff", "-w", 
-					"--inp", folder / reftrajectory,
-					"--out", folder / output,
-					"--model_path", model_path,
-				
-				], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"}, check=True)
-		else: 
-			subprocess.run(["python3",
-				"../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
-					"-cff", "-w",
-					"--inp", folder / reftrajectory,
-					"--out", folder / output,
-					"--model_path", model_path,
-				], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"}, check=True)
 		
 
 def run_visualizer(filename_env, reference_traj, filename_result, filename_output):
 	subprocess.run(["python3",
-		 "../deps/dynoplan/dynobench/utils/viewer/viewer_cli.py",
-		 	"--robot", "point",
-			"--ref", str(reference_traj),
-			"--env", str(filename_env),
-			"--result", str(filename_result),
-			"--output", str(filename_output)
-		 ], check=True)
+		"../scripts/visualize_payload.py",
+		"--env", str(filename_env),
+		"--robot", "point",
+		"--ref", reference_traj,
+		"--result", str(filename_result),
+		"--output", str(filename_output)],
+		check=True)
+    
 
 def run_opt(filename_init, filename_env, folder, timelimit, t_weight=None, t_ref=None):
 	folder = Path(folder)
@@ -129,6 +130,10 @@ def run_opt(filename_init, filename_env, folder, timelimit, t_weight=None, t_ref
 				subprocess.run(["./deps/dynoplan/main_optimization",
 					"--init_file", filename_init,
 					"--env_file", filename_env,
+					"--solver_id", "1",
+					"--max_iter", "50",
+					"--collision_weight", "500.",
+					"--weight_goal", "200",
 					"--models_base_path", "../deps/dynoplan/dynobench/models/",
 					"--results_file", folder / "output"],
 					stdout=f, stderr=f, timeout=timelimit, check=True)
@@ -141,6 +146,8 @@ def run_opt(filename_init, filename_env, folder, timelimit, t_weight=None, t_ref
 					"--env_file", filename_env,
 					"--models_base_path", "../deps/dynoplan/dynobench/models/",
 					"--results_file", folder / "output",
+					"--solver_id", "1",
+					"--max_iter", "50",
 					"--time_ref", t_ref],
 					stdout=f, stderr=f, timeout=timelimit, check=True)
 
@@ -152,6 +159,8 @@ def run_opt(filename_init, filename_env, folder, timelimit, t_weight=None, t_ref
 					"--env_file", filename_env,
 					"--models_base_path", "../deps/dynoplan/dynobench/models/",
 					"--results_file", folder / "output",
+					"--solver_id", "1",
+					"--max_iter", "50",					
 					"--time_weight", t_weight],
 					stdout=f, stderr=f, timeout=timelimit, check=True)
 
@@ -164,9 +173,10 @@ def run_opt(filename_init, filename_env, folder, timelimit, t_weight=None, t_ref
 					"--models_base_path", "../deps/dynoplan/dynobench/models/",
 					"--results_file", folder / "output",
 					"--time_weight", t_weight,
+					"--solver_id", "1",
+					"--max_iter", "50",
 					"--time_ref", t_ref],
 					stdout=f, stderr=f, timeout=timelimit, check=True)
-
 	except Exception as e:
 		print(e)
 
@@ -198,147 +208,78 @@ def inflate_obstacles(filename_env_in, filename_env_out, inflation=0.0):
 def execute_task(task: ExecutionTask):
 	results_path = Path("../results")
 	# tuning_path = Path("../tuning")
-	env_path = Path().resolve() / "../examples/benchmark"
+	if "point" in task.model_path:
+		env_path = Path().resolve() / "../examples/benchmark"
+	elif "unicycle" in task.model_path:
+		env_path = Path().resolve() / "../deps/dynoplan/dynobench/envs/benchmark_planners/coltransplanning/"
 	env = (env_path / task.instance).with_suffix(".yaml")
 	assert(env.is_file())
 
 	try:
-		# if task.alg == "geom":
-		# 	# run_geom -> input:env output: output.yaml
-		# 	run_geom(str(env), str(result_folder), task.timelimit_geom)
-		# 	# gen_ref_init_guess -> inp: output.yaml + "-r" , output: reference trajectory geom_ref_traj.yaml
-		# 	gen_ref_init_guess(str(result_folder)) # dont forget to add -r here for the geom planner reference 
-		# 	#run_controller -> input: reference trajecetory to be tracked (geom_init_guess.yaml), output: controller output (trajectory_geom.yaml)
-		# 	run_controller(result_folder, "init_guess.yaml", "trajectory_geom.yaml", task.num_robots)
-		# 	# visualize: reference trajectory from the geometric planner, output of controller tracking the ref traj
-		# 	run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env ,result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
+
+		result_folder = results_path / task.instance / "geom" / "{:03d}".format(task.trial)
+		if result_folder.exists():
+				print("Warning! {} exists already. Deleting...".format(result_folder))
+				shutil.rmtree(result_folder)
+		result_folder.mkdir(parents=True, exist_ok=False)
+
+
+		# inflate obstacles
+		inflate_obstacles(env, result_folder / "env_inflated.yaml")
+
+		with open("../deps/dynoplan/dynobench/models/" + task.model_path, "r") as f:
+			model_params = yaml.load(f,Loader=yaml.CSafeLoader)
+		if "point" in task.model_path:
+			robot_radius = model_params["col_size_robot"]
+		else:
+			robot_radius = 0
+		# run_geom -> input:env output: output.yaml
+		run_geom(str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_geom, robot_radius)
+
+		# geometric baseline
+
+		# gen_ref_init_guess -> inp: output.yaml + "-r" , output: reference trajectory geom_ref_traj.yaml
+		if "point" in task.model_path:
+			gen_ref_init_guess(str(result_folder))
+
+		# optimization-based solution
+
+		result_folder_geom = result_folder
+		result_folder = results_path / task.instance / "opt" / "{:03d}".format(task.trial)
+		if result_folder.exists():
+				print("Warning! {} exists already. Deleting...".format(result_folder))
+				shutil.rmtree(result_folder)
+		result_folder.mkdir(parents=True, exist_ok=False)
+
+		# copy output.yaml file
+		shutil.copy(result_folder_geom / "output.yaml", result_folder)
+
+		# inflate obstacles
+		inflate_obstacles("../deps/dynoplan/dynobench/envs/benchmark_planners/coltransplanning/" + task.env, result_folder / "env_inflated.yaml")
+
+		# gen_ref_init_guess -> inp: output.yaml, output: initial guess for optimizer
+		if "point" in task.model_path:
+			gen_ref_init_guess(str(result_folder), envName=result_folder / "env_inflated.yaml")
+		elif "unicycle" in task.model_path:
+			gen_unicycle_init_guess(str(result_folder), result_folder / "env_inflated.yaml")
+
+		# filename_init, filename_env, folder, timelimit
+		run_opt(result_folder / "init_guess.yaml", str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_opt)
 		
-		if task.alg == "opt" or task.alg == "geom":
+		if "point" in task.model_path:
+			# run_controller -> input: reference trajecetory to be tracked (output.trajopt.yaml), output: controller output (trajectory_opt.yaml)
+			# TODO: do not forget to pass the model path
+			run_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml", "../deps/dynoplan/dynobench/models/" + task.model_path)
 
-			result_folder = results_path / task.instance / "geom" / "{:03d}".format(task.trial)
-			if result_folder.exists():
-					print("Warning! {} exists already. Deleting...".format(result_folder))
-					shutil.rmtree(result_folder)
-			result_folder.mkdir(parents=True, exist_ok=False)
+			# filename_env, reference_traj, filename_result, filename_output
+			run_visualizer(result_folder / "env_inflated.yaml", result_folder / "output.trajopt.yaml", result_folder / "trajectory_opt.yaml", result_folder / "trajectory_opt.html")
+		
+		elif "unicycle" in task.model_path:
+			run_unicycles_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml", "../deps/dynoplan/dynobench/models/" + task.model_path)
+			run_unicycles_visualizer(result_folder / "env_inflated.yaml", result_folder / "output.trajopt.yaml", result_folder / "trajectory_opt.yaml", result_folder / "trajectory_opt.html")
 
-
-			# inflate obstacles
-			inflate_obstacles(env, result_folder / "env_inflated.yaml")
-
-			with open("../deps/dynoplan/dynobench/models/" + task.model_path, "r") as f:
-				model_params = yaml.load(f,Loader=yaml.CSafeLoader)
-			robot_radius = model_params["col_size_robot"]
-			# run_geom -> input:env output: output.yaml
-			run_geom(str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_geom, robot_radius)
-
-			# geometric baseline
-
-			# gen_ref_init_guess -> inp: output.yaml + "-r" , output: reference trajectory geom_ref_traj.yaml
-			gen_ref_init_guess(str(result_folder)) 
-			#run_controller -> input: reference trajecetory to be tracked (geom_init_guess.yaml), output: controller output (trajectory_geom.yaml)
-			run_controller(result_folder, "init_guess.yaml", "trajectory_geom.yaml", "../deps/dynoplan/dynobench/models/" + task.model_path)
-
-			run_checker("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env,
-						result_folder / "trajectory_geom.yaml", (result_folder / "trajectory_geom.yaml").with_suffix(".check.txt"))
-
-			# visualize: reference trajectory from the geometric planner, output of controller tracking the ref traj
-			run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env ,result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
-
-			# optimization-based solution
-			if task.alg == "opt":
-
-				result_folder_geom = result_folder
-				result_folder = results_path / task.instance / "opt" / "{:03d}".format(task.trial)
-				if result_folder.exists():
-						print("Warning! {} exists already. Deleting...".format(result_folder))
-						shutil.rmtree(result_folder)
-				result_folder.mkdir(parents=True, exist_ok=False)
-
-				# copy output.yaml file
-				shutil.copy(result_folder_geom / "output.yaml", result_folder)
-
-				# inflate obstacles
-				inflate_obstacles("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, result_folder / "env_inflated.yaml")
-
-				# gen_ref_init_guess -> inp: output.yaml, output: initial guess for optimizer
-				gen_ref_init_guess(str(result_folder), envName=result_folder / "env_inflated.yaml")
-
-				# filename_init, filename_env, folder, timelimit
-				run_opt(result_folder / "init_guess.yaml", str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_opt)
-
-				# run_controller -> input: reference trajecetory to be tracked (output.trajopt.yaml), output: controller output (trajectory_opt.yaml)
-				# TODO: do not forget to pass the model path
-				run_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml", "../deps/dynoplan/dynobench/models/" + task.model_path, computeAcc=True)
-
-				run_checker("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env,
-							result_folder / "trajectory_opt.yaml", (result_folder / "trajectory_opt.yaml").with_suffix(".check.txt"))
-
-				# filename_env, reference_traj, filename_result, filename_output
-				run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, result_folder / "output.trajopt.yaml", result_folder / "trajectory_opt.yaml", result_folder / "trajectory_opt.html")
-
-				previous_result = result_folder / "output.trajopt.yaml"
-				for i in range(1, 1):
-					result_folder_i = result_folder / "iter{:02d}".format(i)
-					result_folder_i.mkdir(parents=True, exist_ok=False)
-					run_opt(previous_result, str(result_folder / "env_inflated.yaml"), str(result_folder_i), task.timelimit_opt, t_weight="3.0", t_ref="0.8")
-					previous_result = result_folder_i / "output.trajopt.yaml"
-
-				# only run visualizer and checker on last iteration
-				result_folder = previous_result.parent
-
-				# run_controller -> input: reference trajecetory to be tracked (output.trajopt.yaml), output: controller output (trajectory_opt.yaml)
-				# TODO: do not forget to pass the model path
-				run_controller(result_folder, "output.trajopt.yaml", "trajectory_opt.yaml", "../deps/dynoplan/dynobench/models/" + task.model_path, computeAcc=True)
-
-				run_checker("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env,
-							result_folder / "trajectory_opt.yaml", (result_folder / "trajectory_opt.yaml").with_suffix(".check.txt"))
-
-				# filename_env, reference_traj, filename_result, filename_output
-				run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env, result_folder / "output.trajopt.yaml", result_folder / "trajectory_opt.yaml", result_folder / "trajectory_opt.html")
-
-
-		if task.alg == "payload":
-
-			result_folder = results_path / task.instance / task.alg / "{:03d}".format(task.trial)
-			if result_folder.exists():
-					print("Warning! {} exists already. Deleting...".format(result_folder))
-					shutil.rmtree(result_folder)
-			result_folder.mkdir(parents=True, exist_ok=False)
-
-			num_robots = int(task.model_path[6])
-			env_0robots = env.with_name(env.name.replace("_{}robots.yaml".format(num_robots), "_0robots.yaml"))
-			# inflate obstacles
-			inflate_obstacles(env_0robots, result_folder / "env_inflated.yaml")
-
-			with open("../deps/dynoplan/dynobench/models/" + task.model_path, "r") as f:
-				model_params = yaml.load(f,Loader=yaml.CSafeLoader)
-			robot_radius = model_params["col_size_robot"]
-
-			# run_geom -> input:env output: output.yaml
-			run_geom(str(result_folder / "env_inflated.yaml"), str(result_folder), task.timelimit_geom, robot_radius)
-
-			# gen_ref_init_guess -> inp: output.yaml + "-r" , output: reference trajectory geom_ref_traj.yaml
-			gen_ref_init_guess(str(result_folder)) # dont forget to add -r here for the geom planner reference 
-			add_init_cable_states(str(result_folder), envName=env)
-			
-			#run_controller -> input: reference trajecetory to be tracked (geom_init_guess.yaml), output: controller output (trajectory_geom.yaml)
-			run_controller(result_folder, "init_guess.yaml", "trajectory_geom.yaml", "../deps/dynoplan/dynobench/models/" + task.model_path, nocableTrack=True)
-
-			run_checker("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env,
-				result_folder / "trajectory_geom.yaml", (result_folder / "trajectory_geom.yaml").with_suffix(".check.txt"))
-
-			# # visualize: reference trajectory from the geometric planner, output of controller tracking the ref traj
-			run_visualizer("../deps/dynoplan/dynobench/envs/quad3d_payload/benchmark_envs/" + task.env ,result_folder / "init_guess.yaml",  result_folder / "trajectory_geom.yaml", result_folder / "trajectory_geom.html")
-
-		if task.alg == "extraiter":
-
-			result_folder = results_path / task.instance / "opt" / "{:03d}".format(task.trial)
-			previous_result = result_folder / "output.trajopt.yaml"
-			for i in range(1, 20):
-				result_folder_i = result_folder / "iter{:02d}".format(i)
-				result_folder_i.mkdir(parents=True, exist_ok=False)
-				run_opt(previous_result, str(result_folder / "env_inflated.yaml"), str(result_folder_i), task.timelimit_opt, t_weight="3.0", t_ref="0.8")
-				previous_result = result_folder_i / "output.trajopt.yaml"
+		run_checker(result_folder / "env_inflated.yaml",
+					result_folder / "trajectory_opt.yaml", (result_folder / "trajectory_opt.yaml").with_suffix(".check.txt"))
 
 
 	except:
@@ -347,53 +288,38 @@ def execute_task(task: ExecutionTask):
 def main():
 	parallel = True
 	instances = [
-		{ "name": "empty_1robots", "models_path": "point_1.yaml"},
-		{ "name": "empty_2robots", "models_path": "point_2.yaml"},
-		{ "name": "empty_3robots", "models_path": "point_3.yaml"},
-		{ "name": "empty_4robots", "models_path": "point_4.yaml"},
-		{ "name": "empty_5robots", "models_path": "point_5.yaml"},
-		{ "name": "empty_6robots", "models_path": "point_6.yaml"},
-
-		{ "name": "forest_1robots", "models_path": "point_1.yaml"},
 		{ "name": "forest_2robots", "models_path": "point_2.yaml"},
 		{ "name": "forest_3robots", "models_path": "point_3.yaml"},
 		{ "name": "forest_4robots", "models_path": "point_4.yaml"},
 		{ "name": "forest_5robots", "models_path": "point_5.yaml"},
 		{ "name": "forest_6robots", "models_path": "point_6.yaml"},
 
-		# { "name": "maze_2robots", "models_path": "point_2.yaml"},
-		# { "name": "maze_3robots", "models_path": "point_3.yaml"},
-		# { "name": "maze_4robots", "models_path": "point_4.yaml"},
-		# { "name": "maze_5robots", "models_path": "point_5.yaml"},
-		# { "name": "maze_6robots", "models_path": "point_6.yaml"},
-
-		{ "name": "window_1robots", "models_path": "point_1.yaml"},
 		{ "name": "window_2robots", "models_path": "point_2.yaml"},
 		{ "name": "window_3robots", "models_path": "point_3.yaml"},
 		{ "name": "window_4robots", "models_path": "point_4.yaml"},
 		{ "name": "window_5robots", "models_path": "point_5.yaml"},
 		{ "name": "window_6robots", "models_path": "point_6.yaml"},
 
-		{ "name": "empty_5robots_uniform", "models_path": "point_5.yaml"},
-		{ "name": "forest_4robots_uniform", "models_path": "point_4.yaml"},
-		{ "name": "window_3robots_uniform", "models_path": "point_3.yaml"},
-		{ "name": "takeoff_2robots", "models_path": "point_2.yaml"},
+        {"name": "window_2robots_unicycle", "models_path": "unicyclesWithRods_2.yaml"},
+        {"name": "window_3robots_unicycle", "models_path": "unicyclesWithRods_3.yaml"},
+        {"name": "window_4robots_unicycle", "models_path": "unicyclesWithRods_4.yaml"},
+        {"name": "window_5robots_unicycle", "models_path": "unicyclesWithRods_5.yaml"},
+        {"name": "window_6robots_unicycle", "models_path": "unicyclesWithRods_6.yaml"},
 
-		# { "name": "window_2robots_exp", "models_path": "point_2_exp.yaml"},
-		# { "name": "window_3robots_exp", "models_path": "point_3_exp.yaml"},
-		# { "name": "forest_2robots_exp", "models_path": "point_2_exp.yaml"},
-		# { "name": "forest_3robots_exp", "models_path": "point_3_exp.yaml"},
+        {"name": "forest_2robots_unicycle", "models_path": "unicyclesWithRods_2.yaml"},
+        {"name": "forest_3robots_unicycle", "models_path": "unicyclesWithRods_3.yaml"},
+        {"name": "forest_4robots_unicycle", "models_path": "unicyclesWithRods_4.yaml"},
+        {"name": "forest_5robots_unicycle", "models_path": "unicyclesWithRods_5.yaml"},
+        {"name": "forest_6robots_unicycle", "models_path": "unicyclesWithRods_6.yaml"},
 
+        # {"name": "lego_3robots_unicycle", "models_path": "unicyclesWithRods_3.yaml"},
 
 	]
 	algs = [
-		"payload",
-		"geom",
 		"opt",
-		# "extraiter",
 	]
 	# trials = 3
-	trials = [i for i in range(2)]
+	trials = [i for i in range(10)]
 	timelimit_geom = 350
 	timelimit_opt = 15*60
 	max_cpus = 32 # limit the number of CPUs due to high memory usage
@@ -424,10 +350,10 @@ def main():
 		else: 
 			trials_.append("0"+str(i))
 
-	compute_errors([instance["name"] for instance in instances], algs, trials_)
+	# compute_errors([instance["name"] for instance in instances], algs, trials_)
 
-	paper_tables.write_table1(Path("../results"), trials_)
-	paper_tables.write_plot1(Path("../results"), trials_, timelimit_geom)
-	paper_tables.runtime_results(Path("../results"), trials_)
+	# paper_tables.write_table1(Path("../results"), trials_)
+	# paper_tables.write_plot1(Path("../results"), trials_, timelimit_geom)
+	# paper_tables.runtime_results(Path("../results"), trials_)
 if __name__ == '__main__':
 	main()
