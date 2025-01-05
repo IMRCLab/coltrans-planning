@@ -26,7 +26,10 @@ def polartovector(cablestate, attpoint, length, plstate):
 
     attpInfixedFr = plpos + rn.rotate(plquat, attpoint) # attachment point in fixed frame
     uavpos = attpInfixedFr + length*unitvec 
-    return uavpos, np.linspace(attpInfixedFr, uavpos, num=2).T
+    cablepos = attpInfixedFr + 0.5*length*unitvec 
+    xvec = [0,0,1]
+    cablequat = rn.vector_vector_rotation(xvec, unitvec)
+    return uavpos, cablepos, cablequat
 
 def main(): 
     # loads the abstract meshcat yaml file.
@@ -132,9 +135,13 @@ def main():
                 for cablecounter, attcounter, length, uavcounter in zip(range(0,numofCables,2), range(0,numofAtts,3), cablelengths, range(numofuavs)):
                     cablestate = cablestates[cablecounter:cablecounter+2]
                     attpoint = attpoints[attcounter:attcounter+3]
-                    uavpos, cablegeometry = polartovector(cablestate, attpoint, length, plstate)
+                    uavpos, cablepos, cablequat = polartovector(cablestate, attpoint, length, plstate)
                     # visualize cables
-                    vis["cable"+str(cablecounter)].set_object(g.Line(g.PointsGeometry(cablegeometry)))
+                    vis["cable"+str(cablecounter)].set_object(g.Box([0.005,0.005,0.7*length]), g.MeshLambertMaterial(color=0x000000))
+                    vis["cable"+str(cablecounter)].set_transform(tf.translation_matrix(cablepos).dot(
+                                                                tf.quaternion_matrix(cablequat)))
+
+                    # vis["cable"+str(cablecounter)].set_object(g.Line(g.PointsGeometry(cablegeometry)))
                     # visualize uavs
                     uav, sphere = uavsphere[uavcounter]
                     uav.set_transform(tf.translation_matrix(uavpos))
