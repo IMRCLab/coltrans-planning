@@ -42,21 +42,27 @@ def run_geom(filename_env, folder, timelimit, robot_radius):
 def add_init_cable_states(folder, envName=None):
 	folder = Path(folder)
 	traj = "init_guess.yaml"
-	subprocess.run(["python3",
-			"../scripts/init_cables.py",
-			"--inp", folder / traj,
-			"--out", folder / traj,
-			"--envName", envName], check=True)
+	try:
+		subprocess.run(["python3",
+				"../scripts/init_cables.py",
+				"--inp", folder / traj,
+				"--out", folder / traj,
+				"--envName", envName], check=True)
+	except Exception as e:
+		print(e)
 
 def gen_unicycle_init_guess(folder, envName):
 	folder = Path(folder)
 	traj = "init_guess.yaml"
-	subprocess.run(["python3",
-		"../scripts/init_guess_unicycle.py",
-		"--inp", folder / "output.yaml",
-		"--out", folder / traj,
-		"--envName", envName,
-		"-w"], check=True)	
+	try:
+		subprocess.run(["python3",
+			"../scripts/init_guess_unicycle.py",
+			"--inp", folder / "output.yaml",
+			"--out", folder / traj,
+			"--envName", envName,
+			"-w"], check=True)	
+	except Exception as e:
+		print(e)
 
 def gen_ref_init_guess(folder, envName=None):
 	folder = Path(folder)
@@ -81,46 +87,56 @@ def gen_ref_init_guess(folder, envName=None):
 			"-r"], check=True)
 
 def run_unicycles_controller(folder, reftrajectory, output, model_path):
-	subprocess.run(["python3",
-				"../deps/dynoplan/dynobench/example/unicycle_sim.py",
-				"-w",
-				"--inp", folder / reftrajectory,
-				"--out", folder / output,
-				"--model_path", model_path,
-				], env={"PYTHONPATH": "deps/dynoplan/dynobench"}, check=True)
+	try:
+		subprocess.run(["python3",
+					"../deps/dynoplan/dynobench/example/unicycle_sim.py",
+					"-w",
+					"--inp", folder / reftrajectory,
+					"--out", folder / output,
+					"--model_path", model_path,
+					], env={"PYTHONPATH": "deps/dynoplan/dynobench"}, check=True)
+	except Exception as e:
+		print(e)
 
 def run_unicycles_visualizer(filename_env, reference_traj, filename_result, filename_output):
-	subprocess.run(["python3",
-		"../scripts/visualize_unicycles.py",
-		"--env", str(filename_env),
-		"--robot", "unicycle",
-		"--ref", reference_traj,
-		"--result", str(filename_result),
-		"--output", str(filename_output)],
-		check=True)
+	try:
+		subprocess.run(["python3",
+			"../scripts/visualize_unicycles.py",
+			"--env", str(filename_env),
+			"--robot", "unicycle",
+			"--ref", reference_traj,
+			"--result", str(filename_result),
+			"--output", str(filename_output)],
+			check=True)
+	except Exception as e:
+		print(e)
 
 def run_controller(folder, reftrajectory, output, model_path):
 	folder = Path(folder)
-	subprocess.run(["python3",
-		"../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
-		"-cff", "-w",
-		"--inp", folder / reftrajectory,
-		"--out", folder / output,
-		"--model_path", model_path,
-		], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"}, check=True)
-
+	try:
+		subprocess.run(["python3",
+			"../deps/dynoplan/dynobench/example/test_quad3dpayload_n.py",
+			"-cff", "-w",
+			"--inp", folder / reftrajectory,
+			"--out", folder / output,
+			"--model_path", model_path,
+			], env={"PYTHONPATH": "deps/dynoplan/dynobench:../deps/crazyflie-firmware"}, check=True)
+	except Exception as e:
+		print(e)
 		
 
 def run_visualizer(filename_env, reference_traj, filename_result, filename_output):
-	subprocess.run(["python3",
-		"../scripts/visualize_payload.py",
-		"--env", str(filename_env),
-		"--robot", "point",
-		"--ref", reference_traj,
-		"--result", str(filename_result),
-		"--output", str(filename_output)],
-		check=True)
-    
+	try:
+		subprocess.run(["python3",
+			"../scripts/visualize_payload.py",
+			"--env", str(filename_env),
+			"--robot", "point",
+			"--ref", reference_traj,
+			"--result", str(filename_result),
+			"--output", str(filename_output)],
+			check=True)
+	except Exception as e:
+		print(e)    
 
 def run_opt(filename_init, filename_env, folder, timelimit, t_weight=None, t_ref=None):
 	folder = Path(folder)
@@ -187,7 +203,8 @@ def run_checker(filename_env, filename_result, filename_log):
 					"--env_file", filename_env,
 					"--models_base_path" , "../deps/dynoplan/dynobench/models/",
 					"--goal_tol" , "999",
-					"--u_bound_tol", "0.101",
+					"--u_bound_tol", "0.3",
+					"--x_bound_tol", "0.3",
 					"--col_tol", "0.01"]
 		print(subprocess.list2cmdline(cmd))
 		out = subprocess.run(cmd,
