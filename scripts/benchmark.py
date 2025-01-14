@@ -10,6 +10,7 @@ from compute_errors import compute_errors
 import traceback
 import shutil
 import paper_tables
+import time
 
 @dataclass
 class ExecutionTask:
@@ -27,6 +28,8 @@ class ExecutionTask:
 
 def run_geom(filename_env, folder, timelimit, robot_radius):
 	folder = Path(folder)
+	start_time = time.time()  # Start timer
+
 	try:
 		with open(folder / "log.txt", 'w') as f:
 			subprocess.run(["./nUavsPayloadPlanner",
@@ -38,6 +41,20 @@ def run_geom(filename_env, folder, timelimit, robot_radius):
 						stdout=f, stderr=f, check=True, timeout=timelimit+60)
 	except Exception as e:
 		print(e)
+
+	finally:
+		end_time = time.time()  # End timer
+		geom_time = end_time - start_time
+		# Update stats.yaml
+		stats_file = folder / "stats.yaml"
+		if stats_file.exists():
+			with open(stats_file, "r") as f:
+				stats = yaml.safe_load(f)
+		else:
+			stats = {}
+		stats["geom_time"] = geom_time
+		with open(stats_file, "w") as f:
+			yaml.safe_dump(stats, f)
 
 def add_init_cable_states(folder, envName=None):
 	folder = Path(folder)
@@ -140,6 +157,12 @@ def run_visualizer(filename_env, reference_traj, filename_result, filename_outpu
 
 def run_opt(filename_init, filename_env, folder, timelimit, t_weight=None, t_ref=None):
 	folder = Path(folder)
+
+	geom_folder = Path(str(folder).replace("/opt/", "/geom/"))
+	stats_file = geom_folder / "stats.yaml"  # Path to stats.yaml in geom folder
+
+	start_time = time.time()  # Start timer
+
 	try:
 		if t_ref is None and t_weight is None: 
 			with open(folder / "log.txt", 'w') as f:
@@ -195,6 +218,20 @@ def run_opt(filename_init, filename_env, folder, timelimit, t_weight=None, t_ref
 					stdout=f, stderr=f, timeout=timelimit, check=True)
 	except Exception as e:
 		print(e)
+
+	finally:
+		end_time = time.time()  # End timer
+		opt_time = end_time - start_time
+		# Update stats.yaml
+		stats_file = folder / "stats.yaml"
+		if stats_file.exists():
+			with open(stats_file, "r") as f:
+				stats = yaml.safe_load(f)
+		else:
+			stats = {}
+		stats["opt_time"] = opt_time
+		with open(stats_file, "w") as f:
+			yaml.safe_dump(stats, f)
 
 def run_checker(filename_env, filename_result, filename_log):
 	with open(filename_log, 'w') as f:
@@ -329,6 +366,13 @@ def main():
         {"name": "forest_5robots_unicycle", "models_path": "unicyclesWithRods_5.yaml"},
         {"name": "forest_6robots_unicycle", "models_path": "unicyclesWithRods_6.yaml"},
 
+
+        {"name": "wall_2robots_unicycle", "models_path": "unicyclesWithRods_2_no_right.yaml"},
+        {"name": "wall_3robots_unicycle", "models_path": "unicyclesWithRods_3_no_right.yaml"},
+        {"name": "wall_4robots_unicycle", "models_path": "unicyclesWithRods_4_no_right.yaml"},
+        {"name": "wall_5robots_unicycle", "models_path": "unicyclesWithRods_5_no_right.yaml"},
+        {"name": "wall_6robots_unicycle", "models_path": "unicyclesWithRods_6_no_right.yaml"},
+
         # {"name": "lego_3robots_unicycle", "models_path": "unicyclesWithRods_3.yaml"},
 
 	]
@@ -336,8 +380,8 @@ def main():
 		"opt",
 	]
 	# trials = 3
-	trials = [i for i in range(10)]
-	timelimit_geom = 350
+	trials = [i for i in range(1)]
+	timelimit_geom = 20
 	timelimit_opt = 15*60
 	max_cpus = 32 # limit the number of CPUs due to high memory usage
 
