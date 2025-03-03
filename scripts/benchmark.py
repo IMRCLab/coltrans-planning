@@ -342,6 +342,7 @@ def execute_task(task: ExecutionTask):
 def main():
 	parallel = True
 	instances = [
+		{ "name": "empty_1robots", "models_path": "point_1.yaml"},
 		{ "name": "forest_2robots", "models_path": "point_2.yaml"},
 		{ "name": "forest_3robots", "models_path": "point_3.yaml"},
 		{ "name": "forest_4robots", "models_path": "point_4.yaml"},
