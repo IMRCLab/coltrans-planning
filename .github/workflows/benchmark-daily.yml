@@ -2,8 +2,8 @@ name: Benchmark
 
 on:
   # every midnight
-  schedule:
-    - cron:  '0 0 * * *'
+  # schedule:
+  #   - cron:  '0 0 * * *'
   # manual trigger
   workflow_dispatch:
 
